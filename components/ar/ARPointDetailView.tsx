@@ -13,6 +13,7 @@ import { useUserCollection } from '../../hooks/ar/useUserCollection';
 import { useDeviceId } from '../../hooks/ar/useDeviceId';
 import { ModelViewer } from './ModelViewer';
 import { CollectSuccess } from './CollectSuccess';
+import { hapticPulse, playAudioCue } from '../../services/ar-audio';
 
 // ============================================================================
 // TYPES
@@ -193,8 +194,12 @@ export function ARPointDetailView({
     try {
       const result = await doCollect(numericId);
       if (result.success) {
-        setPointsEarned(result.pointsEarned ?? point?.pointsValue ?? 25);
+        const earned = result.pointsEarned ?? point?.pointsValue ?? 25;
+        setPointsEarned(earned);
         setShowSuccess(true);
+        // Audio-first feedback — additive to CollectSuccess visual animation
+        hapticPulse('collected');
+        playAudioCue('collect');
       }
     } finally {
       setIsCollecting(false);

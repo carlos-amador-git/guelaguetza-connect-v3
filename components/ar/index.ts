@@ -30,3 +30,6 @@ export { AlebrijeView } from './AlebrijeView';
 export { WiFiZonesView } from './WiFiZonesView';
 export type { WiFiZone } from './WiFiZonesView';
 export { OfflineBundleManager } from './OfflineBundleManager';
+
+// Sprint G2 — User Safety + Audio-First
+export { SafeModeOverlay } from './SafeModeOverlay';

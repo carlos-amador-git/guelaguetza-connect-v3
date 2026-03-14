@@ -4,11 +4,11 @@ import {
   Star,
   MapPin,
   Scan,
-  Shirt,
-  Palette,
   Trophy,
   Locate,
   CheckCircle,
+  Volume2,
+  VolumeX,
 } from 'lucide-react';
 import { MapContainer, TileLayer, CircleMarker, Popup, Marker, useMap } from 'react-leaflet';
 import L from 'leaflet';
@@ -20,7 +20,10 @@ import { useGeolocation } from '../../hooks/ar/useGeolocation';
 import { useNearbyPoints } from '../../hooks/ar/useNearbyPoints';
 import { useUserCollection } from '../../hooks/ar/useUserCollection';
 import { useDeviceId } from '../../hooks/ar/useDeviceId';
+import { useMotionDetection } from '../../hooks/ar/useMotionDetection';
+import { useAudioGuide } from '../../hooks/ar/useAudioGuide';
 import { ARPermissions } from './ARPermissions';
+import { SafeModeOverlay } from './SafeModeOverlay';
 
 // ============================================================================
 // CONSTANTS
@@ -422,10 +425,44 @@ function ColeccionTab({ collected, progress, isLoading }: ColeccionTabProps) {
 // MAIN COMPONENT: ARHomeView
 // ============================================================================
 
+// Safe mode localStorage key
+const LS_SAFE_MODE_KEY = 'ar_safe_mode_enabled';
+
+function loadSafeModePref(): boolean {
+  try {
+    const raw = localStorage.getItem(LS_SAFE_MODE_KEY);
+    return raw === null ? true : raw === 'true';
+  } catch {
+    return true;
+  }
+}
+
 export function ARHomeView({ onNavigate, onBack }: ARHomeViewProps) {
   const deviceId = useDeviceId();
   const [hasLocation, setHasLocation] = useState<boolean | null>(null); // null = permission overlay shown
   const [activeTab, setActiveTab] = useState<ActiveTab>('explorar');
+
+  // ── Safety + Audio ────────────────────────────────────────────────────────
+
+  const [safeModeEnabled] = useState<boolean>(loadSafeModePref);
+  const [safeModeUserDismissed, setSafeModeUserDismissed] = useState(false);
+
+  const { isWalking, isStationary } = useMotionDetection();
+  const audioGuide = useAudioGuide();
+
+  // Safe mode is active when: feature enabled AND user is walking AND not manually dismissed
+  const safeModeActive = safeModeEnabled && isWalking && !safeModeUserDismissed;
+
+  // Re-arm safe mode when the user stops (isStationary)
+  React.useEffect(() => {
+    if (isStationary) {
+      setSafeModeUserDismissed(false);
+    }
+  }, [isStationary]);
+
+  const handleSafeModeDismiss = useCallback(() => {
+    setSafeModeUserDismissed(true);
+  }, []);
 
   // Geolocation — only start watching once permission granted
   const { position } = useGeolocation({
@@ -503,13 +540,32 @@ export function ARHomeView({ onNavigate, onBack }: ARHomeViewProps) {
             </div>
           </div>
 
-          {/* Points badge */}
-          <div className="flex items-center gap-1.5 bg-amber-50 border border-amber-200
-                          rounded-full px-3 py-1.5">
-            <Trophy className="w-4 h-4 text-amber-500" aria-hidden="true" />
-            <span className="text-sm font-bold text-amber-700" aria-label={`${totalUserPoints} puntos`}>
-              {totalUserPoints.toLocaleString()}
-            </span>
+          {/* Right side: Audio toggle + Points badge */}
+          <div className="flex items-center gap-2">
+            {/* Audio guide toggle */}
+            <button
+              onClick={audioGuide.toggle}
+              data-testid="audio-guide-toggle"
+              aria-label={audioGuide.isEnabled ? 'Desactivar guia de audio' : 'Activar guia de audio'}
+              aria-pressed={audioGuide.isEnabled}
+              className="p-2 rounded-full hover:bg-gray-100 focus:outline-none
+                         focus:ring-2 focus:ring-red-500 transition-colors"
+            >
+              {audioGuide.isEnabled ? (
+                <Volume2 className="w-5 h-5 text-red-600" aria-hidden="true" />
+              ) : (
+                <VolumeX className="w-5 h-5 text-gray-400" aria-hidden="true" />
+              )}
+            </button>
+
+            {/* Points badge */}
+            <div className="flex items-center gap-1.5 bg-amber-50 border border-amber-200
+                            rounded-full px-3 py-1.5">
+              <Trophy className="w-4 h-4 text-amber-500" aria-hidden="true" />
+              <span className="text-sm font-bold text-amber-700" aria-label={`${totalUserPoints} puntos`}>
+                {totalUserPoints.toLocaleString()}
+              </span>
+            </div>
           </div>
         </div>
       </header>
@@ -522,6 +578,10 @@ export function ARHomeView({ onNavigate, onBack }: ARHomeViewProps) {
           aria-label="Mapa de puntos AR"
           data-testid="map-container"
         >
+          <SafeModeOverlay
+            isActive={safeModeActive}
+            onDismiss={handleSafeModeDismiss}
+          >
           <MapContainer
             center={mapCenter}
             zoom={14}
@@ -611,6 +671,7 @@ export function ARHomeView({ onNavigate, onBack }: ARHomeViewProps) {
               Explora sin ubicacion — distancias no disponibles
             </div>
           )}
+          </SafeModeOverlay>
         </section>
 
         {/* ── Quick actions ─────────────────────────────────────────────────── */}

@@ -23,3 +23,14 @@ export type { UseAlebrijeReturn } from './useAlebrije';
 // Sprint 4.2 — Analytics
 export { useARAnalytics } from './useARAnalytics';
 export type { UseARAnalyticsReturn, AREventType, ARAnalyticsEvent } from './useARAnalytics';
+
+// Sprint G1 — Infrastructure
+export { useBatteryStatus } from './useBatteryStatus';
+export type { BatteryStatusResult } from './useBatteryStatus';
+
+export { useDevicePerformance } from './useDevicePerformance';
+export type { DevicePerformanceResult } from './useDevicePerformance';
+
+// Sprint G2 — User Safety + Audio-First
+export { useMotionDetection } from './useMotionDetection';
+export { useAudioGuide } from './useAudioGuide';
