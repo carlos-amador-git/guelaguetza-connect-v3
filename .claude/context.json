@@ -1,38 +1,43 @@
 {
   "project": "guelaguetza-connect",
   "description": "Super App PWA para digitalizar la experiencia de la Guelaguetza de Oaxaca",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "phase": "alpha",
   "stack": {
-    "frontend": "React 19 + Vite + Tailwind CSS",
+    "frontend": "React 19 + Vite + Tailwind CSS v3 (build-time via PostCSS)",
     "backend": "Node 22 + Fastify + Prisma + PostgreSQL + PostGIS",
-    "ar": "Google model-viewer + MediaPipe + Tripo3D API",
+    "ar": "Google model-viewer v4.0.0 + 21 modelos 3D GLB",
     "testing": "Vitest + Playwright",
-    "infra": "Docker + Sentry + Coolify"
+    "infra": "Docker + Sentry + Vercel (prod)"
+  },
+  "deploy": {
+    "url": "https://guelaguetza-connect-v2.vercel.app",
+    "provider": "Vercel",
+    "branch": "feat/streaming-embeds",
+    "autoDeployOnPush": true
   },
   "features": [
     "PWA offline-first (Workbox + IndexedDB)",
-    "AR module complete (Phases 0-4): scanner, try-on, QR codes, quests, vestimentas",
-    "Mapas interactivos (Leaflet)",
+    "AR Vitrina 3D: 21 modelos (12 Premium + 9 TRELLIS) con AR nativo",
+    "QR-to-AR: ruta directa /#/ar/{modelId} sin login para turistas",
+    "Admin QR panel: generar/imprimir QR codes para puntos físicos",
     "Streaming (YouTube/Facebook Live embeds)",
+    "Mapas interactivos (Leaflet)",
     "Red social (Communities, Stories)",
     "Chat AI (Google GenAI)",
-    "i18n",
-    "Dark mode",
+    "i18n, Dark mode",
     "User safety (anti-zombie walking)",
     "Audio-first UX"
   ],
   "currentBranch": "feat/streaming-embeds",
-  "lastCommit": "40d7554",
+  "lastCommit": "ddadf4c",
   "testsStatus": "348 pass, 0 fail (6 test files skip — Playwright/Vitest config conflict)",
   "knownIssues": [
-    "6 CRITICAL security findings (see .context/AUDIT-7-capas.md): Stripe keys in docs, auth bypass, demo creds in bundle, Gemini key in client, JWT fallback secret, plaintext passwords in localStorage",
-    "3 POI admin routes missing requireAdmin middleware",
-    "Dead dependencies in bundle: three.js (~1.5MB, 0 imports), stripe (Node SDK, never used)",
+    "6 CRITICAL security findings (see .context/AUDIT-7-capas.md)",
     "SmartMapView and SellerDashboard are 100% mock data — no API connection",
     "localhost:3005 hardcoded in multiple services",
-    "Navegacion Single View State — escalabilidad limitada",
-    "6 Vitest test files fail to load (Playwright test.describe picked up by Vitest)"
+    "Safari TRELLIS GLBs: normals added but some models may still not render (needs real device test)",
+    "Some dead test files reference removed components (VestimentasView, AlebrijeView)"
   ],
   "completedSprints": [
     "Sprint 1-3: Hardening, seguridad, DevOps",
@@ -41,18 +46,24 @@
     "Sprint 4.1: Imagenes frontend, paleta, i18n",
     "Sprint 4.2: Local assets migration + custom icons",
     "Security hardening: 90 audit findings fixed (c38c585)",
-    "AR Module Phases 0-4: 10 sprints complete (98809ab)",
+    "AR Module Phases 0-4: 10 sprints (98809ab)",
     "AR Advanced: Try-On, Tripo3D, QR codes, DB prep (e6238b5)",
-    "User safety + audio-first UX + performance infra (ede33b0)",
-    "Streaming embeds: YouTube/Facebook Live support (40d7554)"
+    "User safety + audio-first UX (ede33b0)",
+    "Streaming embeds: YouTube/Facebook Live (40d7554)",
+    "AR Vitrina 3D: 21 modelos, 2 secciones, Safari fix (e3d3130)",
+    "Dead code cleanup: 5 components, 5 ViewStates removed (f9ebae0)",
+    "Tailwind CDN → build-time v3 via PostCSS (77633a8)",
+    "QR-to-AR direct route + Admin QR panel (a0f44b9)",
+    "Vercel production deploy (ddadf4c)",
+    "Repo made private, carlos-amador-git added as collaborator"
   ],
   "nextSteps": [
-    "URGENT: Remediar 6 hallazgos CRITICAL de seguridad (ver AUDIT-7-capas.md)",
-    "Eliminar dead dependencies (three.js, stripe) del bundle frontend",
+    "URGENT: Remediar 6 hallazgos CRITICAL de seguridad",
+    "USDZ conversion para iOS < 17.4 (Reality Converter o Xcode)",
     "Conectar SmartMapView y SellerDashboard a APIs reales",
-    "Resolver conflicto Vitest/Playwright en config de tests",
-    "Evaluar migracion de navegacion (router)",
-    "Integrar imagenes restantes (monte_alban, santo_domingo, barro_negro, textiles)"
+    "Imprimir QR codes físicos para prueba en campo",
+    "Gamificación: 'Encuentra los Alebrijes Escondidos' por Centro Histórico",
+    "Compartir viral: marco 'Guelaguetza 2025' para fotos AR"
   ],
   "lastUpdated": "2026-03-17"
 }
