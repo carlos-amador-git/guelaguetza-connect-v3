@@ -90,7 +90,8 @@
       "Bash(pip install:*)",
       "Bash(python generate-pptx.py:*)",
       "mcp__plugin_context-mode_context-mode__ctx_batch_execute",
-      "mcp__plugin_playwright_playwright__browser_run_code"
+      "mcp__plugin_playwright_playwright__browser_run_code",
+      "Bash(vercel --yes --prod)"
     ]
   }
 }
