@@ -1,3 +1,99 @@
+@import "tailwindcss";
+
+/* ============================================
+   Tailwind v4 Theme — Custom Design Tokens
+   ============================================ */
+
+@theme {
+  /* Colors — Oaxaca palette */
+  --color-oaxaca-pink: #D9006C;
+  --color-oaxaca-pink-light: #FDE8F0;
+  --color-oaxaca-yellow: #FFD100;
+  --color-oaxaca-yellow-light: #FFF8E1;
+  --color-oaxaca-purple: #6A0F49;
+  --color-oaxaca-purple-light: #F3E5F5;
+  --color-oaxaca-sky: #00AEEF;
+  --color-oaxaca-sky-light: #E1F5FE;
+  --color-oaxaca-stone: #F5F5F4;
+  --color-oaxaca-dark: #1C1917;
+  --color-oaxaca-earth: #8B4513;
+
+  /* Accessible grays (WCAG AA 4.5:1) */
+  --color-a11y-gray: #595959;
+  --color-a11y-gray-light: #6B6B6B;
+  --color-a11y-muted: #767676;
+
+  /* Font families */
+  --font-family-sans: 'Inter', system-ui, sans-serif;
+
+  /* Font sizes */
+  --font-size-display: 2.5rem;
+  --font-size-title: 1.5rem;
+  --font-size-subtitle: 1.125rem;
+
+  /* Spacing */
+  --spacing-card: 1rem;
+  --spacing-section: 1.5rem;
+  --spacing-page: 2rem;
+  --spacing-safe: env(safe-area-inset-bottom);
+
+  /* Border radius */
+  --radius-card: 1rem;
+  --radius-button: 0.75rem;
+  --radius-input: 0.75rem;
+  --radius-modal: 1.5rem;
+  --radius-pill: 9999px;
+
+  /* Box shadows */
+  --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --shadow-card-hover: 0 4px 16px rgba(0, 0, 0, 0.12);
+  --shadow-modal: 0 8px 32px rgba(0, 0, 0, 0.2);
+  --shadow-button: 0 2px 4px rgba(217, 0, 108, 0.2);
+
+  /* Animations */
+  --animate-fade-in: fadeIn 0.3s ease-out;
+  --animate-fade-out: fadeOut 0.3s ease-out;
+  --animate-slide-up: slideUp 0.3s ease-out;
+  --animate-slide-down: slideDown 0.3s ease-out;
+  --animate-scale-in: scaleIn 0.2s ease-out;
+  --animate-spin-slow: spin 3s linear infinite;
+  --animate-pulse-soft: pulseSoft 2s ease-in-out infinite;
+  --animate-bounce-soft: bounceSoft 1s ease-in-out infinite;
+
+  /* Keyframes */
+  @keyframes fadeIn {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+  }
+  @keyframes fadeOut {
+    0% { opacity: 1; }
+    100% { opacity: 0; }
+  }
+  @keyframes slideUp {
+    0% { transform: translateY(10px); opacity: 0; }
+    100% { transform: translateY(0); opacity: 1; }
+  }
+  @keyframes slideDown {
+    0% { transform: translateY(-10px); opacity: 0; }
+    100% { transform: translateY(0); opacity: 1; }
+  }
+  @keyframes scaleIn {
+    0% { transform: scale(0.95); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  @keyframes pulseSoft {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+  }
+  @keyframes bounceSoft {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+  }
+}
+
+/* Dark mode variant */
+@variant dark (&:where(.dark, .dark *));
+
 /* ============================================
    Guelaguetza Connect - Additional Styles
    ============================================ */

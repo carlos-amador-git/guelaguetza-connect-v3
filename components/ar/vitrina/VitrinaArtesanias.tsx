@@ -34,13 +34,12 @@ interface VitrinaArtesaniasProps {
 }
 
 /**
- * Waits for the model-viewer custom element to be defined before rendering
- * any <model-viewer> elements. Safari is stricter about custom element upgrade
- * timing — rendering before registration causes blank white boxes.
+ * Ensures model-viewer custom element is registered before rendering.
+ * Safari requires the element to be defined before instantiation.
  *
- * We rely on whichever script registered the element first (ModelViewer.tsx
- * injects CDN v3.4.0 as a fallback; in production the npm package registers it).
- * We do NOT inject a second CDN script here to avoid version conflicts.
+ * Strategy: check if already defined → if not, inject CDN script → wait for definition.
+ * The CDN URL matches the one in index.html (v4.0.0). If index.html already
+ * loaded it, the script is a no-op. If not (e.g. headless, offline), we inject it.
  */
 function useModelViewerReady(): boolean {
   const [isReady, setIsReady] = useState(
@@ -49,7 +48,23 @@ function useModelViewerReady(): boolean {
 
   useEffect(() => {
     if (isReady) return;
-    customElements.whenDefined('model-viewer').then(() => setIsReady(true));
+
+    // If not defined after 1s, inject CDN script as fallback
+    const fallbackTimer = setTimeout(() => {
+      if (!customElements.get('model-viewer') && !document.querySelector('script[src*="model-viewer"]')) {
+        const script = document.createElement('script');
+        script.type = 'module';
+        script.src = 'https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js';
+        document.head.appendChild(script);
+      }
+    }, 1000);
+
+    customElements.whenDefined('model-viewer').then(() => {
+      clearTimeout(fallbackTimer);
+      setIsReady(true);
+    });
+
+    return () => clearTimeout(fallbackTimer);
   }, [isReady]);
 
   return isReady;

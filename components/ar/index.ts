@@ -20,11 +20,6 @@ export { AchievementToast } from './AchievementToast';
 
 // Sprint 3.1 — Vestimentas Catalog + 3D Viewer
 export { VestimentaCard } from './VestimentaCard';
-export { VestimentasView } from './VestimentasView';
-export { VestimentaDetailView } from './VestimentaDetailView';
-
-// Sprint 3.2 — Crea tu Alebrije (Drawing + Image-to-3D)
-export { AlebrijeView } from './AlebrijeView';
 
 // Sprint 3.3 — Try-On with MediaPipe
 export { TryOnView } from './TryOnView';
