@@ -530,9 +530,22 @@ const App: React.FC = () => {
     ViewState.AR_DIRECT,
   ].includes(currentView);
 
+  // QR hash route: render AR view immediately, bypass everything else
+  if (currentView === ViewState.AR_DIRECT && selectedItemId) {
+    return (
+      <ARDirectView
+        modelId={selectedItemId}
+        onClose={() => {
+          window.location.hash = '';
+          setCurrentView(ViewState.HOME);
+          setShowLanding(true);
+        }}
+      />
+    );
+  }
+
   // Show landing page if not authenticated or showLanding is true
-  // Skip landing entirely when accessing via QR hash route (AR_DIRECT)
-  if (showLanding && currentView !== ViewState.AR_DIRECT) {
+  if (showLanding) {
     return <LandingView onUserSelected={handleUserSelected} />;
   }
 
