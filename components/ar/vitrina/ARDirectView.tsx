@@ -47,7 +47,10 @@ function findModel(modelId: string): ArtesaniaItem | undefined {
 }
 
 export default function ARDirectView({ modelId, onClose }: ARDirectViewProps) {
-  const isReady = useModelViewerReady();
+  // Don't gate on useModelViewerReady — render <model-viewer> immediately.
+  // The custom element auto-upgrades when the script loads (from index.html CDN).
+  // This avoids blank screen on slow mobile connections.
+  useModelViewerReady(); // Still triggers fallback CDN injection if needed
   const item = findModel(modelId);
   const [shareSupported] = useState(() => typeof navigator !== 'undefined' && !!navigator.share);
 
@@ -117,33 +120,34 @@ export default function ARDirectView({ modelId, onClose }: ARDirectViewProps) {
         </button>
       </div>
 
-      {/* 3D model — fills most of the screen */}
-      <div className="flex-1 relative">
-        {isReady ? (
-          <model-viewer
-            src={item.glb}
-            camera-controls
-            auto-rotate
-            auto-rotate-delay="0"
-            interaction-prompt="auto"
-            camera-orbit="0deg 75deg 105%"
-            environment-image="neutral"
-            tone-mapping="commerce"
-            shadow-intensity="1"
-            exposure="1.1"
-            ar
-            ar-modes="webxr scene-viewer quick-look"
-            reveal="auto"
-            style={{ display: 'block', width: '100%', height: '100%' }}
-          />
-        ) : (
-          <div className="flex h-full items-center justify-center">
+      {/* 3D model — render immediately, auto-upgrades when model-viewer script loads */}
+      <div className="flex-1 relative bg-gray-900">
+        {/* @ts-expect-error model-viewer web component */}
+        <model-viewer
+          src={item.glb}
+          camera-controls
+          auto-rotate
+          auto-rotate-delay="0"
+          interaction-prompt="auto"
+          camera-orbit="0deg 75deg 105%"
+          environment-image="neutral"
+          tone-mapping="commerce"
+          shadow-intensity="1"
+          exposure="1.1"
+          ar
+          ar-modes="webxr scene-viewer quick-look"
+          reveal="auto"
+          loading="eager"
+          style={{ display: 'block', width: '100%', height: '100%' }}
+        >
+          {/* Loading indicator inside model-viewer slot — visible until model loads */}
+          <div slot="poster" className="flex h-full w-full items-center justify-center bg-gray-900">
             <div className="flex flex-col items-center gap-3">
               <div className="size-12 rounded-full border-2 border-gray-600 border-t-amber-500 animate-spin" />
-              <p className="text-sm text-gray-400">Cargando modelo 3D…</p>
+              <p className="text-sm text-gray-400">Cargando modelo 3D...</p>
             </div>
           </div>
-        )}
+        </model-viewer>
       </div>
 
       {/* Bottom overlay — model info + AR button */}
