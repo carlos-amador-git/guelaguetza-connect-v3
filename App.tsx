@@ -531,7 +531,8 @@ const App: React.FC = () => {
   ].includes(currentView);
 
   // Show landing page if not authenticated or showLanding is true
-  if (showLanding) {
+  // Skip landing entirely when accessing via QR hash route (AR_DIRECT)
+  if (showLanding && currentView !== ViewState.AR_DIRECT) {
     return <LandingView onUserSelected={handleUserSelected} />;
   }
 
@@ -622,8 +623,8 @@ const App: React.FC = () => {
         </main>
       </div>
 
-      {/* PWA Prompts */}
-      <NotificationPrompt />
+      {/* PWA Prompts — hidden in AR direct mode (QR scan) */}
+      {currentView !== ViewState.AR_DIRECT && <NotificationPrompt />}
       <UpdatePrompt />
     </div>
   );
