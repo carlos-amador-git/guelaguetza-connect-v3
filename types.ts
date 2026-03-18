@@ -39,7 +39,9 @@ export enum ViewState {
   // Phase 6: Reservaciones
   EXPERIENCES = 'EXPERIENCES',
   EXPERIENCE_DETAIL = 'EXPERIENCE_DETAIL',
-  MY_BOOKINGS = 'MY_BOOKINGS'
+  MY_BOOKINGS = 'MY_BOOKINGS',
+  // QR / tourist direct AR view — no login required
+  AR_DIRECT = 'AR_DIRECT'
 }
 
 export interface BusRoute {

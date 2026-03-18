@@ -30,6 +30,7 @@ import { ARHomeView } from './components/ar/ARHomeView';
 import { QuestView } from './components/ar/QuestView';
 import VitrinaArtesanias, { type VitrinaSection } from './components/ar/vitrina/VitrinaArtesanias';
 import VitrinaDetalle from './components/ar/vitrina/VitrinaDetalle';
+import ARDirectView from './components/ar/vitrina/ARDirectView';
 import TiendaView from './components/TiendaView';
 import ProductDetailView from './components/ProductDetailView';
 import WishlistView from './components/WishlistView';
@@ -84,11 +85,25 @@ class ErrorBoundary extends React.Component<
 
 const App: React.FC = () => {
   const { isAuthenticated, isDemoMode, user } = useAuth();
-  const [currentView, setCurrentView] = useState<ViewState>(ViewState.HOME);
+
+  // Detect QR code hash routing: #/ar/<modelId> opens AR_DIRECT without login
+  const initialArModelId = (() => {
+    if (typeof window === 'undefined') return null;
+    const hash = window.location.hash;
+    if (hash.startsWith('#/ar/')) {
+      const id = hash.slice('#/ar/'.length).trim();
+      return id || null;
+    }
+    return null;
+  })();
+
+  const [currentView, setCurrentView] = useState<ViewState>(
+    initialArModelId ? ViewState.AR_DIRECT : ViewState.HOME
+  );
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [previousView, setPreviousView] = useState<ViewState>(ViewState.HOME);
-  const [showLanding, setShowLanding] = useState(true);
+  const [showLanding, setShowLanding] = useState(!initialArModelId);
   const [adminViewingAsUser, setAdminViewingAsUser] = useState(false);
 
   // DM state
@@ -108,7 +123,7 @@ const App: React.FC = () => {
   const [selectedStreamId, setSelectedStreamId] = useState<string | null>(null);
   // AR module: selected AR point ID (numeric, stored as string)
   const [selectedArPointId, setSelectedArPointId] = useState<string | null>(null);
-  const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
+  const [selectedItemId, setSelectedItemId] = useState<string | null>(initialArModelId);
   const [vitrinaSection, setVitrinaSection] = useState<VitrinaSection>('premium');
   // AR module: selected Quest ID
   const [selectedQuestId, setSelectedQuestId] = useState<string | null>(null);
@@ -462,6 +477,18 @@ const App: React.FC = () => {
             onBack={() => setCurrentView(ViewState.HOME)}
           />
         );
+      // QR tourist direct AR — no login required
+      case ViewState.AR_DIRECT:
+        return (
+          <ARDirectView
+            modelId={selectedItemId ?? ''}
+            onClose={() => {
+              window.location.hash = '';
+              setCurrentView(ViewState.HOME);
+              setShowLanding(true);
+            }}
+          />
+        );
       default:
         return <HomeView setView={setCurrentView} />;
     }
@@ -499,6 +526,8 @@ const App: React.FC = () => {
     ViewState.AR_QUEST,
     ViewState.AR_VITRINA,
     ViewState.AR_VITRINA_DETALLE,
+    // QR tourist direct AR — fullscreen, no nav
+    ViewState.AR_DIRECT,
   ].includes(currentView);
 
   // Show landing page if not authenticated or showLanding is true

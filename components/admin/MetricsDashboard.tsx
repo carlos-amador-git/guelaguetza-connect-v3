@@ -21,10 +21,12 @@ import {
   Ticket,
   RefreshCw,
   ChevronRight,
+  QrCode,
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { getDashboardStats, DashboardStats } from '../../services/admin';
 import { ViewState } from '../../types';
+import QRCodesPanel from './QRCodesPanel';
 
 interface MetricsDashboardProps {
   onBack: () => void;
@@ -75,6 +77,7 @@ const MetricsDashboard: React.FC<MetricsDashboardProps> = ({ onBack, onNavigate 
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [timeRange, setTimeRange] = useState<'today' | 'week' | 'month'>('today');
+  const [activeTab, setActiveTab] = useState<'metrics' | 'qrcodes'>('metrics');
 
   useEffect(() => {
     loadStats();
@@ -99,6 +102,39 @@ const MetricsDashboard: React.FC<MetricsDashboardProps> = ({ onBack, onNavigate 
 
   const maxWeeklyUsers = Math.max(...WEEKLY_USERS.map(d => d.users));
 
+  if (activeTab === 'qrcodes') {
+    return (
+      <div className="h-full flex flex-col">
+        {/* Slim header with back-to-metrics */}
+        <div className="bg-gradient-to-br from-oaxaca-purple via-oaxaca-pink to-oaxaca-purple text-white px-4 py-3 flex items-center gap-3 flex-shrink-0">
+          <button
+            onClick={() => setActiveTab('metrics')}
+            className="p-2 hover:bg-white/10 rounded-full transition"
+          >
+            <ArrowLeft size={20} />
+          </button>
+          <div className="flex-1">
+            <h1 className="font-bold text-lg">Códigos QR — AR</h1>
+            <p className="text-xs text-white/70">Panel de Administracion</p>
+          </div>
+          {onNavigate && (
+            <button
+              onClick={() => onNavigate(ViewState.HOME)}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-white/20 hover:bg-white/30 rounded-full transition"
+              title="Ver la app como usuario"
+            >
+              <Eye size={16} />
+              <span className="text-xs font-medium hidden sm:inline">Ver App</span>
+            </button>
+          )}
+        </div>
+        <div className="flex-1 overflow-hidden">
+          <QRCodesPanel />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="h-full bg-gray-50 dark:bg-gray-950 overflow-y-auto">
       {/* Header */}
@@ -118,6 +154,14 @@ const MetricsDashboard: React.FC<MetricsDashboardProps> = ({ onBack, onNavigate 
               </div>
             </div>
             <div className="flex items-center gap-2">
+              <button
+                onClick={() => setActiveTab('qrcodes')}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-white/20 hover:bg-white/30 rounded-full transition"
+                title="Códigos QR para AR"
+              >
+                <QrCode size={16} />
+                <span className="text-xs font-medium hidden sm:inline">QR Codes</span>
+              </button>
               <button
                 onClick={handleRefresh}
                 className={`p-2 hover:bg-white/10 rounded-full transition ${refreshing ? 'animate-spin' : ''}`}
