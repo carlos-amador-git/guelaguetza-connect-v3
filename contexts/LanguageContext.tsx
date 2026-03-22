@@ -165,7 +165,7 @@ const translations: Record<Language, Record<string, string>> = {
     directions: 'Direcciones',
 
     // AR / Museum
-    ar_museum: 'Museo AR',
+    ar_museum: 'AR Guelaguetza',
     discover_magic: 'Descubre la magia',
     scan: 'Escanear',
 
@@ -380,7 +380,7 @@ const translations: Record<Language, Record<string, string>> = {
     directions: 'Directions',
 
     // AR / Museum
-    ar_museum: 'AR Museum',
+    ar_museum: 'AR Guelaguetza',
     discover_magic: 'Discover the magic',
     scan: 'Scan',
 

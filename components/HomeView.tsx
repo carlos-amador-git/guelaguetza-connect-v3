@@ -257,7 +257,7 @@ const HomeView: React.FC<HomeViewProps> = ({ setView }) => {
                 onClick={() => setView(ViewState.AR_SCANNER)}
                 className="bg-white dark:bg-gray-800 p-4 md:p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 active:scale-95 transition cursor-pointer hover:shadow-lg hover:-translate-y-0.5"
               >
-                <img src="/images/ui/icon_ar.png" alt="Museo AR" className="w-14 h-14 md:w-16 md:h-16 object-contain mb-3 drop-shadow-md" />
+                <img src="/images/ui/icon_ar.png" alt="AR Guelaguetza" className="w-14 h-14 md:w-16 md:h-16 object-contain mb-3 drop-shadow-md" />
                 <h3 className="font-bold text-gray-800 dark:text-gray-100">{t('ar_museum')}</h3>
                 <p className="text-xs md:text-sm text-gray-500 dark:text-gray-400 mt-1">{t('discover_magic')}</p>
               </div>
