@@ -9,7 +9,8 @@ RUN apk add --no-cache \
     openssl \
     libc6-compat \
     wget \
-    dumb-init
+    dumb-init \
+    netcat-openbsd
 
 RUN addgroup -g 1001 -S nodejs && \
     adduser -S nodejs -u 1001
