@@ -24,7 +24,7 @@ COPY . .
 
 RUN npx prisma generate
 
-RUN npm run build 2>&1 || (echo "=== BUILD ERRORS ===" && npx tsc --noEmit 2>&1 && exit 1)
+RUN npm run build
 
 RUN npm prune --production
 
