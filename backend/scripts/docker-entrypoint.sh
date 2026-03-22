@@ -83,19 +83,28 @@ run_migrations() {
 # ============================================
 seed_database() {
     echo "AUTO_SEED=$AUTO_SEED"
-    if [ "$AUTO_SEED" = "true" ]; then
+    echo "Checking if seed file exists..."
+    ls -la dist-seed/prisma/seed.js 2>/dev/null || echo "dist-seed/prisma/seed.js NOT FOUND"
+
+    if [ "$AUTO_SEED" = "true" ] || [ "$AUTO_SEED" = "auto" ]; then
         echo "🌱 Seeding database..."
         if [ -f "dist-seed/prisma/seed.js" ]; then
-            echo "Found seed file, executing..."
-            if node dist-seed/prisma/seed.js; then
+            echo "Running: node dist-seed/prisma/seed.js"
+            node dist-seed/prisma/seed.js 2>&1
+            SEED_EXIT=$?
+            echo "Seed exit code: $SEED_EXIT"
+            if [ $SEED_EXIT -eq 0 ]; then
                 echo "✅ Database seeded successfully!"
             else
-                echo "⚠️  Seed failed, continuing..."
+                echo "⚠️  Seed failed with exit code $SEED_EXIT, continuing..."
             fi
         else
             echo "⚠️  Seed file not found at dist-seed/prisma/seed.js"
-            ls -la dist-seed/ 2>/dev/null || echo "dist-seed/ directory does not exist"
+            echo "Contents of /app:"
+            ls dist-seed/ 2>/dev/null || echo "dist-seed/ does not exist"
         fi
+    else
+        echo "Skipping seed (AUTO_SEED=$AUTO_SEED)"
     fi
 }
 
