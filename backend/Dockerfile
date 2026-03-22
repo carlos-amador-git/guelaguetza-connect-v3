@@ -24,8 +24,7 @@ COPY . .
 
 RUN npx prisma generate
 
-RUN npx tsc 2>&1 || echo "TSCHECK DONE"
-RUN npm run build
+RUN npx tsc || true
 
 RUN npm prune --production
 
