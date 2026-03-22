@@ -90,13 +90,10 @@ seed_database() {
         echo "🌱 Seeding database..."
         if [ -f "dist-seed/prisma/seed.js" ]; then
             echo "Running: node dist-seed/prisma/seed.js"
-            node dist-seed/prisma/seed.js 2>&1
-            SEED_EXIT=$?
-            echo "Seed exit code: $SEED_EXIT"
-            if [ $SEED_EXIT -eq 0 ]; then
+            if node dist-seed/prisma/seed.js 2>&1; then
                 echo "✅ Database seeded successfully!"
             else
-                echo "⚠️  Seed failed with exit code $SEED_EXIT, continuing..."
+                echo "⚠️  Seed failed, continuing..."
             fi
         else
             echo "⚠️  Seed file not found at dist-seed/prisma/seed.js"

@@ -21,10 +21,6 @@ async function main() {
   await prisma.pointOfInterest.deleteMany();
   await prisma.streamMessage.deleteMany();
   await prisma.liveStream.deleteMany();
-  await prisma.orderItem.deleteMany();
-  await prisma.order.deleteMany();
-  await prisma.cartItem.deleteMany();
-  await prisma.cart.deleteMany();
   await prisma.productReview.deleteMany();
   await prisma.product.deleteMany();
   await prisma.sellerProfile.deleteMany();
