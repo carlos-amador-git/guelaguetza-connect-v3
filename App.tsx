@@ -87,15 +87,15 @@ const App: React.FC = () => {
   const { isAuthenticated, isDemoMode, user } = useAuth();
 
   // Detect QR code hash routing: #/ar/<modelId> opens AR_DIRECT without login
-  const initialArModelId = (() => {
-    if (typeof window === 'undefined') return null;
-    const hash = window.location.hash;
+  const parseArHash = (hash: string): string | null => {
     if (hash.startsWith('#/ar/')) {
       const id = hash.slice('#/ar/'.length).trim();
       return id || null;
     }
     return null;
-  })();
+  };
+
+  const initialArModelId = typeof window !== 'undefined' ? parseArHash(window.location.hash) : null;
 
   const [currentView, setCurrentView] = useState<ViewState>(
     initialArModelId ? ViewState.AR_DIRECT : ViewState.HOME
@@ -127,6 +127,19 @@ const App: React.FC = () => {
   const [vitrinaSection, setVitrinaSection] = useState<VitrinaSection>('premium');
   // AR module: selected Quest ID
   const [selectedQuestId, setSelectedQuestId] = useState<string | null>(null);
+
+  // Listen for hash changes to support QR-to-AR navigation while app is already open
+  useEffect(() => {
+    const handleHashChange = () => {
+      const modelId = parseArHash(window.location.hash);
+      if (modelId) {
+        setSelectedItemId(modelId);
+        setCurrentView(ViewState.AR_DIRECT);
+      }
+    };
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
 
   // Handle user selection from landing - receives role directly to avoid race condition
   const handleUserSelected = (selectedRole?: string) => {

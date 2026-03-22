@@ -237,6 +237,12 @@ const SellerDashboard: React.FC<SellerDashboardProps> = ({ onBack, onNavigate })
 
   return (
     <div className="h-full bg-gray-50 dark:bg-gray-950 overflow-y-auto pb-20">
+      {/* Demo data banner */}
+      <div className="bg-amber-50 dark:bg-amber-950/50 border-b border-amber-200 dark:border-amber-800 px-4 py-2 flex items-center gap-2 text-amber-800 dark:text-amber-300 text-sm">
+        <span className="text-base" aria-hidden="true">&#9888;</span>
+        <span>Vista de demostración — los datos mostrados son ilustrativos.</span>
+      </div>
+
       {/* Header */}
       <div className="bg-gradient-to-br from-oaxaca-yellow via-oaxaca-pink to-oaxaca-purple text-white">
         <div className="px-4 py-4">

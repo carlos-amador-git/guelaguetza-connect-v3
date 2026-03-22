@@ -22,7 +22,7 @@
     "QR-to-AR: ruta directa /#/ar/{modelId} sin login para turistas",
     "Admin QR panel: generar/imprimir QR codes para puntos físicos",
     "Streaming (YouTube/Facebook Live embeds)",
-    "Mapas interactivos (Leaflet)",
+    "Mapas interactivos (Leaflet) — Mapa Cultural con 12 POIs reales",
     "Red social (Communities, Stories)",
     "Chat AI (Google GenAI)",
     "i18n, Dark mode",
@@ -30,14 +30,13 @@
     "Audio-first UX"
   ],
   "currentBranch": "feat/streaming-embeds",
-  "lastCommit": "ddadf4c",
+  "lastCommit": "93e0d6a",
   "testsStatus": "348 pass, 0 fail (6 test files skip — Playwright/Vitest config conflict)",
   "knownIssues": [
-    "6 CRITICAL security findings (see .context/AUDIT-7-capas.md)",
-    "SmartMapView and SellerDashboard are 100% mock data — no API connection",
-    "localhost:3005 hardcoded in multiple services",
-    "Safari TRELLIS GLBs: normals added but some models may still not render (needs real device test)",
-    "Some dead test files reference removed components (VestimentasView, AlebrijeView)"
+    "SellerDashboard uses mock data (MOCK_SELLER_PRODUCTS, MOCK_SELLER_EXPERIENCES) — now has demo disclaimer banner",
+    "Safari TRELLIS GLBs: normals added but needs real device verification",
+    "Some dead test files reference removed components (VestimentasView, AlebrijeView)",
+    "Streaming viewer counts are hardcoded mock (1234, 567)"
   ],
   "completedSprints": [
     "Sprint 1-3: Hardening, seguridad, DevOps",
@@ -55,15 +54,16 @@
     "Tailwind CDN → build-time v3 via PostCSS (77633a8)",
     "QR-to-AR direct route + Admin QR panel (a0f44b9)",
     "Vercel production deploy (ddadf4c)",
-    "Repo made private, carlos-amador-git added as collaborator"
+    "Repo made private, carlos-amador-git added as collaborator",
+    "AR direct view fixes: blank screen + landing flash (8bf77e3, cf7678d, ef8f550)"
   ],
   "nextSteps": [
-    "URGENT: Remediar 6 hallazgos CRITICAL de seguridad",
-    "USDZ conversion para iOS < 17.4 (Reality Converter o Xcode)",
-    "Conectar SmartMapView y SellerDashboard a APIs reales",
-    "Imprimir QR codes físicos para prueba en campo",
+    "Verificar modelos 3D TRELLIS en Safari/iPhone real",
+    "Conectar SellerDashboard a APIs reales (actualmente mock con disclaimer)",
+    "Imprimir QR codes físicos para prueba en campo (panel Admin QR listo)",
     "Gamificación: 'Encuentra los Alebrijes Escondidos' por Centro Histórico",
-    "Compartir viral: marco 'Guelaguetza 2025' para fotos AR"
+    "Compartir viral: marco 'Guelaguetza 2025' para fotos AR",
+    "USDZ conversion para iOS < 17.4 (baja prioridad — iOS 17.4+ es >85% del mercado)"
   ],
-  "lastUpdated": "2026-03-17"
+  "lastUpdated": "2026-03-21"
 }
