@@ -61,8 +61,10 @@ services:
       context: .
       dockerfile: Dockerfile.frontend
       args:
-        VITE_API_URL: ""
+        VITE_API_URL: "https://guelaguetzav2.mdconsultoria-ti.org"
     restart: always
+    environment:
+      VITE_API_URL: "https://guelaguetzav2.mdconsultoria-ti.org"
     ports:
       - "3080:80"
     depends_on:
