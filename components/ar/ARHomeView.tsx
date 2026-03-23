@@ -576,10 +576,10 @@ export function ARHomeView({ onNavigate, onBack }: ARHomeViewProps) {
             <button
               onClick={onBack}
               aria-label="Volver"
-              className="p-2 -ml-1 rounded-full hover:bg-gray-100 focus:outline-none
+              className="p-3 -ml-1 rounded-full bg-white shadow-md hover:bg-gray-50 focus:outline-none
                          focus:ring-2 focus:ring-red-500 transition-colors"
             >
-              <ChevronLeft className="w-6 h-6 text-gray-700" />
+              <ChevronLeft className="w-7 h-7 text-gray-700" />
             </button>
             <div>
               <h1 className="text-xl font-bold bg-gradient-to-r from-red-600 to-amber-500

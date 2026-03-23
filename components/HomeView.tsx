@@ -263,6 +263,24 @@ const HomeView: React.FC<HomeViewProps> = ({ setView }) => {
               </div>
 
               <div
+                onClick={() => {
+                  setView(ViewState.AR_SCANNER);
+                }}
+                className="bg-gradient-to-r from-purple-600 to-violet-500 p-4 md:p-5 rounded-2xl shadow-lg border-2 border-purple-400 active:scale-95 transition cursor-pointer hover:shadow-xl hover:-translate-y-1"
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-2xl md:text-3xl">🦌</span>
+                  <span className="bg-white text-purple-600 text-xs font-bold px-2 py-1 rounded-full">3D</span>
+                </div>
+                <h3 className="font-bold text-white text-sm md:text-lg">Alebrijes 3D</h3>
+                <p className="text-purple-100 text-xs mt-1">Ve modelos AR</p>
+                <div className="mt-2 flex items-center gap-1 text-white text-xs font-semibold">
+                  <span>Toca aquí</span>
+                  <ChevronRight className="w-3 h-3 md:w-4 md:h-4" />
+                </div>
+              </div>
+
+              <div
                 onClick={() => setView(ViewState.STORIES)}
                 className="bg-white dark:bg-gray-800 p-4 md:p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 active:scale-95 transition cursor-pointer hover:shadow-lg hover:-translate-y-0.5"
               >

@@ -94,7 +94,8 @@
       "Bash(vercel --yes --prod)",
       "Bash(gh repo:*)",
       "Bash(gh api:*)",
-      "Bash(vercel --yes --prod --force)"
+      "Bash(vercel --yes --prod --force)",
+      "Bash(cd:*)"
     ]
   }
 }
