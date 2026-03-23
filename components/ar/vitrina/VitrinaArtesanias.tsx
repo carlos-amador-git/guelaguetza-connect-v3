@@ -78,13 +78,13 @@ export default function VitrinaArtesanias({ section, onSelect, onBack }: Vitrina
   return (
     <div className="min-h-dvh bg-gray-950">
       {/* Top bar — sticky so back button is always accessible */}
-      <div className="sticky top-0 z-20 flex items-center gap-3 px-4 py-3 bg-gray-950/90 backdrop-blur-sm border-b border-gray-800/50">
+      <div className="sticky top-0 z-20 flex items-center gap-3 px-4 py-3 bg-gray-950/95 backdrop-blur-sm border-b border-gray-800/50">
         <button
           onClick={onBack}
-          className="flex items-center gap-1.5 rounded-xl bg-gray-800/70 px-3 py-2 text-sm font-medium text-gray-200 active:scale-95 transition-transform"
+          className="flex items-center gap-2 rounded-xl bg-white shadow-lg px-4 py-2.5 text-sm font-semibold text-gray-800 active:scale-95 transition-transform"
         >
-          <ArrowLeft className="size-4" />
-          Guelaguetza AR
+          <ArrowLeft className="size-5" />
+          <span>Volver</span>
         </button>
       </div>
 

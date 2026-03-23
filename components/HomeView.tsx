@@ -263,9 +263,7 @@ const HomeView: React.FC<HomeViewProps> = ({ setView }) => {
               </div>
 
               <div
-                onClick={() => {
-                  setView(ViewState.AR_SCANNER);
-                }}
+                onClick={() => setView(ViewState.AR_HOME)}
                 className="bg-gradient-to-r from-purple-600 to-violet-500 p-4 md:p-5 rounded-2xl shadow-lg border-2 border-purple-400 active:scale-95 transition cursor-pointer hover:shadow-xl hover:-translate-y-1"
               >
                 <div className="flex items-center justify-between mb-2">

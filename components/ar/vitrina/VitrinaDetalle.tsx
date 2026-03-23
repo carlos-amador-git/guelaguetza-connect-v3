@@ -87,10 +87,11 @@ export default function VitrinaDetalle({ itemId, onBack }: VitrinaDetalleProps) 
       <div className="absolute inset-x-0 top-0 z-10 flex items-center justify-between p-4">
         <button
           onClick={onBack}
-          className="flex items-center gap-2 rounded-xl bg-gray-950/70 px-4 py-2.5 text-sm font-medium text-white shadow-lg backdrop-blur-sm active:scale-95 transition-transform"
+          className="flex items-center gap-2 rounded-xl bg-gray-950/70 px-4 py-2.5 text-sm font-medium text-white shadow-lg backdrop-blur-sm active:scale-95 transition-transform hover:bg-gray-800 md:px-5 md:py-3 md:text-base"
         >
-          <ArrowLeft className="size-4" />
-          Artesanías
+          <ArrowLeft className="size-4 md:size-5" />
+          <span className="hidden sm:inline">Artesanías</span>
+          <span className="sm:hidden">Volver</span>
         </button>
 
         <button
