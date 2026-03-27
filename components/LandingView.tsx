@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Users,
   ShoppingBag,
@@ -8,16 +8,23 @@ import {
   MapPin,
   Calendar,
 } from 'lucide-react';
+import gsap from 'gsap';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import ThemeToggle from './ui/ThemeToggle';
-import GradientPlaceholder, { type PlaceholderVariant } from './ui/GradientPlaceholder';
-
-const HERO_VARIANTS: PlaceholderVariant[] = ['dancers', 'pineapple', 'stage'];
 
 interface LandingViewProps {
   onUserSelected: (role?: string) => void;
 }
+
+const INTRO_IMAGES = [
+  '/images/intro/1 lagarto1.png',
+  '/images/intro/2 guela1.png',
+  '/images/intro/3 chica.png',
+  '/images/intro/4 arcoiris.png',
+  '/images/intro/5 guela2.png',
+  '/images/intro/6 lagarto2.png',
+];
 
 const USER_TYPES = [
   {
@@ -26,6 +33,7 @@ const USER_TYPES = [
     title: 'Soy Visitante',
     description: 'Explora la Guelaguetza, descubre eventos, transporte, historias y conecta con la comunidad.',
     icon: Users,
+    image: '/images/dance_pluma.png',
     color: 'from-oaxaca-sky to-oaxaca-purple',
     features: ['Mapa interactivo', 'Rutas de transporte', 'Eventos y calendario', 'Historias de la comunidad'],
   },
@@ -35,6 +43,7 @@ const USER_TYPES = [
     title: 'Soy Vendedor',
     description: 'Vende productos artesanales, ofrece tours y experiencias, gestiona pedidos y reservas.',
     icon: ShoppingBag,
+    image: '/images/product_barro_negro.png',
     color: 'from-oaxaca-yellow to-oaxaca-pink',
     features: ['Gestiona productos', 'Crea experiencias', 'Pedidos y reservas', 'Estadisticas de ventas'],
   },
@@ -44,6 +53,7 @@ const USER_TYPES = [
     title: 'Administrador',
     description: 'Panel de metricas, estadisticas de uso y gestion de la plataforma.',
     icon: Shield,
+    image: '/images/poi_monte_alban.png',
     color: 'from-oaxaca-purple to-oaxaca-pink',
     features: ['Dashboard de metricas', 'Gestion de usuarios', 'Ver app como usuario', 'Reportes de actividad'],
   },
@@ -54,20 +64,70 @@ const LandingView: React.FC<LandingViewProps> = ({ onUserSelected }) => {
   const { t } = useLanguage();
   const [loading, setLoading] = useState<string | null>(null);
   const [selectedType, setSelectedType] = useState<string | null>(null);
-  const [heroIndex, setHeroIndex] = useState(0);
+
+  const containerRef = useRef<HTMLDivElement>(null);
+  const imagesRef = useRef<(HTMLImageElement | null)[]>([]);
+  const cardsRef = useRef<HTMLDivElement>(null);
+  const footerRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setHeroIndex((prev) => (prev + 1) % HERO_VARIANTS.length);
-    }, 4000);
-    return () => clearInterval(interval);
+    const ctx = gsap.context(() => {
+      const tl = gsap.timeline({ defaults: { ease: 'power4.out' } });
+
+      // Images fade in with gentle zoom, one by one
+      imagesRef.current.forEach((img, i) => {
+        if (img) {
+          gsap.set(img, { opacity: 0, scale: 1.1, filter: 'blur(4px)' });
+          tl.to(img, {
+            opacity: 1,
+            scale: 1,
+            filter: 'blur(0px)',
+            duration: 0.8,
+            ease: 'power2.out',
+          }, i * 0.35);
+        }
+      });
+
+      // Cards slide up smoothly
+      if (cardsRef.current) {
+        const cards = cardsRef.current.children;
+        gsap.set(cards, { opacity: 0, y: 40 });
+        tl.to(cards, {
+          opacity: 1,
+          y: 0,
+          duration: 0.8,
+          stagger: 0.2,
+          ease: 'power2.out',
+        }, '-=0.5');
+      }
+
+      // Footer fades in
+      if (footerRef.current) {
+        gsap.set(footerRef.current, { opacity: 0 });
+        tl.to(footerRef.current, { opacity: 1, duration: 0.8 }, '-=0.3');
+      }
+
+      // Subtle Ken Burns on final visible image
+      const lastImg = imagesRef.current[0];
+      if (lastImg) {
+        gsap.to(lastImg, {
+          scale: 1.03,
+          duration: 10,
+          ease: 'none',
+          repeat: -1,
+          yoyo: true,
+          delay: tl.duration(),
+        });
+      }
+    }, containerRef);
+
+    return () => ctx.revert();
   }, []);
 
   const handleSelectUser = async (type: 'user' | 'seller' | 'admin') => {
     setLoading(type);
     setSelectedType(type);
     await loginAsDemo(type);
-    // Map type to role
     const roleMap: Record<string, string> = {
       user: 'USER',
       seller: 'SELLER',
@@ -79,33 +139,24 @@ const LandingView: React.FC<LandingViewProps> = ({ onUserSelected }) => {
   };
 
   return (
-    <div className="min-h-screen relative overflow-hidden">
-      {/* Background Gradient Carousel */}
-      {HERO_VARIANTS.map((variant, index) => (
-        <div
-          key={variant}
-          className={`absolute inset-0 transition-opacity duration-1000 ${
-            index === heroIndex ? 'opacity-100' : 'opacity-0'
-          }`}
-          aria-hidden="true"
-        >
-          <GradientPlaceholder variant={variant} className="w-full h-full" iconSize={0} />
-        </div>
-      ))}
-
-      {/* Overlay gradient */}
-      <div className="absolute inset-0 bg-gradient-to-b from-oaxaca-purple/80 via-oaxaca-pink/70 to-oaxaca-yellow/60" aria-hidden="true" />
-
-      {/* Decorative blur elements */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
-        <div className="absolute -top-40 -right-40 w-60 sm:w-80 h-60 sm:h-80 bg-white/10 rounded-full blur-3xl" />
-        <div className="absolute -bottom-40 -left-40 w-60 sm:w-80 h-60 sm:h-80 bg-white/10 rounded-full blur-3xl" />
+    <div ref={containerRef} className="min-h-screen relative overflow-hidden">
+      {/* Background - Image 7 as base */}
+      <div className="absolute inset-0 z-0">
+        <img src="/images/intro/7 rojo.png" alt="" className="absolute inset-0 w-full h-full object-cover" />
+        {[...INTRO_IMAGES].reverse().map((src, i) => (
+          <img
+            key={i}
+            ref={(el) => { imagesRef.current[INTRO_IMAGES.length - 1 - i] = el; }}
+            src={src}
+            alt=""
+            className="absolute inset-0 w-full h-full object-contain"
+          />
+        ))}
       </div>
 
       <div className="relative z-10 min-h-screen flex flex-col">
         {/* Header */}
         <header className="pt-6 sm:pt-8 pb-4 sm:pb-6 px-4 sm:px-6 text-center relative">
-          {/* Theme Toggle in top right - minimum touch target 44px */}
           <div className="absolute top-3 sm:top-4 right-3 sm:right-4">
             <ThemeToggle
               variant="toggle"
@@ -113,28 +164,13 @@ const LandingView: React.FC<LandingViewProps> = ({ onUserSelected }) => {
               className="min-w-[44px] min-h-[44px]"
             />
           </div>
-
-          <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-full px-3 sm:px-4 py-1.5 sm:py-2 mb-3 sm:mb-4">
-            <Sparkles size={14} className="text-oaxaca-yellow sm:w-4 sm:h-4" aria-hidden="true" />
-            <span className="text-white text-xs sm:text-sm font-medium">{t('july_dates')}</span>
-          </div>
-          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-2">
-            Guelaguetza Connect
-          </h1>
-          <p className="text-white/80 text-base sm:text-lg max-w-xs sm:max-w-md mx-auto px-2">
-            {t('welcome_message')} {t('in_your_pocket')}
-          </p>
         </header>
 
-        {/* Main Content */}
-        <main className="flex-1 px-3 sm:px-4 pb-6 sm:pb-8">
-          <div className="max-w-5xl mx-auto">
-            <h2 className="text-white text-center text-lg sm:text-xl font-semibold mb-4 sm:mb-6">
-              {t('select_entry')}
-            </h2>
 
-            {/* Responsive grid: 1 col mobile, 2 cols tablet, 3 cols desktop for better use of space */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+        {/* Main Content */}
+        <main className="flex-1 flex flex-col justify-end px-3 sm:px-4 pb-10 sm:pb-12">
+          <div className="max-w-5xl mx-auto w-full">
+            <div ref={cardsRef} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
               {USER_TYPES.map((userType) => (
                 <button
                   key={userType.type}
@@ -142,15 +178,18 @@ const LandingView: React.FC<LandingViewProps> = ({ onUserSelected }) => {
                   disabled={loading !== null}
                   aria-label={`Ingresar como ${userType.name}`}
                   aria-busy={loading === userType.type}
-                  className={`relative bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm rounded-2xl p-4 sm:p-5 text-left transition-all duration-200 hover:scale-[1.02] hover:shadow-2xl active:scale-[0.98] focus-visible:ring-4 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-oaxaca-purple ${
-                    selectedType === userType.type ? 'ring-4 ring-white shadow-2xl scale-[1.02]' : ''
+                  style={{ boxShadow: 'inset 0 1px 1px 0 rgba(255,255,255,0.3), 0 8px 32px rgba(0,0,0,0.1)' }}
+                  className={`relative bg-white/5 dark:bg-white/[0.03] backdrop-blur-2xl backdrop-saturate-150 border border-white/15 dark:border-white/10 rounded-2xl p-4 sm:p-5 text-left transition-all duration-200 hover:scale-[1.02] hover:bg-white/10 active:scale-[0.98] focus-visible:ring-4 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-oaxaca-purple ${
+                    selectedType === userType.type ? 'ring-4 ring-white/50 scale-[1.02] bg-white/15 dark:bg-white/10' : ''
                   } ${loading && loading !== userType.type ? 'opacity-50' : ''}`}
                 >
-                  {/* Icon & Title */}
+                  {/* Image & Title */}
                   <div className="flex items-start gap-3 sm:gap-4 mb-2 sm:mb-3">
-                    <div className={`p-2.5 sm:p-3 rounded-xl bg-gradient-to-br ${userType.color} text-white shadow-lg flex-shrink-0`}>
-                      <userType.icon size={24} className="sm:w-7 sm:h-7" aria-hidden="true" />
-                    </div>
+                    <img
+                      src={userType.image}
+                      alt={userType.name}
+                      className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl object-cover shadow-lg flex-shrink-0"
+                    />
                     <div className="flex-1 min-w-0">
                       <h3 className="font-bold text-base sm:text-lg text-gray-900 dark:text-white truncate">
                         {userType.title}
@@ -173,7 +212,7 @@ const LandingView: React.FC<LandingViewProps> = ({ onUserSelected }) => {
                     {userType.description}
                   </p>
 
-                  {/* Features - Hidden on very small screens, show 2 on mobile, all on larger */}
+                  {/* Features */}
                   <div className="flex flex-wrap gap-1.5 sm:gap-2">
                     {userType.features.slice(0, 3).map((feature, idx) => (
                       <span
@@ -206,7 +245,7 @@ const LandingView: React.FC<LandingViewProps> = ({ onUserSelected }) => {
         </main>
 
         {/* Footer */}
-        <footer className="py-4 sm:py-6 px-4 text-center mt-auto">
+        <footer ref={footerRef} className="py-4 sm:py-6 px-4 text-center mt-auto">
           <div className="flex items-center justify-center gap-4 sm:gap-6 text-white/60 text-xs sm:text-sm mb-2 sm:mb-4 flex-wrap">
             <div className="flex items-center gap-1">
               <MapPin size={12} className="sm:w-3.5 sm:h-3.5" aria-hidden="true" />
@@ -214,7 +253,7 @@ const LandingView: React.FC<LandingViewProps> = ({ onUserSelected }) => {
             </div>
             <div className="flex items-center gap-1">
               <Calendar size={12} className="sm:w-3.5 sm:h-3.5" aria-hidden="true" />
-              <span>Guelaguetza 2025</span>
+              <span>Guelaguetza 2026</span>
             </div>
           </div>
           <p className="text-white/70 text-[10px] sm:text-xs">

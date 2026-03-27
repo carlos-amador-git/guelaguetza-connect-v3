@@ -90,13 +90,15 @@ const ProfileView: React.FC<ProfileViewProps> = ({ setView }) => {
   return (
     <div className="h-full flex flex-col bg-gray-50 dark:bg-gray-950 pb-20 transition-colors">
       {/* Header */}
-      <div className="bg-gradient-to-br from-oaxaca-purple to-oaxaca-pink p-6 pt-8 pb-20 relative">
-        <h2 className="text-white font-bold text-xl mb-1">Mi Perfil</h2>
-        <p className="text-white/70 text-sm">Gestiona tu cuenta</p>
+      <div className="bg-gradient-to-br from-oaxaca-purple to-oaxaca-pink p-6 md:px-6 lg:px-8 pt-8 pb-20 relative">
+        <div className="max-w-7xl mx-auto">
+          <h2 className="text-white font-bold text-xl mb-1">Mi Perfil</h2>
+          <p className="text-white/70 text-sm">Gestiona tu cuenta</p>
+        </div>
       </div>
 
       {/* Profile Card */}
-      <div className="px-4 -mt-14 relative z-10">
+      <div className="px-4 md:px-6 lg:px-8 -mt-14 relative z-10 max-w-7xl mx-auto w-full">
         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6">
           <div className="flex items-center gap-4">
             {/* Avatar */}
@@ -153,7 +155,7 @@ const ProfileView: React.FC<ProfileViewProps> = ({ setView }) => {
       </div>
 
       {/* XP Progress */}
-      <div className="px-4 mt-4">
+      <div className="px-4 md:px-6 lg:px-8 mt-4 max-w-7xl mx-auto w-full">
         {loadingStats ? (
           <div className="bg-white dark:bg-gray-800 rounded-xl p-6 flex justify-center">
             <Loader2 className="animate-spin text-oaxaca-pink" size={24} />
@@ -170,7 +172,7 @@ const ProfileView: React.FC<ProfileViewProps> = ({ setView }) => {
       </div>
 
       {/* Gamification Buttons */}
-      <div className="px-4 mt-4 flex gap-3">
+      <div className="px-4 md:px-6 lg:px-8 mt-4 flex gap-3 max-w-7xl mx-auto w-full">
         <button
           onClick={() => setView(ViewState.BADGES)}
           className="flex-1 bg-white dark:bg-gray-800 rounded-xl p-4 flex flex-col items-center gap-2 shadow-sm hover:shadow-md transition-shadow"
@@ -187,7 +189,7 @@ const ProfileView: React.FC<ProfileViewProps> = ({ setView }) => {
           <div className="p-3 bg-oaxaca-pink/20 rounded-full">
             <Trophy size={24} className="text-oaxaca-pink" />
           </div>
-          <span className="text-sm font-medium text-gray-900 dark:text-white">Leaderboard</span>
+          <span className="text-sm font-medium text-gray-900 dark:text-white">Tabla de clasificación</span>
           {stats && (
             <span className="text-xs text-gray-400">#{stats.rank}</span>
           )}
@@ -195,7 +197,7 @@ const ProfileView: React.FC<ProfileViewProps> = ({ setView }) => {
       </div>
 
       {/* Menu Options */}
-      <div className="px-4 mt-6 space-y-3">
+      <div className="px-4 md:px-6 lg:px-8 mt-6 space-y-3 max-w-7xl mx-auto w-full">
         {/* Theme Section */}
         <div className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden">
           <p className="px-4 py-2 text-xs font-semibold text-gray-400 uppercase">Apariencia</p>

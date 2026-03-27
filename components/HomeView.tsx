@@ -27,11 +27,11 @@ interface HomeViewProps {
   setView: (view: ViewState) => void;
 }
 
-const GASTRO_ITEMS: { name: string; desc: string; icon: typeof Utensils; category: GastronomyCategory }[] = [
-  { name: 'Tlayudas', desc: 'Tortilla gigante con asiento, frijoles y quesillo', icon: Utensils, category: 'TLAYUDAS' },
-  { name: 'Mezcal', desc: 'Destilado artesanal de agave oaxaqueño', icon: Wine, category: 'MEZCAL' },
-  { name: 'Chocolate', desc: 'Bebida tradicional de cacao y canela', icon: Coffee, category: 'CHOCOLATE' },
-  { name: 'Nieves', desc: 'Helados artesanales de sabores regionales', icon: IceCream, category: 'NIEVES' },
+const GASTRO_ITEMS: { name: string; desc: string; icon: typeof Utensils; image: string; category: GastronomyCategory }[] = [
+  { name: 'Tlayudas', desc: 'Tortilla gigante con asiento, frijoles y quesillo', icon: Utensils, image: '/images/gastro_tlayuda_dish.png', category: 'TLAYUDAS' },
+  { name: 'Mezcal', desc: 'Destilado artesanal de agave oaxaqueño', icon: Wine, image: '/images/experience_mezcal_tasting.png', category: 'MEZCAL' },
+  { name: 'Chocolate', desc: 'Bebida tradicional de cacao y canela', icon: Coffee, image: '/images/product_chocolate.png', category: 'CHOCOLATE' },
+  { name: 'Nieves', desc: 'Helados artesanales de sabores regionales', icon: IceCream, image: '/images/gastro_nieves_place.png', category: 'NIEVES' },
 ];
 
 interface DiscoverySlide {
@@ -87,6 +87,7 @@ const HomeView: React.FC<HomeViewProps> = ({ setView }) => {
   const [heroIndex, setHeroIndex] = useState(0);
   const [discoverIndex, setDiscoverIndex] = useState(0);
   const [wishlistCount, setWishlistCount] = useState(0);
+  const dragRef = React.useRef<{ startX: number; isDragging: boolean }>({ startX: 0, isDragging: false });
 
   // Filter gastronomy places by selected category
   const filteredPlaces = selectedGastroCategory === 'ALL'
@@ -115,60 +116,74 @@ const HomeView: React.FC<HomeViewProps> = ({ setView }) => {
   }, []);
 
   const nextHero = () => setHeroIndex((prev) => (prev + 1) % HERO_IMAGES.length);
-  const prevHero = () => setHeroIndex((prev) => (prev - 1 + HERO_IMAGES.length) % HERO_IMAGES.length);
+
+  // Drag handlers using ref
+  const handleDragStart = (clientX: number) => {
+    dragRef.current.startX = clientX;
+    dragRef.current.isDragging = true;
+  };
+
+  const handleDragEnd = (clientX: number) => {
+    if (!dragRef.current.isDragging) return;
+    const diff = clientX - dragRef.current.startX;
+    if (Math.abs(diff) > 30) {
+      nextHero();
+    }
+    dragRef.current.isDragging = false;
+  };
 
   return (
     <div className="pb-24 md:pb-8 animate-fade-in">
       {/* Hero Header - Responsive with Carousel */}
-      <div className="relative h-72 md:h-96 lg:h-[28rem] md:rounded-b-[2rem] lg:rounded-b-[3rem] overflow-hidden shadow-lg">
-        {/* Hero Gradient Carousel */}
-        {HERO_IMAGES.map((image, index) => (
-          <div
-            key={index}
-            className={`absolute inset-0 transition-opacity duration-700 ${index === heroIndex ? 'opacity-100' : 'opacity-0'
-              }`}
-          >
-            <img
-              src={image}
-              alt="Guelaguetza Hero"
-              className="w-full h-full object-cover"
-            />
-          </div>
-        ))}
+      <div 
+        className="relative h-72 md:h-96 lg:h-[28rem] md:rounded-b-[2rem] lg:rounded-b-[3rem] overflow-hidden shadow-guelaguetza select-none"
+        onMouseDown={(e) => handleDragStart(e.clientX)}
+        onMouseUp={(e) => handleDragEnd(e.clientX)}
+        onMouseLeave={() => dragRef.current.isDragging = false}
+        onTouchStart={(e) => handleDragStart(e.touches[0].clientX)}
+        onTouchEnd={(e) => handleDragEnd(e.changedTouches[0].clientX)}
+      >
+        {/* Hero Images with slide animation */}
+        <div className="relative w-full h-full">
+          {HERO_IMAGES.map((image, index) => (
+            <div
+              key={index}
+              className={`absolute inset-0 transition-all duration-700 ease-in-out ${index === heroIndex ? 'opacity-100 translate-x-0 z-10' : index === (heroIndex - 1 + HERO_IMAGES.length) % HERO_IMAGES.length ? 'opacity-0 -translate-x-full z-0' : 'opacity-0 translate-x-full z-0'
+                }`}
+            >
+              <img
+                src={image}
+                alt="Guelaguetza Hero"
+                className="w-full h-full object-cover"
+              />
+            </div>
+          ))}
+        </div>
 
-        {/* Overlay gradient */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/70"></div>
-
-        {/* Carousel Controls */}
-        <button
-          onClick={prevHero}
-          aria-label="Imagen anterior"
-          className="absolute left-2 top-1/2 -translate-y-1/2 p-2 bg-black/30 hover:bg-black/50 rounded-full text-white transition z-10 hidden md:block"
-        >
-          <ChevronLeft size={24} aria-hidden="true" />
-        </button>
+        {/* Carousel Controls - Both buttons advance forward */}
         <button
           onClick={nextHero}
-          aria-label="Imagen siguiente"
-          className="absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-black/30 hover:bg-black/50 rounded-full text-white transition z-10 hidden md:block"
+          aria-label="Siguiente"
+          className="absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-guelaguetza-purple/50 hover:bg-guelaguetza-purple/70 rounded-full text-white transition z-20"
         >
           <ChevronRight size={24} aria-hidden="true" />
         </button>
 
         {/* Carousel Indicators */}
-        <div className="absolute bottom-20 md:bottom-24 left-1/2 -translate-x-1/2 flex gap-2 z-10">
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-20 md:bottom-24">
           {HERO_IMAGES.map((_, index) => (
             <button
               key={index}
               onClick={() => setHeroIndex(index)}
               className={`w-2 h-2 rounded-full transition-all ${index === heroIndex ? 'bg-white w-6' : 'bg-white/50 hover:bg-white/70'
                 }`}
+              aria-label={`Imagen ${index + 1}`}
             />
           ))}
         </div>
 
         {/* Top Navigation Bar */}
-        <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between px-4 py-3 md:px-6">
+        <div className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-4 py-3 md:px-6">
           <div className="flex items-center gap-3">
             <div className="text-white font-bold text-lg drop-shadow-lg">GC</div>
             {/* Language Selector */}
@@ -177,34 +192,34 @@ const HomeView: React.FC<HomeViewProps> = ({ setView }) => {
           <div className="flex items-center gap-2">
             <button
               onClick={() => setView(ViewState.SEARCH)}
-              className="p-2 rounded-full bg-black/20 hover:bg-black/40 transition text-white backdrop-blur-sm"
+              className="p-2 rounded-full bg-guelaguetza-purple/40 hover:bg-guelaguetza-purple/60 transition text-white backdrop-blur-sm"
               aria-label={t('search')}
             >
               <Search size={20} />
             </button>
             <button
               onClick={() => setView(ViewState.WISHLIST)}
-              className="p-2 rounded-full bg-black/20 hover:bg-black/40 transition text-white backdrop-blur-sm relative"
+              className="p-2 rounded-full bg-guelaguetza-purple/40 hover:bg-guelaguetza-purple/60 transition text-white backdrop-blur-sm relative"
               aria-label="Lista de deseos"
             >
               <Heart size={20} />
               {wishlistCount > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-oaxaca-pink text-white text-[10px] rounded-full flex items-center justify-center font-bold border border-white">
+                <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-guelaguetza-pink text-white text-[10px] rounded-full flex items-center justify-center font-bold border border-white">
                   {wishlistCount}
                 </span>
               )}
             </button>
             <button
               onClick={() => setView(ViewState.EVENTS)}
-              className="p-2 rounded-full bg-black/20 hover:bg-black/40 transition text-white backdrop-blur-sm relative"
+              className="p-2 rounded-full bg-guelaguetza-purple/40 hover:bg-guelaguetza-purple/60 transition text-white backdrop-blur-sm relative"
               aria-label={t('events')}
             >
               <CalendarDays size={20} />
-              <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-oaxaca-yellow rounded-full border border-white"></span>
+              <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-guelaguetza-yellow rounded-full border border-white"></span>
             </button>
             <button
               onClick={() => setView(ViewState.PROFILE)}
-              className="p-2 rounded-full bg-black/20 hover:bg-black/40 transition text-white backdrop-blur-sm"
+              className="p-2 rounded-full bg-guelaguetza-purple/40 hover:bg-guelaguetza-purple/60 transition text-white backdrop-blur-sm"
               aria-label={t('profile')}
             >
               <User size={20} />
@@ -213,26 +228,34 @@ const HomeView: React.FC<HomeViewProps> = ({ setView }) => {
         </div>
 
         {/* Hero Content */}
-        <div className="absolute bottom-6 left-6 right-6 md:bottom-10 md:left-10 text-white">
-          <p className="text-sm md:text-base font-semibold uppercase tracking-wider mb-1 text-oaxaca-yellow drop-shadow-lg">{t('july_dates')}</p>
-          <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold leading-tight drop-shadow-lg">{greeting}! Guelaguetza</h1>
-          <p className="text-white/90 text-sm md:text-base lg:text-lg mt-2 max-w-xl drop-shadow">{t('welcome_message')} {t('in_your_pocket')}.</p>
+        <div className="absolute bottom-6 left-6 right-6 md:bottom-10 md:left-10 text-white z-20">
+          <div className="flex flex-col gap-1">
+            <div className="bg-black/30 backdrop-blur-sm rounded-lg px-3 py-1.5 self-start">
+              <p className="text-sm md:text-base font-semibold uppercase tracking-wider bg-gradient-to-r from-yellow-300 via-yellow-400 to-yellow-200 bg-[length:200%_auto] animate-gradient-text text-transparent bg-clip-text">{t('july_dates')}</p>
+            </div>
+            <div className="bg-black/30 backdrop-blur-sm rounded-lg px-4 py-2 self-start mb-2">
+              <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold leading-tight bg-gradient-to-r from-pink-300 via-purple-300 to-indigo-300 bg-[length:200%_auto] animate-gradient-text text-transparent bg-clip-text pb-1">{greeting}</h1>
+            </div>
+            <div className="bg-black/30 backdrop-blur-sm rounded-lg px-3 py-1.5 self-start">
+              <p className="text-white/90 text-sm md:text-base lg:text-lg drop-shadow-lg">{t('welcome_message')} {t('in_your_pocket')}.</p>
+            </div>
+          </div>
         </div>
       </div>
 
       {/* Main Content Grid - Responsive */}
-      <div className="px-4 md:px-6 lg:px-8">
+      <div className="px-4 md:px-6 lg:px-8 max-w-7xl mx-auto">
         {/* Next Event Card */}
         <div className="-mt-8 relative z-10 max-w-3xl">
           <div
             onClick={() => setView(ViewState.PROGRAM)}
-            className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-4 md:p-5 flex items-center justify-between border-l-4 border-oaxaca-yellow cursor-pointer hover:shadow-lg transition active:scale-[0.98]"
+            className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-4 md:p-5 flex items-center justify-between border-l-4 border-guelaguetza-yellow cursor-pointer hover:shadow-lg transition active:scale-[0.98]"
           >
             <div>
               <h2 className="font-bold text-gray-800 dark:text-gray-100 md:text-lg">{t('next_event')}</h2>
               <p className="text-sm md:text-base text-gray-500 dark:text-gray-400">{t('parade')} • 17:00</p>
             </div>
-            <button className="bg-oaxaca-purple text-white p-2 md:p-3 rounded-full hover:bg-opacity-90 transition">
+            <button className="bg-guelaguetza-purple text-white p-2 md:p-3 rounded-full hover:bg-guelaguetza-purple/90 transition">
               <PlayCircle size={24} />
             </button>
           </div>
@@ -246,54 +269,66 @@ const HomeView: React.FC<HomeViewProps> = ({ setView }) => {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div
                 onClick={() => setView(ViewState.TRANSPORT)}
-                className="bg-white dark:bg-gray-800 p-4 md:p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 active:scale-95 transition cursor-pointer hover:shadow-lg hover:-translate-y-0.5"
+                className="relative p-4 md:p-5 rounded-2xl shadow-lg active:scale-95 transition cursor-pointer hover:shadow-xl hover:-translate-y-0.5 overflow-hidden"
               >
-                <img src="/images/ui/icon_transport.png" alt="Transporte" className="w-14 h-14 md:w-16 md:h-16 object-contain mb-3 drop-shadow-md" />
-                <h3 className="font-bold text-gray-800 dark:text-gray-100">{t('transport')}</h3>
-                <p className="text-xs md:text-sm text-gray-500 dark:text-gray-400 mt-1">{t('safe_routes')}</p>
+                <img src="/images/rojo.png" alt="Transporte" className="absolute inset-0 w-full h-full object-cover" />
+                <div className="relative z-10">
+                  <img src="/images/poi_santo_domingo.png" alt="Transporte" className="w-14 h-14 md:w-16 md:h-16 object-contain mb-3 drop-shadow-md rounded-lg" />
+                  <h3 className="font-bold text-white text-sm md:text-base">{t('transport')}</h3>
+                  <p className="text-white/70 text-xs mt-1">{t('safe_routes')}</p>
+                </div>
               </div>
 
               <div
                 onClick={() => setView(ViewState.AR_SCANNER)}
-                className="bg-white dark:bg-gray-800 p-4 md:p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 active:scale-95 transition cursor-pointer hover:shadow-lg hover:-translate-y-0.5"
+                className="relative p-4 md:p-5 rounded-2xl shadow-lg active:scale-95 transition cursor-pointer hover:shadow-xl hover:-translate-y-0.5 overflow-hidden"
               >
-                <img src="/images/ui/icon_ar.png" alt="AR Guelaguetza" className="w-14 h-14 md:w-16 md:h-16 object-contain mb-3 drop-shadow-md" />
-                <h3 className="font-bold text-gray-800 dark:text-gray-100">{t('ar_museum')}</h3>
-                <p className="text-xs md:text-sm text-gray-500 dark:text-gray-400 mt-1">{t('discover_magic')}</p>
+                <img src="/images/amarillo.png" alt="AR Guelaguetza" className="absolute inset-0 w-full h-full object-cover" />
+                <div className="relative z-10">
+                  <img src="/images/product_alebrije.png" alt="AR Guelaguetza" className="w-14 h-14 md:w-16 md:h-16 object-contain mb-3 drop-shadow-md rounded-lg" />
+                  <h3 className="font-bold text-white text-sm md:text-base">{t('ar_museum')}</h3>
+                  <p className="text-white/70 text-xs mt-1">{t('discover_magic')}</p>
+                </div>
               </div>
 
               <div
                 onClick={() => setView(ViewState.AR_HOME)}
-                className="bg-gradient-to-r from-purple-600 to-violet-500 p-4 md:p-5 rounded-2xl shadow-lg border-2 border-purple-400 active:scale-95 transition cursor-pointer hover:shadow-xl hover:-translate-y-1"
+                className="relative p-4 md:p-5 rounded-2xl shadow-lg active:scale-95 transition cursor-pointer hover:shadow-xl hover:-translate-y-1 overflow-hidden"
               >
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-2xl md:text-3xl">🦌</span>
-                  <span className="bg-white text-purple-600 text-xs font-bold px-2 py-1 rounded-full">3D</span>
-                </div>
-                <h3 className="font-bold text-white text-sm md:text-lg">Alebrijes 3D</h3>
-                <p className="text-purple-100 text-xs mt-1">Ve modelos AR</p>
-                <div className="mt-2 flex items-center gap-1 text-white text-xs font-semibold">
-                  <span>Toca aquí</span>
-                  <ChevronRight className="w-3 h-3 md:w-4 md:h-4" />
+                <img src="/images/verde.png" alt="Alebrijes" className="absolute inset-0 w-full h-full object-cover" />
+                <div className="relative z-10">
+                  <img src="/images/product_alebrije_dragon.png" alt="Alebrijes" className="w-14 h-14 md:w-16 md:h-16 object-contain mb-2 drop-shadow-md rounded-lg" />
+                  <h3 className="font-bold text-white text-sm md:text-lg">Alebrijes 3D</h3>
+                  <p className="text-white/70 text-xs mt-1">Ve modelos AR</p>
+                  <div className="mt-2 flex items-center gap-1 text-white text-xs font-semibold">
+                    <span>Toca aquí</span>
+                    <ChevronRight className="w-3 h-3 md:w-4 md:h-4" />
+                  </div>
                 </div>
               </div>
 
               <div
                 onClick={() => setView(ViewState.STORIES)}
-                className="bg-white dark:bg-gray-800 p-4 md:p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 active:scale-95 transition cursor-pointer hover:shadow-lg hover:-translate-y-0.5"
+                className="relative p-4 md:p-5 rounded-2xl shadow-lg active:scale-95 transition cursor-pointer hover:shadow-xl hover:-translate-y-0.5 overflow-hidden"
               >
-                <img src="/images/ui/icon_home.png" alt="Historias" className="w-14 h-14 md:w-16 md:h-16 object-contain mb-3 drop-shadow-md" />
-                <h3 className="font-bold text-gray-800 dark:text-gray-100">{t('stories')}</h3>
-                <p className="text-xs md:text-sm text-gray-500 dark:text-gray-400 mt-1">{t('live_moments')}</p>
+                <img src="/images/azul.png" alt="Historias" className="absolute inset-0 w-full h-full object-cover" />
+                <div className="relative z-10">
+                  <img src="/images/dance_tehuana.png" alt="Historias" className="w-14 h-14 md:w-16 md:h-16 object-contain mb-3 drop-shadow-md rounded-lg" />
+                  <h3 className="font-bold text-white text-sm md:text-base">{t('stories')}</h3>
+                  <p className="text-white/70 text-xs mt-1">{t('live_moments')}</p>
+                </div>
               </div>
 
               <div
                 onClick={() => setView(ViewState.PROGRAM)}
-                className="bg-white dark:bg-gray-800 p-4 md:p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 active:scale-95 transition cursor-pointer hover:shadow-lg hover:-translate-y-0.5"
+                className="relative p-4 md:p-5 rounded-2xl shadow-lg active:scale-95 transition cursor-pointer hover:shadow-xl hover:-translate-y-0.5 overflow-hidden"
               >
-                <img src="/images/ui/icon_events.png" alt="Programa" className="w-14 h-14 md:w-16 md:h-16 object-contain mb-3 drop-shadow-md" />
-                <h3 className="font-bold text-gray-800 dark:text-gray-100">{t('program')}</h3>
-                <p className="text-xs md:text-sm text-gray-500 dark:text-gray-400 mt-1">{t('complete_calendar')}</p>
+                <img src="/images/morado.png" alt="Programa" className="absolute inset-0 w-full h-full object-cover" />
+                <div className="relative z-10">
+                  <img src="/images/poi_auditorio_guelaguetza.png" alt="Programa" className="w-14 h-14 md:w-16 md:h-16 object-contain mb-3 drop-shadow-md rounded-lg" />
+                  <h3 className="font-bold text-white text-sm md:text-base">{t('program')}</h3>
+                  <p className="text-white/70 text-xs mt-1">{t('complete_calendar')}</p>
+                </div>
               </div>
             </div>
 
@@ -303,34 +338,42 @@ const HomeView: React.FC<HomeViewProps> = ({ setView }) => {
               <div className="grid grid-cols-4 md:grid-cols-4 gap-3 md:gap-4">
                 <div
                   onClick={() => setView(ViewState.TIENDA)}
-                  className="flex flex-col items-center p-3 md:p-4 bg-oaxaca-yellow-light dark:bg-oaxaca-yellow/20 rounded-2xl cursor-pointer hover:bg-oaxaca-yellow/30 transition active:scale-95"
+                  className="relative h-20 md:h-24 rounded-2xl cursor-pointer hover:shadow-xl transition active:scale-95 overflow-hidden"
                 >
-                  <img src="/images/ui/icon_market.png" alt="Tienda" className="w-11 h-11 md:w-14 md:h-14 object-contain mb-2 drop-shadow-sm" />
-                  <span className="text-xs md:text-sm font-medium text-gray-700 dark:text-gray-300">{t('shop')}</span>
+                  <img src="/images/product_barro_negro.png" alt="Tienda" className="absolute inset-0 w-full h-full object-cover" />
+                  <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+                    <span className="text-xs md:text-sm font-bold text-white drop-shadow-lg">{t('shop')}</span>
+                  </div>
                 </div>
 
                 <div
                   onClick={() => setView(ViewState.STREAMS)}
-                  className="flex flex-col items-center p-3 md:p-4 bg-red-50 dark:bg-red-900/20 rounded-2xl cursor-pointer hover:bg-red-100 transition active:scale-95"
+                  className="relative h-20 md:h-24 rounded-2xl cursor-pointer hover:shadow-xl transition active:scale-95 overflow-hidden"
                 >
-                  <img src="/images/ui/icon_live.png" alt="En Vivo" className="w-11 h-11 md:w-14 md:h-14 object-contain mb-2 drop-shadow-sm" />
-                  <span className="text-xs md:text-sm font-medium text-gray-700 dark:text-gray-300">{t('streams')}</span>
+                  <img src="/images/poi_auditorio_guelaguetza.png" alt="En Vivo" className="absolute inset-0 w-full h-full object-cover" />
+                  <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+                    <span className="text-xs md:text-sm font-bold text-white drop-shadow-lg">{t('streams')}</span>
+                  </div>
                 </div>
 
                 <div
                   onClick={() => setView(ViewState.EXPERIENCES)}
-                  className="flex flex-col items-center p-3 md:p-4 bg-oaxaca-purple-light dark:bg-oaxaca-purple/20 rounded-2xl cursor-pointer hover:bg-oaxaca-purple/30 transition active:scale-95"
+                  className="relative h-20 md:h-24 rounded-2xl cursor-pointer hover:shadow-xl transition active:scale-95 overflow-hidden"
                 >
-                  <img src="/images/ui/icon_events.png" alt="Tours" className="w-11 h-11 md:w-14 md:h-14 object-contain mb-2 drop-shadow-sm" />
-                  <span className="text-xs md:text-sm font-medium text-gray-700 dark:text-gray-300">{t('tours')}</span>
+                  <img src="/images/experience_mezcal_tasting.png" alt="Experiencias" className="absolute inset-0 w-full h-full object-cover" />
+                  <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+                    <span className="text-xs md:text-sm font-bold text-white drop-shadow-lg">{t('tours')}</span>
+                  </div>
                 </div>
 
                 <div
                   onClick={() => setView(ViewState.SMART_MAP)}
-                  className="flex flex-col items-center p-3 md:p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-2xl cursor-pointer hover:bg-emerald-100 transition active:scale-95"
+                  className="relative h-20 md:h-24 rounded-2xl cursor-pointer hover:shadow-xl transition active:scale-95 overflow-hidden"
                 >
-                  <img src="/images/ui/icon_plan.png" alt="Planificar" className="w-11 h-11 md:w-14 md:h-14 object-contain mb-2 drop-shadow-sm" />
-                  <span className="text-xs md:text-sm font-medium text-gray-700 dark:text-gray-300">{t('plan')}</span>
+                  <img src="/images/poi_monte_alban.png" alt="Planificar" className="absolute inset-0 w-full h-full object-cover" />
+                  <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+                    <span className="text-xs md:text-sm font-bold text-white drop-shadow-lg">{t('plan')}</span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -341,20 +384,26 @@ const HomeView: React.FC<HomeViewProps> = ({ setView }) => {
               <div className="grid grid-cols-2 gap-4">
                 <div
                   onClick={() => setView(ViewState.EVENTS)}
-                  className="bg-gradient-to-br from-oaxaca-pink to-oaxaca-purple p-4 md:p-5 rounded-xl shadow-md cursor-pointer hover:shadow-lg transition active:scale-[0.98] text-white"
+                  className="relative p-4 md:p-5 rounded-xl shadow-md cursor-pointer hover:shadow-lg transition active:scale-[0.98] text-white overflow-hidden"
                 >
-                  <img src="/images/ui/icon_events.png" alt="Eventos" className="w-12 h-12 md:w-14 md:h-14 object-contain mb-3 drop-shadow-lg" />
-                  <h3 className="font-bold">{t('events')}</h3>
-                  <p className="text-xs md:text-sm text-white/80 mt-1">{t('complete_calendar')}</p>
+                  <img src="/images/rojo.png" alt="" className="absolute inset-0 w-full h-full object-cover" />
+                  <div className="relative z-10">
+                    <img src="/images/dance_pluma.png" alt="Eventos" className="w-12 h-12 md:w-14 md:h-14 object-contain mb-3 drop-shadow-lg rounded-lg" />
+                    <h3 className="font-bold">{t('events')}</h3>
+                    <p className="text-xs md:text-sm text-white/80 mt-1">{t('complete_calendar')}</p>
+                  </div>
                 </div>
 
                 <div
                   onClick={() => setView(ViewState.COMMUNITIES)}
-                  className="bg-gradient-to-br from-oaxaca-purple to-oaxaca-pink p-4 md:p-5 rounded-xl shadow-md cursor-pointer hover:shadow-lg transition active:scale-[0.98] text-white"
+                  className="relative p-4 md:p-5 rounded-xl shadow-md cursor-pointer hover:shadow-lg transition active:scale-[0.98] text-white overflow-hidden"
                 >
-                  <img src="/images/ui/icon_community.png" alt="Comunidades" className="w-12 h-12 md:w-14 md:h-14 object-contain mb-3 drop-shadow-lg" />
-                  <h3 className="font-bold">{t('communities')}</h3>
-                  <p className="text-xs md:text-sm text-white/80 mt-1">{t('community_groups')}</p>
+                  <img src="/images/azul.png" alt="" className="absolute inset-0 w-full h-full object-cover" />
+                  <div className="relative z-10">
+                    <img src="/images/textil_huipil_istmo.png" alt="Comunidades" className="w-12 h-12 md:w-14 md:h-14 object-contain mb-3 drop-shadow-lg rounded-lg" />
+                    <h3 className="font-bold">{t('communities')}</h3>
+                    <p className="text-xs md:text-sm text-white/80 mt-1">{t('community_groups')}</p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -368,7 +417,7 @@ const HomeView: React.FC<HomeViewProps> = ({ setView }) => {
                     <button
                       key={index}
                       onClick={() => setDiscoverIndex(index)}
-                      className={`w-2 h-2 rounded-full transition-all ${index === discoverIndex ? 'bg-oaxaca-pink w-5' : 'bg-gray-300 dark:bg-gray-600 hover:bg-gray-400'
+                      className={`w-2 h-2 rounded-full transition-all ${index === discoverIndex ? 'bg-guelaguetza-pink w-5' : 'bg-gray-300 dark:bg-gray-600 hover:bg-gray-400'
                         }`}
                       aria-label={`Ir a slide ${index + 1}`}
                     />
@@ -410,7 +459,7 @@ const HomeView: React.FC<HomeViewProps> = ({ setView }) => {
                     {DISCOVER_SLIDES.map((slide, index) => (
                       <p
                         key={`tag-${slide.id}`}
-                        className={`text-oaxaca-yellow text-xs md:text-sm font-semibold uppercase tracking-wider transition-opacity duration-700 ${index === discoverIndex ? 'opacity-100' : 'opacity-0 absolute'
+                        className={`text-guelaguetza-yellow text-xs md:text-sm font-semibold uppercase tracking-wider transition-opacity duration-700 ${index === discoverIndex ? 'opacity-100' : 'opacity-0 absolute'
                           }`}
                       >
                         {slide.tag}
@@ -445,15 +494,15 @@ const HomeView: React.FC<HomeViewProps> = ({ setView }) => {
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
                     <span className="text-gray-500 dark:text-gray-400">{t('delegations')}</span>
-                    <span className="font-bold text-oaxaca-pink">8 {t('regions')}</span>
+                    <span className="font-bold text-guelaguetza-pink">8 {t('regions')}</span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-gray-500 dark:text-gray-400">{t('events')}</span>
-                    <span className="font-bold text-oaxaca-purple">50+</span>
+                    <span className="font-bold text-guelaguetza-purple">50+</span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-gray-500 dark:text-gray-400">{t('artisans')}</span>
-                    <span className="font-bold text-oaxaca-yellow">200+</span>
+                    <span className="font-bold text-guelaguetza-yellow">200+</span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-gray-500 dark:text-gray-400">{t('expected_visitors')}</span>
@@ -463,23 +512,26 @@ const HomeView: React.FC<HomeViewProps> = ({ setView }) => {
               </div>
 
               {/* GuelaBot Card */}
-              <div className="bg-gradient-to-br from-oaxaca-purple to-oaxaca-pink rounded-xl p-5 text-white">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="bg-white/20 p-2 rounded-full">
-                    <MessageCircle size={24} />
+              <div className="relative rounded-xl p-5 text-white overflow-hidden">
+                <img src="/images/morado.png" alt="" className="absolute inset-0 w-full h-full object-cover" />
+                <div className="relative z-10">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="bg-white/20 p-2 rounded-full">
+                      <MessageCircle size={24} />
+                    </div>
+                    <div>
+                      <h3 className="font-bold">{t('guelabot')}</h3>
+                      <p className="text-xs text-white/70">{t('virtual_assistant')}</p>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="font-bold">{t('guelabot')}</h3>
-                    <p className="text-xs text-white/70">{t('virtual_assistant')}</p>
-                  </div>
+                  <p className="text-sm text-white/90 mb-4">{t('ask_about')}</p>
+                  <button
+                    onClick={() => setView(ViewState.CHAT)}
+                    className="w-full bg-white text-guelaguetza-purple font-medium py-2 rounded-lg hover:bg-white/90 transition"
+                  >
+                    {t('start_chat')}
+                  </button>
                 </div>
-                <p className="text-sm text-white/90 mb-4">{t('ask_about')}</p>
-                <button
-                  onClick={() => setView(ViewState.CHAT)}
-                  className="w-full bg-white text-oaxaca-purple font-medium py-2 rounded-lg hover:bg-white/90 transition"
-                >
-                  {t('start_chat')}
-                </button>
               </div>
 
               {/* Gastronomy Quick Links */}
@@ -495,9 +547,7 @@ const HomeView: React.FC<HomeViewProps> = ({ setView }) => {
                       }}
                       className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition"
                     >
-                      <div className="bg-oaxaca-yellow/20 p-2 rounded-full">
-                        <item.icon size={16} className="text-oaxaca-purple" />
-                      </div>
+                      <img src={item.image} alt={item.name} className="w-10 h-10 rounded-lg object-cover shadow-sm" />
                       <span className="text-sm text-gray-700 dark:text-gray-300">{item.name}</span>
                       <ChevronRight size={14} className="ml-auto text-gray-400" />
                     </div>
@@ -514,7 +564,7 @@ const HomeView: React.FC<HomeViewProps> = ({ setView }) => {
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-end md:items-center justify-center p-4">
           <div className="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-lg max-h-[85vh] overflow-hidden animate-in slide-in-from-bottom duration-300">
             {/* Modal Header */}
-            <div className="bg-gradient-to-r from-oaxaca-purple to-oaxaca-pink p-4 text-white">
+            <div className="bg-gradient-to-r from-guelaguetza-purple to-guelaguetza-pink p-4 text-white">
               <div className="flex items-center justify-between mb-3">
                 <div>
                   <h3 className="font-bold text-lg">{t('flavors_of_oaxaca')}</h3>
@@ -537,7 +587,7 @@ const HomeView: React.FC<HomeViewProps> = ({ setView }) => {
                 <button
                   onClick={() => setSelectedGastroCategory('ALL')}
                   className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition ${selectedGastroCategory === 'ALL'
-                    ? 'bg-white text-oaxaca-purple'
+                    ? 'bg-white text-guelaguetza-purple'
                     : 'bg-white/20 text-white hover:bg-white/30'
                     }`}
                 >
@@ -548,7 +598,7 @@ const HomeView: React.FC<HomeViewProps> = ({ setView }) => {
                     key={item.category}
                     onClick={() => setSelectedGastroCategory(item.category)}
                     className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition flex items-center gap-1.5 ${selectedGastroCategory === item.category
-                      ? 'bg-white text-oaxaca-purple'
+                      ? 'bg-white text-guelaguetza-purple'
                       : 'bg-white/20 text-white hover:bg-white/30'
                       }`}
                   >
@@ -583,7 +633,7 @@ const HomeView: React.FC<HomeViewProps> = ({ setView }) => {
                       </div>
                       {/* Reservation Badge */}
                       {place.requiresReservation && (
-                        <div className="absolute top-1 right-1 bg-oaxaca-yellow p-0.5 rounded">
+                        <div className="absolute top-1 right-1 bg-guelaguetza-yellow p-0.5 rounded">
                           <Clock size={10} className="text-white" />
                         </div>
                       )}
@@ -601,11 +651,11 @@ const HomeView: React.FC<HomeViewProps> = ({ setView }) => {
                         "{place.vibe}"
                       </p>
                       <div className="flex items-center gap-2 mt-1.5">
-                        <span className="text-xs font-medium text-oaxaca-yellow dark:text-oaxaca-yellow">
+                        <span className="text-xs font-medium text-guelaguetza-yellow dark:text-guelaguetza-yellow">
                           {place.priceRange}
                         </span>
                         {place.requiresReservation && (
-                          <span className="text-[10px] bg-oaxaca-yellow-light dark:bg-oaxaca-yellow/20 text-oaxaca-yellow dark:text-oaxaca-yellow px-1.5 py-0.5 rounded">
+                          <span className="text-[10px] bg-guelaguetza-yellow-light dark:bg-guelaguetza-yellow/20 text-guelaguetza-yellow dark:text-guelaguetza-yellow px-1.5 py-0.5 rounded">
                             Reservar
                           </span>
                         )}
@@ -616,7 +666,7 @@ const HomeView: React.FC<HomeViewProps> = ({ setView }) => {
                   {/* Must Try Section */}
                   <div className="px-3 pb-2">
                     <div className="flex items-start gap-1.5 text-xs">
-                      <Star size={12} className="text-oaxaca-yellow fill-oaxaca-yellow flex-shrink-0 mt-0.5" />
+                      <Star size={12} className="text-guelaguetza-yellow fill-guelaguetza-yellow flex-shrink-0 mt-0.5" />
                       <div>
                         <span className="font-medium text-gray-700 dark:text-gray-300">{t('must_try')}: </span>
                         <span className="text-gray-600 dark:text-gray-400">{place.mustTry}</span>
@@ -640,7 +690,7 @@ const HomeView: React.FC<HomeViewProps> = ({ setView }) => {
                       href={getGoogleMapsDirectionsUrl(place)}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-medium text-oaxaca-purple dark:text-oaxaca-yellow hover:bg-oaxaca-purple-light dark:hover:bg-oaxaca-purple/20 transition"
+                      className="flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-medium text-guelaguetza-purple dark:text-guelaguetza-yellow hover:bg-guelaguetza-purple-light dark:hover:bg-guelaguetza-purple/20 transition"
                     >
                       <Navigation size={12} />
                       {t('how_to_get_there')}
@@ -665,7 +715,7 @@ const HomeView: React.FC<HomeViewProps> = ({ setView }) => {
                   setSelectedGastroCategory('ALL');
                   setView(ViewState.CHAT);
                 }}
-                className="w-full py-3 bg-oaxaca-pink text-white rounded-xl font-medium hover:bg-opacity-90 transition flex items-center justify-center gap-2"
+                className="w-full py-3 bg-guelaguetza-pink text-white rounded-xl font-medium hover:bg-opacity-90 transition flex items-center justify-center gap-2"
               >
                 <MessageCircle size={18} aria-hidden="true" />
                 {t('ask_guelabot')}
@@ -679,11 +729,11 @@ const HomeView: React.FC<HomeViewProps> = ({ setView }) => {
       <button
         onClick={() => setView(ViewState.CHAT)}
         aria-label={t('ask_guelabot_short')}
-        className="md:hidden fixed bottom-24 right-4 bg-oaxaca-purple text-white p-4 rounded-full shadow-lg hover:bg-oaxaca-purple/90 transition-all hover:scale-110 active:scale-95 z-40 group"
+        className="md:hidden fixed bottom-24 right-4 bg-guelaguetza-purple text-white p-4 rounded-full shadow-lg hover:bg-guelaguetza-purple/90 transition-all hover:scale-110 active:scale-95 z-40 group"
       >
         <div className="relative">
           <MessageCircle size={24} aria-hidden="true" />
-          <Sparkles size={12} className="absolute -top-1 -right-1 text-oaxaca-yellow" aria-hidden="true" />
+          <Sparkles size={12} className="absolute -top-1 -right-1 text-guelaguetza-yellow" aria-hidden="true" />
         </div>
         <span className="absolute right-full mr-2 top-1/2 -translate-y-1/2 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 text-xs font-medium px-3 py-1.5 rounded-lg shadow-md whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">
           {t('ask_guelabot_short')}

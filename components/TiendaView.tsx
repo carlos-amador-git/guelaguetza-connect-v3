@@ -18,7 +18,6 @@ import { ViewState } from '../types';
 import EmptyState from './ui/EmptyState';
 import { SkeletonGrid } from './ui/LoadingSpinner';
 import GradientPlaceholder from './ui/GradientPlaceholder';
-import PullToRefresh from './ui/PullToRefresh';
 import LoadingButton from './ui/LoadingButton';
 
 interface TiendaViewProps {
@@ -31,6 +30,7 @@ const CATEGORIES: ProductCategory[] = ['ARTESANIA', 'MEZCAL', 'TEXTIL', 'CERAMIC
 export default function TiendaView({ onNavigate, onBack }: TiendaViewProps) {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchInput, setSearchInput] = useState('');
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState<ProductCategory | ''>('');
   const [showFilters, setShowFilters] = useState(false);
@@ -38,10 +38,16 @@ export default function TiendaView({ onNavigate, onBack }: TiendaViewProps) {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
 
+  // Debounce search input
+  useEffect(() => {
+    const timer = setTimeout(() => setSearch(searchInput), 300);
+    return () => clearTimeout(timer);
+  }, [searchInput]);
+
   useEffect(() => {
     loadProducts();
     loadWishlistCount();
-  }, [category]);
+  }, [category, search]);
 
   const loadProducts = async (append = false) => {
     try {
@@ -94,9 +100,9 @@ export default function TiendaView({ onNavigate, onBack }: TiendaViewProps) {
   };
 
   return (
-    <div className="flex flex-col h-full bg-gray-50 dark:bg-gray-900">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-oaxaca-yellow to-oaxaca-yellow text-white p-4 pt-8 md:pt-6">
+    <div className="flex flex-col h-full min-h-0 bg-gray-50 dark:bg-gray-900">
+      {/* Header - sticky */}
+      <div className="flex-shrink-0 sticky top-0 z-10 bg-gradient-to-r from-oaxaca-yellow to-oaxaca-yellow text-white p-4 pt-8 md:pt-6">
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
@@ -130,9 +136,8 @@ export default function TiendaView({ onNavigate, onBack }: TiendaViewProps) {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
               <input
                 type="text"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
                 placeholder="Buscar productos..."
                 className="w-full pl-10 pr-4 py-2.5 md:py-3 bg-white text-gray-900 rounded-lg"
               />
@@ -173,7 +178,7 @@ export default function TiendaView({ onNavigate, onBack }: TiendaViewProps) {
       </div>
 
       {/* Products Grid */}
-      <PullToRefresh onRefresh={handleRefresh} className="flex-1">
+      <div className="flex-1 overflow-y-auto min-h-0 pb-20">
         <div className="p-4 md:p-6 lg:p-8">
           <div className="max-w-7xl mx-auto">
             {loading && products.length === 0 ? (
@@ -186,9 +191,9 @@ export default function TiendaView({ onNavigate, onBack }: TiendaViewProps) {
                 action={{
                   label: 'Ver todos',
                   onClick: () => {
+                    setSearchInput('');
                     setSearch('');
                     setCategory('');
-                    loadProducts();
                   },
                 }}
               />
@@ -220,7 +225,7 @@ export default function TiendaView({ onNavigate, onBack }: TiendaViewProps) {
             )}
           </div>
         </div>
-      </PullToRefresh>
+      </div>
     </div>
   );
 }

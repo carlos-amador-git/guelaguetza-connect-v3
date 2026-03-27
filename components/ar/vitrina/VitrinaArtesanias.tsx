@@ -78,7 +78,8 @@ export default function VitrinaArtesanias({ section, onSelect, onBack }: Vitrina
   return (
     <div className="min-h-dvh bg-gray-950">
       {/* Top bar — sticky so back button is always accessible */}
-      <div className="sticky top-0 z-20 flex items-center gap-3 px-4 py-3 bg-gray-950/95 backdrop-blur-sm border-b border-gray-800/50">
+      <div className="sticky top-0 z-20 px-4 md:px-6 lg:px-8 py-3 bg-gray-950/95 backdrop-blur-sm border-b border-gray-800/50">
+      <div className="flex items-center gap-3 max-w-7xl mx-auto">
         <button
           onClick={onBack}
           className="flex items-center gap-2 rounded-xl bg-white shadow-lg px-4 py-2.5 text-sm font-semibold text-gray-800 active:scale-95 transition-transform"
@@ -87,9 +88,10 @@ export default function VitrinaArtesanias({ section, onSelect, onBack }: Vitrina
           <span>Volver</span>
         </button>
       </div>
+      </div>
 
       {/* Header */}
-      <header className="px-4 py-6 text-center">
+      <header className="px-4 md:px-6 lg:px-8 py-6 text-center max-w-7xl mx-auto w-full">
         <p className={`text-xs font-semibold uppercase tracking-widest ${config.tagColor}`}>
           Guelaguetza AR
         </p>
@@ -102,7 +104,7 @@ export default function VitrinaArtesanias({ section, onSelect, onBack }: Vitrina
       </header>
 
       {/* Grid */}
-      <section className="px-4 pb-8">
+      <section className="px-4 md:px-6 lg:px-8 pb-8 max-w-7xl mx-auto w-full">
         <div className="mb-4 flex items-center gap-2">
           <Icon className={`size-4 ${config.iconColor}`} />
           <h2 className="text-lg font-bold text-white">{config.sectionTitle}</h2>

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Home, Bus, Camera, Search, User, ShoppingBag, Radio, Map, Ticket, MessageCircle, Users, CalendarDays, MoreHorizontal, X } from 'lucide-react';
+import { Home, Bus, Camera, Search, User, ShoppingBag, Radio, Map, Ticket, MessageCircle, Users, CalendarDays, Menu, MoreHorizontal, X, ChevronRight } from 'lucide-react';
 import { ViewState } from '../types';
 import { useAuth } from '../contexts/AuthContext';
 import haptics from '../services/haptics';
@@ -12,9 +12,14 @@ interface NavigationProps {
   setView: (view: ViewState) => void;
   onUserProfile?: (userId: string) => void;
   variant?: 'bottom' | 'sidebar';
+  onToggleSidebar?: () => void;
+  sidebarVisible?: boolean;
+  sidebarStyle?: 'amarillo' | 'verde' | 'rojo' | 'azul' | 'morado' | 'blanco';
+  setSidebarStyle?: (style: 'amarillo' | 'verde' | 'rojo' | 'azul' | 'morado' | 'blanco') => void;
+  onOpenMobileSidebar?: () => void;
 }
 
-const Navigation: React.FC<NavigationProps> = ({ currentView, setView, onUserProfile, variant = 'bottom' }) => {
+const Navigation: React.FC<NavigationProps> = ({ currentView, setView, onUserProfile, variant = 'bottom', onToggleSidebar, sidebarVisible, sidebarStyle = 'gradient1', setSidebarStyle, onOpenMobileSidebar }) => {
   const { isAuthenticated, user } = useAuth();
   const [showNotifications, setShowNotifications] = useState(false);
   const [showMoreMenu, setShowMoreMenu] = useState(false);
@@ -29,22 +34,22 @@ const Navigation: React.FC<NavigationProps> = ({ currentView, setView, onUserPro
 
   // Items shown in desktop sidebar - all main items
   const mainNavItems = [
-    { view: ViewState.HOME, icon: '/images/ui/icon_home.png', label: 'Inicio', isImage: true },
-    { view: ViewState.PROGRAM, icon: CalendarDays, label: 'Programa' },
-    { view: ViewState.TIENDA, icon: '/images/ui/icon_market.png', label: 'Tienda', isImage: true },
-    { view: ViewState.SEARCH, icon: Search, label: 'Buscar' },
-    { view: ViewState.PROFILE, icon: User, label: 'Perfil' },
+    { view: ViewState.HOME, icon: '/images/poi_auditorio_guelaguetza.png', label: 'Inicio', isImage: true },
+    { view: ViewState.PROGRAM, icon: '/images/poi_auditorio_guelaguetza.png', label: 'Programa', isImage: true },
+    { view: ViewState.TIENDA, icon: '/images/product_barro_negro.png', label: 'Tienda', isImage: true },
+    { view: ViewState.SEARCH, icon: '/images/poi_santo_domingo.png', label: 'Buscar', isImage: true },
+    { view: ViewState.PROFILE, icon: '/images/dance_tehuana.png', label: 'Perfil', isImage: true },
   ];
 
   // Extra items for sidebar "Explorar" section
   const extraNavItems = [
-    { view: ViewState.TRANSPORT, icon: '/images/ui/icon_transport.png', label: 'BinniBus', isImage: true },
-    { view: ViewState.STREAMS, icon: '/images/ui/icon_live.png', label: 'En Vivo', isImage: true },
-    { view: ViewState.SMART_MAP, icon: '/images/ui/icon_plan.png', label: 'Mapa', isImage: true },
-    { view: ViewState.EXPERIENCES, icon: '/images/ui/icon_events.png', label: 'Tours', isImage: true },
-    { view: ViewState.COMMUNITIES, icon: '/images/ui/icon_community.png', label: 'Comunidad', isImage: true },
-    { view: ViewState.AR_HOME, icon: '/images/ui/icon_ar.png', label: 'AR Guelaguetza', isImage: true },
-    { view: ViewState.CHAT, icon: MessageCircle, label: 'GuelaBot' },
+    { view: ViewState.TRANSPORT, icon: '/images/poi_santo_domingo.png', label: 'BinniBus', isImage: true },
+    { view: ViewState.STREAMS, icon: '/images/poi_auditorio_guelaguetza.png', label: 'En Vivo', isImage: true },
+    { view: ViewState.SMART_MAP, icon: '/images/poi_monte_alban.png', label: 'Mapa', isImage: true },
+    { view: ViewState.EXPERIENCES, icon: '/images/experience_mezcal_tasting.png', label: 'Tours', isImage: true },
+    { view: ViewState.COMMUNITIES, icon: '/images/textil_huipil_istmo.png', label: 'Comunidad', isImage: true },
+    { view: ViewState.AR_HOME, icon: '/images/product_alebrije.png', label: 'AR Guelaguetza', isImage: true },
+    { view: ViewState.CHAT, icon: '/images/dance_pluma.png', label: 'GuelaBot', isImage: true },
   ];
 
   // All extra items for mobile "More" menu (includes Search)
@@ -58,24 +63,128 @@ const Navigation: React.FC<NavigationProps> = ({ currentView, setView, onUserPro
     setView(view);
   };
 
+  // Sidebar gradient styles
+  const sidebarGradients = {
+    amarillo: '',
+    verde: '',
+    rojo: '',
+    azul: '',
+    morado: '',
+    blanco: 'bg-white dark:bg-gray-900',
+  };
+
+  const textColors = {
+    amarillo: 'text-black',
+    verde: 'text-black',
+    rojo: 'text-white',
+    azul: 'text-white',
+    morado: 'text-white',
+    blanco: 'text-gray-900 dark:text-white',
+  };
+
+  const getSidebarBgImage = (style: string) => {
+    const images: Record<string, string> = {
+      amarillo: '/images/amarillo.png',
+      verde: '/images/verde.png',
+      rojo: '/images/rojo.png',
+      azul: '/images/azul.png',
+      morado: '/images/morado.png',
+      blanco: '',
+    };
+    return images[style] || '';
+  };
+
   // Sidebar variant for tablet/desktop
   if (variant === 'sidebar') {
-    return (
-      <>
+    const bgImage = getSidebarBgImage(sidebarStyle);
+    const isImageBg = bgImage !== '';
+
+    // Collapsed state - show images only
+    if (!sidebarVisible) {
+      return (
         <aside
-          className="hidden md:flex flex-col w-64 lg:w-72 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700 h-full"
+          className={`relative flex flex-col w-20 ${sidebarGradients[sidebarStyle]} h-full`}
           role="complementary"
           aria-label="Barra lateral de navegación"
         >
+          {bgImage && (
+            <img src={bgImage} alt="" className="absolute inset-0 w-full h-full object-cover" />
+          )}
+          <div className="relative z-10">
+            {/* Logo */}
+            <div className={`p-4 border-b flex justify-center ${sidebarStyle === 'blanco' ? 'border-gray-200 dark:border-gray-700' : 'border-white/20'}`}>
+              <h1 className={`text-2xl font-bold ${textColors[sidebarStyle]}`}>G</h1>
+            </div>
+
+            {/* Navigation Icons */}
+            <nav className="flex-1 py-4 space-y-2 overflow-y-auto" role="navigation">
+              {[...mainNavItems, ...extraNavItems].map((item) => {
+                const isActive = currentView === item.view;
+                return (
+                  <button
+                    key={item.view}
+                    onClick={() => handleNavClick(item.view)}
+                    aria-label={item.label}
+                    className={`flex w-full justify-center p-2 rounded-xl transition-all ${isActive
+                      ? 'bg-white/20'
+                      : 'hover:bg-white/10'
+                      }`}
+                  >
+                    {item.isImage ? (
+                      <img
+                        src={item.icon as string}
+                        alt={item.label}
+                        className={`w-10 h-10 rounded-lg object-cover ${isActive ? 'ring-2 ring-white' : ''}`}
+                      />
+                    ) : (
+                      <item.icon size={22} className="text-white" />
+                    )}
+                  </button>
+                );
+              })}
+            </nav>
+
+            {/* Toggle Button - collapsed state */}
+            <div className="absolute -right-3.5 bottom-6 z-10">
+              {onToggleSidebar && (
+                <button
+                  onClick={onToggleSidebar}
+                  className="w-7 h-7 rounded-full flex items-center justify-center bg-white dark:bg-gray-800 shadow-md hover:shadow-lg text-gray-700 dark:text-gray-300"
+                  aria-label="Mostrar sidebar"
+                >
+                  <ChevronRight size={14} />
+                </button>
+              )}
+            </div>
+          </div>
+        </aside>
+      );
+    }
+
+    // Expanded state
+    return (
+      <aside
+        className={`relative flex flex-col w-64 lg:w-72 ${sidebarGradients[sidebarStyle]} border-r border-gray-200 dark:border-gray-700 h-full`}
+        role="complementary"
+        aria-label="Barra lateral de navegación"
+      >
+        {bgImage && (
+          <img src={bgImage} alt="" className="absolute inset-0 w-full h-full object-cover" />
+        )}
+        
+        {/* Scrollable content area */}
+        <div className="relative z-10 flex flex-col h-full overflow-hidden">
           {/* Logo/Brand */}
-          <div className="p-6 border-b border-gray-100 dark:border-gray-800">
-            <h1 className="text-xl font-bold text-oaxaca-pink">Guelaguetza</h1>
-            <p className="text-xs text-gray-500 dark:text-gray-500">Connect 2025</p>
+          <div className="p-4 border-b border-gray-100/20 dark:border-gray-800/50 flex-shrink-0">
+            <h1 className={`text-xl font-bold ${textColors[sidebarStyle]}`}>Guelaguetza</h1>
+            <p className={`text-xs ${sidebarStyle === 'amarillo' || sidebarStyle === 'verde' ? 'text-black/70' : sidebarStyle === 'blanco' ? 'text-gray-500 dark:text-gray-400' : 'text-white/70'}`}>Connect 2025</p>
           </div>
 
-          {/* Main Navigation */}
+          {/* Main Navigation - Scrollable */}
           <nav className="flex-1 p-4 space-y-1 overflow-y-auto" role="navigation" aria-label="Navegación principal">
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 px-3" aria-hidden="true">Principal</p>
+            {sidebarVisible && (
+              <p className={`text-xs font-semibold uppercase tracking-wider mb-3 px-3 ${textColors[sidebarStyle]} opacity-60`} aria-hidden="true">Principal</p>
+            )}
             {mainNavItems.map((item) => {
               const isActive = currentView === item.view;
               const isProfile = item.view === ViewState.PROFILE;
@@ -86,34 +195,36 @@ const Navigation: React.FC<NavigationProps> = ({ currentView, setView, onUserPro
                   onClick={() => handleNavClick(item.view)}
                   aria-label={item.label}
                   aria-current={isActive ? 'page' : undefined}
-                  className={`flex items-center gap-3 w-full px-3 py-2.5 rounded-xl transition-all ${isActive
-                    ? 'bg-oaxaca-pink/10 text-oaxaca-pink font-medium'
-                    : 'text-gray-600 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800'
+                  className={`flex items-center ${sidebarVisible ? 'gap-3 px-3 py-2.5' : 'justify-center p-2'} w-full rounded-xl transition-all ${isActive
+                    ? (sidebarStyle === 'amarillo' || sidebarStyle === 'verde' || sidebarStyle === 'blanco' ? 'bg-black/20 text-black dark:text-white font-medium' : 'bg-white/20 text-white font-medium')
+                    : sidebarStyle === 'amarillo' || sidebarStyle === 'verde' || sidebarStyle === 'blanco' ? 'text-black/80 dark:text-white/80 hover:bg-black/10 dark:hover:bg-white/10' : 'text-white/80 hover:bg-white/10'
                     }`}
                 >
                   {isProfile && isAuthenticated && user?.faceData ? (
                     <img
                       src={user.faceData}
                       alt="Perfil"
-                      className={`w-5 h-5 rounded-full object-cover ${isActive ? 'ring-2 ring-oaxaca-pink' : ''}`}
+                      className={`${sidebarVisible ? 'w-5 h-5' : 'w-8 h-8'} rounded-full object-cover ${isActive ? 'ring-2 ring-oaxaca-pink' : ''}`}
                     />
                   ) : item.isImage ? (
                     <img
                       src={item.icon as string}
                       alt={item.label}
-                      className={`w-5 h-5 object-contain ${isActive ? '' : 'opacity-70'}`}
+                      className={`${sidebarVisible ? 'w-9 h-9' : 'w-10 h-10'} rounded-lg object-cover shadow-sm ${isActive ? 'ring-2 ring-oaxaca-pink' : ''}`}
                     />
                   ) : (
-                    <item.icon size={20} strokeWidth={isActive ? 2.5 : 2} aria-hidden="true" />
+                    <item.icon size={sidebarVisible ? 20 : 24} strokeWidth={isActive ? 2.5 : 2} aria-hidden="true" />
                   )}
-                  <span className="text-sm">{item.label}</span>
+                  {sidebarVisible && <span className="text-sm">{item.label}</span>}
                 </button>
               );
             })}
 
-            <div className="my-4 border-t border-gray-100 dark:border-gray-800" aria-hidden="true" />
+            <div className={`my-4 border-t ${sidebarStyle === 'amarillo' || sidebarStyle === 'verde' ? 'border-black/20' : sidebarStyle === 'blanco' ? 'border-gray-200 dark:border-gray-700' : 'border-white/20'}`} aria-hidden="true" />
 
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 px-3" aria-hidden="true">Explorar</p>
+            {sidebarVisible && (
+              <p className={`text-xs font-semibold uppercase tracking-wider mb-3 px-3 ${textColors[sidebarStyle]} opacity-60`} aria-hidden="true">Explorar</p>
+            )}
             {extraNavItems.map((item) => {
               const isActive = currentView === item.view;
 
@@ -123,28 +234,28 @@ const Navigation: React.FC<NavigationProps> = ({ currentView, setView, onUserPro
                   onClick={() => handleNavClick(item.view)}
                   aria-label={item.label}
                   aria-current={isActive ? 'page' : undefined}
-                  className={`flex items-center gap-3 w-full px-3 py-2.5 rounded-xl transition-all ${isActive
-                    ? 'bg-oaxaca-pink/10 text-oaxaca-pink font-medium'
-                    : 'text-gray-600 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800'
+                  className={`flex items-center ${sidebarVisible ? 'gap-3 px-3 py-2.5' : 'justify-center p-2'} w-full rounded-xl transition-all ${isActive
+                    ? (sidebarStyle === 'amarillo' || sidebarStyle === 'verde' || sidebarStyle === 'blanco' ? 'bg-black/20 text-black dark:text-white font-medium' : 'bg-white/20 text-white font-medium')
+                    : sidebarStyle === 'amarillo' || sidebarStyle === 'verde' || sidebarStyle === 'blanco' ? 'text-black/80 dark:text-white/80 hover:bg-black/10 dark:hover:bg-white/10' : 'text-white/80 hover:bg-white/10'
                     }`}
                 >
                   {item.isImage ? (
                     <img
                       src={item.icon as string}
                       alt={item.label}
-                      className={`w-5 h-5 object-contain ${isActive ? '' : 'opacity-70'}`}
+                      className={`${sidebarVisible ? 'w-9 h-9' : 'w-10 h-10'} rounded-lg object-cover shadow-sm ${isActive ? 'ring-2 ring-oaxaca-pink' : 'opacity-80'}`}
                     />
                   ) : (
-                    <item.icon size={20} strokeWidth={isActive ? 2.5 : 2} aria-hidden="true" />
+                    <item.icon size={sidebarVisible ? 20 : 24} strokeWidth={isActive ? 2.5 : 2} aria-hidden="true" />
                   )}
-                  <span className="text-sm">{item.label}</span>
+                  {sidebarVisible && <span className="text-sm">{item.label}</span>}
                 </button>
               );
             })}
           </nav>
 
-          {/* Theme Toggle & User Info */}
-          <div className="p-4 border-t border-gray-100 dark:border-gray-800 space-y-4">
+          {/* Theme Toggle & User Info - Fixed at bottom */}
+          <div className="p-4 border-t border-gray-100 dark:border-gray-800 space-y-4 flex-shrink-0">
             {/* Theme Toggle */}
             <div className="flex items-center justify-between">
               <span className="text-sm text-gray-600 dark:text-gray-400">Tema</span>
@@ -172,24 +283,53 @@ const Navigation: React.FC<NavigationProps> = ({ currentView, setView, onUserPro
                 <NotificationBell onClick={() => setShowNotifications(true)} />
               </div>
             )}
-          </div>
-        </aside>
 
-        {/* Notifications Dropdown */}
-        <NotificationsDropdown
-          isOpen={showNotifications}
-          onClose={() => setShowNotifications(false)}
-          onUserProfile={onUserProfile}
-        />
-      </>
+            {/* Style selector buttons */}
+            {setSidebarStyle && (
+              <div className="flex gap-1 justify-center py-2">
+                {(['amarillo', 'verde', 'rojo', 'azul', 'morado', 'blanco'] as const).map((style) => (
+                  <button
+                    key={style}
+                    onClick={() => setSidebarStyle(style)}
+                    className={`w-5 h-5 rounded-full border-2 transition-all ${
+                      sidebarStyle === style ? 'border-gray-800 dark:border-white scale-110' : 'border-gray-400 dark:border-gray-500 opacity-70 hover:opacity-100'
+                    } ${
+                      style === 'amarillo' ? 'bg-yellow-400' :
+                      style === 'verde' ? 'bg-green-500' :
+                      style === 'rojo' ? 'bg-red-500' :
+                      style === 'azul' ? 'bg-blue-500' :
+                      style === 'morado' ? 'bg-purple-500' :
+                      'bg-white'
+                    }`}
+                    aria-label={`Estilo ${style}`}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Toggle Button - at bottom on the border */}
+        <div className="absolute -right-3.5 bottom-6 z-10">
+          {onToggleSidebar && (
+            <button
+              onClick={onToggleSidebar}
+              className="w-7 h-7 rounded-full flex items-center justify-center bg-white dark:bg-gray-800 shadow-md hover:shadow-lg text-gray-700 dark:text-gray-300"
+              aria-label="Ocultar sidebar"
+            >
+              <ChevronRight size={14} className="rotate-180" />
+            </button>
+          )}
+        </div>
+      </aside>
     );
   }
 
   // Check if current view is in the "More" menu
-  const isMoreActive = moreMenuItems.some(item => item.view === currentView);
+const isMoreActive = moreMenuItems.some(item => item.view === currentView);
 
-  // Bottom variant for mobile
-  return (
+// Bottom variant for mobile
+return (
     <>
       {/* More Menu Bottom Sheet */}
       {showMoreMenu && (
@@ -237,8 +377,8 @@ const Navigation: React.FC<NavigationProps> = ({ currentView, setView, onUserPro
                       setShowMoreMenu(false);
                     }}
                     className={`flex flex-col items-center justify-center p-3 rounded-2xl transition-all ${isActive
-                      ? 'bg-oaxaca-pink/10 text-oaxaca-pink'
-                      : 'text-gray-600 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800'
+                      ? 'bg-white/20 text-white'
+                    : sidebarStyle === 'amarillo' || sidebarStyle === 'verde' ? 'text-black/80 hover:bg-black/10' : 'text-white/80 hover:bg-white/10'
                       }`}
                   >
                     <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-2 ${isActive
@@ -249,7 +389,7 @@ const Navigation: React.FC<NavigationProps> = ({ currentView, setView, onUserPro
                         <img
                           src={item.icon as string}
                           alt={item.label}
-                          className={`w-6 h-6 object-contain ${isActive ? 'brightness-100' : 'brightness-0 opacity-60 dark:invert'}`}
+                          className={`w-6 h-6 rounded-lg object-cover shadow-sm ${isActive ? 'ring-2 ring-oaxaca-pink' : ''}`}
                         />
                       ) : (
                         <item.icon size={24} strokeWidth={isActive ? 2.5 : 2} />
@@ -277,8 +417,9 @@ const Navigation: React.FC<NavigationProps> = ({ currentView, setView, onUserPro
         role="navigation"
         aria-label="Navegación principal"
       >
+        <img src="/images/rojo.png" alt="" className="absolute inset-0 w-full h-full object-cover opacity-20" />
         {/* Minimum height of 64px ensures 44px touch targets with some padding */}
-        <div className="flex justify-around items-center h-16 sm:h-[68px]">
+        <div className="flex justify-around items-center h-16 sm:h-[68px] relative z-10">
           {mobileNavItems.map((item) => {
             const isActive = currentView === item.view;
             const isProfile = item.view === ViewState.PROFILE;
@@ -308,7 +449,7 @@ const Navigation: React.FC<NavigationProps> = ({ currentView, setView, onUserPro
                   <img
                     src={item.icon as string}
                     alt={item.label}
-                    className={`w-6 h-6 object-contain mb-0.5 ${isActive ? 'brightness-100' : 'brightness-0 opacity-60 dark:invert'}`}
+                    className={`w-6 h-6 rounded-lg object-cover shadow-sm ${isActive ? 'ring-2 ring-oaxaca-pink' : ''}`}
                   />
                 ) : (
                   <item.icon size={24} strokeWidth={isActive ? 2.5 : 2} />
@@ -318,20 +459,18 @@ const Navigation: React.FC<NavigationProps> = ({ currentView, setView, onUserPro
             );
           })}
 
-          {/* More Button - With minimum 44px touch target */}
+          {/* Menu Button - Opens mobile sidebar */}
           <button
             onClick={() => {
               haptics.tap();
-              setShowMoreMenu(true);
+              onOpenMobileSidebar?.();
             }}
-            aria-label="Más opciones"
-            aria-expanded={showMoreMenu}
-            aria-haspopup="dialog"
+            aria-label="Abrir menú"
             className={`flex flex-col items-center justify-center w-full h-full min-h-[48px] transition-colors duration-200 focus-visible:bg-gray-100 dark:focus-visible:bg-gray-800 focus-visible:outline-none ${isMoreActive ? 'text-oaxaca-pink' : 'text-gray-500 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300'
               }`}
           >
-            <MoreHorizontal size={24} strokeWidth={isMoreActive ? 2.5 : 2} aria-hidden="true" />
-            <span className="text-[10px] sm:text-xs font-medium mt-1">Mas</span>
+            <Menu size={24} strokeWidth={isMoreActive ? 2.5 : 2} aria-hidden="true" />
+            <span className="text-[10px] sm:text-xs font-medium mt-1">Menú</span>
           </button>
         </div>
 

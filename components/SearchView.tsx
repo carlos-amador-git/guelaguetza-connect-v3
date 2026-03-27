@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Users, Image, TrendingUp, Loader2, Hash } from 'lucide-react';
+import { ArrowLeft, Search, Users, Image, TrendingUp, Loader2, Hash } from 'lucide-react';
 import SearchBar from './ui/SearchBar';
 import {
   search,
@@ -225,27 +225,32 @@ const SearchView: React.FC<SearchViewProps> = ({
 
   return (
     <div className="h-full flex flex-col bg-gray-50 dark:bg-gray-900">
-      {/* Header */}
-      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-3">
-        <div className="flex items-center gap-3 mb-3">
-          <button
-            onClick={onBack}
-            className="p-2 -ml-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"
-          >
-            <ArrowLeft size={24} />
-          </button>
-          <div className="flex-1">
-            <SearchBar
-              value={query}
-              onChange={setQuery}
-              onSearch={handleSearch}
-              placeholder="Buscar usuarios, historias..."
-              autoFocus
-            />
+      {/* Header con imagen */}
+      <div className="relative overflow-hidden">
+        <img src="/images/morado.png" alt="" className="absolute inset-0 w-full h-full object-cover" />
+        <div className="relative p-4 pt-8 md:pt-6 md:px-6 lg:px-8 text-white">
+          <div className="flex items-center gap-3 max-w-7xl mx-auto">
+            <button
+              onClick={onBack}
+              className="p-2 -ml-2 rounded-full hover:bg-white/20 transition-colors"
+            >
+              <ArrowLeft size={24} />
+            </button>
+            <Search size={22} />
+            <h1 className="text-xl font-bold">Buscar</h1>
           </div>
         </div>
+      </div>
 
-        {/* Tabs */}
+      {/* Search & Tabs */}
+      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 md:px-6 lg:px-8 py-3 space-y-3 max-w-7xl mx-auto w-full">
+        <SearchBar
+          value={query}
+          onChange={setQuery}
+          onSearch={handleSearch}
+          placeholder="Buscar usuarios, historias..."
+          autoFocus
+        />
         <div className="flex gap-2">
           {tabs.map((tab) => (
             <button
@@ -268,7 +273,7 @@ const SearchView: React.FC<SearchViewProps> = ({
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-y-auto px-4">
+      <div className="flex-1 overflow-y-auto px-4 md:px-6 lg:px-8 max-w-7xl mx-auto w-full">
         {loading ? (
           <div className="flex items-center justify-center py-16">
             <Loader2 className="animate-spin text-oaxaca-pink" size={32} />

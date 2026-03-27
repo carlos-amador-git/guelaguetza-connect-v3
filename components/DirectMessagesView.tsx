@@ -114,7 +114,7 @@ const DirectMessagesView: React.FC<DirectMessagesViewProps> = ({
 
       {/* Content */}
       <PullToRefresh onRefresh={loadConversations} className="flex-1">
-        <div className="h-full">
+        <div className="h-full max-w-7xl mx-auto">
           {loading ? (
             <div className="p-4">
               <SkeletonGrid type="message" count={6} columns={1} />

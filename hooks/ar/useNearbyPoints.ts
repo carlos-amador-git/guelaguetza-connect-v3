@@ -43,9 +43,15 @@ export function useNearbyPoints(
 
   const abortControllerRef = useRef<AbortController | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const hasFailedRef = useRef(false);
+
+  // Store position in a ref so fetchPoints doesn't depend on it
+  const positionRef = useRef(position);
+  positionRef.current = position;
 
   const fetchPoints = useCallback(async () => {
-    if (!position || !enabled) return;
+    if (!positionRef.current || !enabled) return;
+    if (hasFailedRef.current) return;
 
     abortControllerRef.current?.abort();
     abortControllerRef.current = new AbortController();
@@ -54,7 +60,8 @@ export function useNearbyPoints(
 
     // --- Try online ---
     try {
-      const url = `${API_BASE}/ar/nearby?lat=${position.lat}&lng=${position.lng}&radius=${radius}`;
+      const pos = positionRef.current!;
+      const url = `${API_BASE}/ar/nearby?lat=${pos.lat}&lng=${pos.lng}&radius=${radius}`;
       const res = await fetch(url, { signal: abortControllerRef.current.signal });
 
       if (!res.ok) throw new Error(`Error ${res.status}: ${res.statusText}`);
@@ -64,6 +71,7 @@ export function useNearbyPoints(
       setError(null);
       setIsOffline(false);
       setIsStale(false);
+      hasFailedRef.current = false;
 
       // Cache in the background
       if (json.points?.length) {
@@ -106,10 +114,17 @@ export function useNearbyPoints(
       setIsOffline(true);
     } finally {
       setIsLoading(false);
+      hasFailedRef.current = true;
+      // Stop polling after failure to avoid spamming console
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
     }
-  }, [position, enabled, radius]);
+  }, [enabled, radius]);
 
   const refresh = useCallback(() => {
+    hasFailedRef.current = false;
     fetchPoints();
   }, [fetchPoints]);
 
@@ -127,7 +142,7 @@ export function useNearbyPoints(
         intervalRef.current = null;
       }
     };
-  }, [fetchPoints, refreshInterval, position, enabled]);
+  }, [fetchPoints, refreshInterval, enabled]);
 
   return {
     points: data?.points || [],

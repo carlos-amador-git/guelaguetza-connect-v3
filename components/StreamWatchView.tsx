@@ -136,7 +136,7 @@ export default function StreamWatchView({
   const isLive = stream.status === 'LIVE';
 
   return (
-    <div className="flex flex-col h-full bg-gray-900">
+    <div className="flex flex-col h-full bg-gray-900 max-w-7xl mx-auto">
       {/* Top bar — always accessible, outside iframe */}
       <div className="flex items-center justify-between px-3 py-2 bg-gray-800 border-b border-gray-700">
         <button onClick={onBack} className="flex items-center gap-1 p-2 text-white hover:text-gray-300 transition-colors">

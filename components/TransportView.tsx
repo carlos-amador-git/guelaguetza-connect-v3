@@ -386,10 +386,10 @@ const TransportView: React.FC<TransportViewProps> = ({ onBack }) => {
   };
 
   return (
-    <div className="h-screen flex flex-col bg-gray-50 dark:bg-gray-900 overflow-hidden">
+    <div className="h-[100dvh] flex flex-col bg-gray-50 dark:bg-gray-900 overflow-hidden max-w-7xl mx-auto w-full">
       {/* Header */}
-      <div className="bg-white dark:bg-gray-800 px-4 py-3 shadow-sm z-20 sticky top-0">
-        <div className="flex items-center justify-between mb-2">
+      <div className="bg-white dark:bg-gray-800 px-4 md:px-6 lg:px-8 py-3 shadow-sm z-20 sticky top-0 flex-shrink-0">
+        <div className="flex items-center justify-between mb-2 max-w-7xl mx-auto">
           <div className="flex items-center gap-3">
             {onBack && (
               <button
@@ -416,7 +416,7 @@ const TransportView: React.FC<TransportViewProps> = ({ onBack }) => {
         </div>
 
         {/* Route Selector */}
-        <div className="flex gap-2 overflow-x-auto py-2 no-scrollbar">
+        <div className="flex gap-2 overflow-x-auto py-2 no-scrollbar max-w-7xl mx-auto">
           <button
             onClick={() => setShowAllRoutes(true)}
             className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${

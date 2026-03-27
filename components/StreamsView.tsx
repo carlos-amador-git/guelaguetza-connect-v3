@@ -88,7 +88,7 @@ export default function StreamsView({ onNavigate, onBack }: StreamsViewProps) {
   return (
     <div className="flex flex-col h-full bg-gray-900">
       {/* Header */}
-      <div className="bg-gradient-to-r from-red-600 to-oaxaca-pink text-white p-4 pt-8 md:pt-6">
+      <div className="bg-gradient-to-r from-red-600 to-oaxaca-pink text-white p-4 pt-8 md:pt-6 w-full">
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">

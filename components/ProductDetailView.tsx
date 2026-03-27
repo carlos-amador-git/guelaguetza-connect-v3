@@ -108,9 +108,40 @@ export default function ProductDetailView({
 
   return (
     <div className="flex flex-col h-full bg-white">
+      {/* Header */}
+      <div className="bg-gradient-to-r from-oaxaca-yellow to-oaxaca-yellow text-white p-4 pt-8 md:pt-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <button onClick={onBack} className="p-2 hover:bg-white/20 rounded-full transition">
+                <ArrowLeft className="w-6 h-6" />
+              </button>
+              <div>
+                <h1 className="text-xl md:text-2xl font-bold">{product.name}</h1>
+                <p className="text-sm md:text-base text-white/80">{CATEGORY_LABELS[product.category]}</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handleToggleWishlist}
+                disabled={wishlistLoading}
+                className={`p-2 md:p-3 rounded-full transition ${
+                  inWishlist ? 'bg-oaxaca-pink text-white' : 'bg-white/20 hover:bg-white/30'
+                } ${wishlistLoading ? 'opacity-50' : ''}`}
+              >
+                <Heart className={`w-6 h-6 ${inWishlist ? 'fill-current' : ''}`} />
+              </button>
+              <button onClick={handleShare} className="p-2 md:p-3 bg-white/20 rounded-full hover:bg-white/30 transition">
+                <Share2 className="w-6 h-6" />
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Image Gallery */}
-      <div className="relative">
-        <div className="aspect-square bg-gray-100">
+      <div className="relative px-6 md:px-8 lg:px-12 py-4 max-w-7xl mx-auto w-full">
+        <div className="h-[30vh] sm:h-[35vh] md:h-[40vh] lg:h-[45vh] bg-gray-100 rounded-2xl overflow-hidden shadow-xl">
           {images.length > 0 ? (
             <img
               src={images[activeImageIndex]}
@@ -120,29 +151,6 @@ export default function ProductDetailView({
           ) : (
             <GradientPlaceholder variant="shop" className="w-full h-full" alt={product.name} />
           )}
-        </div>
-
-        {/* Navigation */}
-        <div className="absolute top-0 left-0 right-0 p-4 pt-12 flex justify-between">
-          <button onClick={onBack} className="p-2 bg-white/90 backdrop-blur-sm rounded-full shadow text-gray-800">
-            <ArrowLeft className="w-6 h-6" />
-          </button>
-          <div className="flex gap-2">
-            <button
-              onClick={handleToggleWishlist}
-              disabled={wishlistLoading}
-              className={`p-2 backdrop-blur-sm rounded-full shadow transition ${
-                inWishlist
-                  ? 'bg-oaxaca-pink text-white'
-                  : 'bg-white/90 text-gray-800 hover:bg-oaxaca-pink-light'
-              } ${wishlistLoading ? 'opacity-50' : ''}`}
-            >
-              <Heart className={`w-6 h-6 ${inWishlist ? 'fill-current' : ''}`} />
-            </button>
-            <button onClick={handleShare} className="p-2 bg-white/90 backdrop-blur-sm rounded-full shadow text-gray-800">
-              <Share2 className="w-6 h-6" />
-            </button>
-          </div>
         </div>
 
         {/* Thumbnails */}
@@ -162,8 +170,8 @@ export default function ProductDetailView({
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-y-auto">
-        <div className="p-4">
+      <div className="flex-1 overflow-y-auto max-w-7xl mx-auto w-full">
+        <div className="max-w-7xl mx-auto p-4">
           {/* Category & Price */}
           <div className="flex justify-between items-start mb-2">
             <span className="px-3 py-1 bg-oaxaca-yellow-light text-oaxaca-yellow text-sm font-medium rounded-full">
@@ -285,7 +293,7 @@ export default function ProductDetailView({
       </div>
 
       {/* Contact Seller Bar */}
-      <div className="border-t bg-white p-4">
+      <div className="border-t bg-white p-4 max-w-7xl mx-auto w-full">
         <button
           onClick={() => onNavigate(ViewState.DIRECT_MESSAGES)}
           className="w-full py-4 rounded-lg font-medium flex items-center justify-center gap-2 bg-oaxaca-yellow text-white hover:bg-oaxaca-yellow/90 transition"

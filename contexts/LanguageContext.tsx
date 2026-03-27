@@ -14,7 +14,7 @@ interface LanguageContextType {
 const translations: Record<Language, Record<string, string>> = {
   es: {
     // Common
-    greeting: 'Bienvenido',
+    greeting: 'Bienvenido! Guelaguetza',
     welcome_message: 'La maxima fiesta de los Oaxaquenos',
     hello: 'Hola',
     thank_you: 'Gracias',

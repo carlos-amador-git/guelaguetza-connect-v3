@@ -453,7 +453,12 @@ function loadSafeModePref(): boolean {
 
 export function ARHomeView({ onNavigate, onBack }: ARHomeViewProps) {
   const deviceId = useDeviceId();
-  const [hasLocation, setHasLocation] = useState<boolean | null>(null); // null = permission overlay shown
+  const [hasLocation, setHasLocation] = useState<boolean | null>(() => {
+    const saved = localStorage.getItem('ar-location-choice');
+    if (saved === 'granted') return true;
+    if (saved === 'skipped') return false;
+    return null; // first time — show prompt once
+  });
   const [activeTab, setActiveTab] = useState<ActiveTab>('explorar');
   const [qrScannerOpen, setQrScannerOpen] = useState(false);
 
@@ -509,6 +514,19 @@ export function ARHomeView({ onNavigate, onBack }: ARHomeViewProps) {
 
   const handlePermissionsReady = useCallback((granted: boolean) => {
     setHasLocation(granted);
+    localStorage.setItem('ar-location-choice', granted ? 'granted' : 'skipped');
+  }, []);
+
+  const handleEnableLocation = useCallback(() => {
+    if (!navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(
+      () => {
+        setHasLocation(true);
+        localStorage.setItem('ar-location-choice', 'granted');
+      },
+      () => { /* denied — do nothing */ },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
   }, []);
 
   const handleSelectPoint = useCallback(
@@ -553,8 +571,8 @@ export function ARHomeView({ onNavigate, onBack }: ARHomeViewProps) {
   return (
     <div className="flex flex-col h-full bg-gradient-to-b from-purple-50 to-gray-50 overflow-hidden" data-testid="ar-home-view">
       {/* Banner destacado */}
-      <div className="mx-4 mt-4 bg-gradient-to-r from-purple-600 via-violet-500 to-purple-600 rounded-2xl p-4 shadow-lg">
-        <div className="flex items-center justify-between">
+      <div className="mt-4 bg-gradient-to-r from-purple-600 via-violet-500 to-purple-600 p-4 shadow-lg">
+        <div className="flex items-center justify-between max-w-7xl mx-auto">
           <div>
             <h2 className="text-white font-bold text-lg">🎨 Vitrina Digital 3D</h2>
             <p className="text-purple-100 text-sm">Explora artesanías y alebrijes en realidad aumentada</p>
@@ -570,7 +588,7 @@ export function ARHomeView({ onNavigate, onBack }: ARHomeViewProps) {
       
       {/* ── Header ─────────────────────────────────────────────────────────── */}
       <header className="bg-white shadow-sm z-10 shrink-0">
-        <div className="flex items-center justify-between px-4 pt-8 pb-4 md:pt-5">
+        <div className="flex items-center justify-between px-4 md:px-6 lg:px-8 pt-8 pb-4 md:pt-5 max-w-7xl mx-auto">
           {/* Back + Title */}
           <div className="flex items-center gap-3">
             <button
@@ -623,7 +641,7 @@ export function ARHomeView({ onNavigate, onBack }: ARHomeViewProps) {
       </header>
 
       {/* ── Scrollable body ────────────────────────────────────────────────── */}
-      <main className="flex-1 overflow-y-auto">
+      <main className="flex-1 overflow-y-auto max-w-7xl mx-auto w-full">
         {/* ── Map section ──────────────────────────────────────────────────── */}
         <section
           className="h-56 md:h-72 relative"
@@ -714,14 +732,17 @@ export function ARHomeView({ onNavigate, onBack }: ARHomeViewProps) {
             <RecenterControl position={userLatLng} />
           </MapContainer>
 
-          {/* No-location overlay hint */}
+          {/* No-location — button to activate */}
           {!hasLocation && (
-            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-white/90 backdrop-blur-sm
-                            rounded-full px-4 py-1.5 shadow text-xs text-gray-600 flex items-center gap-2
-                            pointer-events-none">
-              <MapPin className="w-3.5 h-3.5 text-gray-400" aria-hidden="true" />
-              Explora sin ubicacion — distancias no disponibles
-            </div>
+            <button
+              onClick={handleEnableLocation}
+              className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-white/90 backdrop-blur-sm
+                            rounded-full px-4 py-2 shadow-lg text-xs text-gray-700 font-medium flex items-center gap-2
+                            hover:bg-white transition-colors"
+            >
+              <MapPin className="w-3.5 h-3.5 text-red-500" aria-hidden="true" />
+              Activar ubicación
+            </button>
           )}
 
           {/* QR scan button — top-right corner of the map */}

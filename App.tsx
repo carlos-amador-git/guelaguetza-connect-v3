@@ -46,7 +46,7 @@ import LandingView from './components/LandingView';
 import SellerDashboard from './components/SellerDashboard';
 import SmartMapView from './components/SmartMapView';
 import { ViewState } from './types';
-import { Eye } from 'lucide-react';
+import { Eye, ChevronRight } from 'lucide-react';
 import { Participant } from './services/dm';
 import { useAuth } from './contexts/AuthContext';
 
@@ -105,6 +105,10 @@ const App: React.FC = () => {
   const [previousView, setPreviousView] = useState<ViewState>(ViewState.HOME);
   const [showLanding, setShowLanding] = useState(!initialArModelId);
   const [adminViewingAsUser, setAdminViewingAsUser] = useState(false);
+  const [sidebarVisible, setSidebarVisible] = useState(true);
+  const [sidebarStyle, setSidebarStyle] = useState<'amarillo' | 'verde' | 'rojo' | 'azul' | 'morado' | 'blanco'>('blanco');
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+
 
   // DM state
   const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
@@ -516,25 +520,17 @@ const App: React.FC = () => {
     ViewState.LEADERBOARD,
     ViewState.DIRECT_MESSAGES,
     ViewState.DIRECT_CHAT,
-    ViewState.SEARCH,
     ViewState.EVENTS,
     ViewState.EVENT_DETAIL,
     ViewState.ANALYTICS,
     ViewState.ADMIN,
     ViewState.SELLER_DASHBOARD,
-    ViewState.COMMUNITIES,
     ViewState.COMMUNITY_DETAIL,
     // Phase 6 views
-    ViewState.EXPERIENCES,
     ViewState.EXPERIENCE_DETAIL,
     ViewState.MY_BOOKINGS,
-    ViewState.SMART_MAP,
-    ViewState.TIENDA,
-    ViewState.PRODUCT_DETAIL,
-    ViewState.STREAMS,
+    // ViewState.PRODUCT_DETAIL, // Keep sidebar visible
     ViewState.STREAM_WATCH,
-    // AR Module views
-    ViewState.AR_HOME,
     ViewState.AR_POINT_DETAIL,
     ViewState.AR_QUEST,
     ViewState.AR_VITRINA,
@@ -574,21 +570,24 @@ const App: React.FC = () => {
 
       {/* Demo Mode Indicator */}
       {isDemoMode && !adminViewingAsUser && (
-        <div className="fixed top-0 left-0 right-0 bg-gradient-to-r from-oaxaca-sky to-oaxaca-purple text-white text-xs py-1.5 px-4 z-50 flex items-center justify-between">
-          <span className="hidden sm:inline">Modo Demo: {user?.nombre}</span>
-          <span className="sm:hidden">Demo</span>
-          <DemoUserSelector
-            compact
-            onUserChange={(type) => {
-              // Map demo type to role and navigate
-              const roleMap: Record<string, string> = {
-                user: 'USER',
-                seller: 'SELLER',
-                admin: 'ADMIN',
-              };
-              handleUserSelected(roleMap[type]);
-            }}
-          />
+        <div className="fixed top-0 left-0 right-0 text-white text-xs py-1.5 px-4 z-50 flex items-center justify-between overflow-hidden">
+          <img src="/images/rojo.png" alt="" className="absolute inset-0 w-full h-full object-cover" />
+          <div className="relative z-10 flex items-center justify-between w-full">
+            <span className="hidden sm:inline">Modo Demo: {user?.nombre}</span>
+            <span className="sm:hidden">Demo</span>
+            <DemoUserSelector
+              compact
+              onUserChange={(type) => {
+                // Map demo type to role and navigate
+                const roleMap: Record<string, string> = {
+                  user: 'USER',
+                  seller: 'SELLER',
+                  admin: 'ADMIN',
+                };
+                handleUserSelected(roleMap[type]);
+              }}
+            />
+          </div>
         </div>
       )}
 
@@ -613,18 +612,46 @@ const App: React.FC = () => {
       )}
 
       <div className={`flex h-screen ${isDemoMode || adminViewingAsUser ? 'pt-8' : ''}`}>
-        {/* Sidebar Navigation - Desktop/Tablet */}
+        {/* Sidebar Navigation - Desktop/Tablet (collapsible) */}
         {!hideNav && (
-          <Navigation
-            currentView={currentView}
-            setView={setCurrentView}
-            onUserProfile={handleViewUserProfile}
-            variant="sidebar"
-          />
+          <div className="hidden md:flex">
+            <Navigation
+              currentView={currentView}
+              setView={setCurrentView}
+              onUserProfile={handleViewUserProfile}
+              variant="sidebar"
+              onToggleSidebar={() => setSidebarVisible(!sidebarVisible)}
+              sidebarVisible={sidebarVisible}
+              sidebarStyle={sidebarStyle}
+              setSidebarStyle={setSidebarStyle}
+            />
+          </div>
+        )}
+
+        {/* Mobile Sidebar Overlay */}
+        {!hideNav && mobileSidebarOpen && (
+          <div className="md:hidden fixed inset-0 z-[70]">
+            <div
+              className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+              onClick={() => setMobileSidebarOpen(false)}
+            />
+            <div className="absolute left-0 top-0 bottom-0 w-72 animate-slide-right">
+              <Navigation
+                currentView={currentView}
+                setView={(view) => { setCurrentView(view); setMobileSidebarOpen(false); }}
+                onUserProfile={handleViewUserProfile}
+                variant="sidebar"
+                onToggleSidebar={() => setMobileSidebarOpen(false)}
+                sidebarVisible={true}
+                sidebarStyle={sidebarStyle}
+                setSidebarStyle={setSidebarStyle}
+              />
+            </div>
+          </div>
         )}
 
         {/* Main Content */}
-        <main className="flex-1 flex flex-col overflow-hidden">
+        <main className={`flex-1 flex flex-col min-h-0 overflow-hidden ${!hideNav && !sidebarVisible ? 'ml-4 mt-4 pr-4' : ''}`}>
           {/* Onboarding */}
           {showOnboarding && <Onboarding onComplete={() => setShowOnboarding(false)} />}
 
@@ -644,6 +671,7 @@ const App: React.FC = () => {
               setView={setCurrentView}
               onUserProfile={handleViewUserProfile}
               variant="bottom"
+              onOpenMobileSidebar={() => setMobileSidebarOpen(true)}
             />
           )}
         </main>

@@ -12,21 +12,24 @@ const DEMO_USERS = [
     type: 'user' as const,
     name: 'Usuario Demo',
     description: 'Visitante del festival',
-    icon: Users,
+    icon: '/images/dance_tehuana.png',
+    isImage: true,
     color: 'from-oaxaca-sky to-oaxaca-sky',
   },
   {
     type: 'seller' as const,
     name: 'Vendedor Demo',
     description: 'Productos y experiencias',
-    icon: ShoppingBag,
+    icon: '/images/product_barro_negro.png',
+    isImage: true,
     color: 'from-oaxaca-yellow to-oaxaca-yellow',
   },
   {
     type: 'admin' as const,
     name: 'Admin Demo',
     description: 'Metricas y gestion',
-    icon: Shield,
+    icon: '/images/poi_auditorio_guelaguetza.png',
+    isImage: true,
     color: 'from-oaxaca-purple to-oaxaca-purple',
   },
 ];
@@ -66,7 +69,11 @@ const DemoUserSelector: React.FC<DemoUserSelectorProps> = ({ compact = false, on
           onClick={() => setIsOpen(!isOpen)}
           className="flex items-center gap-2 px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-lg text-white text-sm transition"
         >
-          <currentDemo.icon size={16} />
+          {currentDemo.isImage ? (
+            <img src={currentDemo.icon} alt="" className="w-5 h-5 rounded object-cover" />
+          ) : (
+            <currentDemo.icon size={16} />
+          )}
           <span className="hidden sm:inline">{currentDemo.name}</span>
           <ChevronDown size={14} className={`transition-transform ${isOpen ? 'rotate-180' : ''}`} />
         </button>
@@ -88,8 +95,12 @@ const DemoUserSelector: React.FC<DemoUserSelectorProps> = ({ compact = false, on
                       demo.type === currentUserType ? 'bg-gray-100 dark:bg-gray-700' : ''
                     }`}
                   >
-                    <div className={`p-2 rounded-lg bg-gradient-to-br ${demo.color} text-white`}>
-                      <demo.icon size={16} />
+                    <div className={`p-2 rounded-lg bg-gradient-to-br ${demo.color} text-white flex items-center justify-center`}>
+                      {demo.isImage ? (
+                        <img src={demo.icon} alt="" className="w-4 h-4 rounded object-cover" />
+                      ) : (
+                        <demo.icon size={16} />
+                      )}
                     </div>
                     <div className="flex-1 text-left">
                       <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{demo.name}</p>
@@ -126,7 +137,11 @@ const DemoUserSelector: React.FC<DemoUserSelectorProps> = ({ compact = false, on
                 : 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300'
             }`}
           >
-            <demo.icon size={24} className="mb-1" />
+            {demo.isImage ? (
+              <img src={demo.icon} alt="" className="w-6 h-6 mb-1 rounded object-cover" />
+            ) : (
+              <demo.icon size={24} className="mb-1" />
+            )}
             <span className="text-xs font-medium">{demo.name}</span>
           </button>
         ))}

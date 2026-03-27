@@ -24,11 +24,30 @@ export default {
           dark: '#1C1917',
           earth: '#8B4513',
         },
+        guelaguetza: {
+          purple: '#7C3AED',
+          'purple-dark': '#6B21A8',
+          'purple-light': '#C4B5FD',
+          pink: '#EC4899',
+          'pink-dark': '#DB2777',
+          'pink-light': '#FBCFE8',
+          red: '#F43F5E',
+          yellow: '#FBBF24',
+          'yellow-dark': '#F59E0B',
+          'yellow-light': '#FDE68A',
+          coral: '#FB7185',
+          fuchsia: '#E879F9',
+        },
         a11y: {
           gray: '#595959',
           'gray-light': '#6B6B6B',
           muted: '#767676',
         },
+      },
+      backgroundImage: {
+        'guelaguetza-gradient': 'linear-gradient(135deg, #7C3AED 0%, #EC4899 50%, #F43F5E 100%)',
+        'guelaguetza-gradient-light': 'linear-gradient(135deg, #A78BFA 0%, #F472B6 50%, #FB7185 100%)',
+        'guelaguetza-vertical': 'linear-gradient(180deg, #7C3AED 0%, #EC4899 50%, #FBBF24 100%)',
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
@@ -56,6 +75,7 @@ export default {
         'card-hover': '0 4px 16px rgba(0, 0, 0, 0.12)',
         modal: '0 8px 32px rgba(0, 0, 0, 0.2)',
         button: '0 2px 4px rgba(217, 0, 108, 0.2)',
+        'guelaguetza': '0 4px 20px rgba(124, 58, 237, 0.3)',
       },
       transitionDuration: {
         fast: '150ms',
@@ -77,6 +97,10 @@ export default {
         'spin-slow': 'spin 3s linear infinite',
         'pulse-soft': 'pulseSoft 2s ease-in-out infinite',
         'bounce-soft': 'bounceSoft 1s ease-in-out infinite',
+        'gradient': 'gradient 3s ease infinite',
+        'gradient-slow': 'gradient 5s ease infinite',
+        'gradient-text': 'gradientText 3s linear infinite',
+        'slide-right': 'slideRight 0.3s ease-out',
       },
       keyframes: {
         fadeIn: {
@@ -90,6 +114,10 @@ export default {
         slideUp: {
           '0%': { transform: 'translateY(10px)', opacity: '0' },
           '100%': { transform: 'translateY(0)', opacity: '1' },
+        },
+        slideRight: {
+          '0%': { transform: 'translateX(-100%)' },
+          '100%': { transform: 'translateX(0)' },
         },
         slideDown: {
           '0%': { transform: 'translateY(-10px)', opacity: '0' },
@@ -106,6 +134,14 @@ export default {
         bounceSoft: {
           '0%, 100%': { transform: 'translateY(0)' },
           '50%': { transform: 'translateY(-5px)' },
+        },
+        gradient: {
+          '0%, 100%': { backgroundPosition: '0% 50%' },
+          '50%': { backgroundPosition: '100% 50%' },
+        },
+        gradientText: {
+          '0%': { backgroundPosition: '0% 50%' },
+          '100%': { backgroundPosition: '200% 50%' },
         },
       },
     },

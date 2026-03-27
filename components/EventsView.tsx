@@ -177,7 +177,7 @@ const EventsView: React.FC<EventsViewProps> = ({
 
       {/* Content */}
       <PullToRefresh onRefresh={loadEvents} className="flex-1">
-        <div className="px-4 py-4">
+        <div className="px-4 md:px-6 lg:px-8 py-4 max-w-7xl mx-auto">
           {loading ? (
             <SkeletonGrid type="event" count={4} columns={1} />
           ) : events.length === 0 ? (

@@ -137,7 +137,9 @@ const ProgramView: React.FC<ProgramViewProps> = ({ onBack }) => {
   return (
     <div className="h-full flex flex-col bg-gray-50 dark:bg-gray-950 pb-20 transition-colors">
       {/* Header */}
-      <div className="bg-oaxaca-purple p-4 pt-6 text-white">
+      <div className="relative overflow-hidden">
+        <img src="/images/rojo.png" alt="" className="absolute inset-0 w-full h-full object-cover" />
+        <div className="relative p-4 pt-6 text-white max-w-7xl mx-auto w-full">
         <div className="flex items-center justify-between mb-1">
           <div className="flex items-center gap-2">
             {onBack && (
@@ -146,7 +148,7 @@ const ProgramView: React.FC<ProgramViewProps> = ({ onBack }) => {
               </button>
             )}
             <img src="/images/ui/icon_events.png" alt="Programa" className="w-10 h-10 md:w-12 md:h-12 object-contain drop-shadow-md" />
-            <h2 className="text-xl font-bold">Programa Guelaguetza 2025</h2>
+            <h2 className="text-xl font-bold">Programa Guelaguetza 2026</h2>
           </div>
           <button
             onClick={handleRefresh}
@@ -158,11 +160,12 @@ const ProgramView: React.FC<ProgramViewProps> = ({ onBack }) => {
           </button>
         </div>
         <p className="text-sm text-white/70">Julio 21 - 28, Oaxaca de Juárez</p>
+        </div>
       </div>
 
       {/* Day Selector */}
       <div className="bg-white dark:bg-gray-900 shadow-sm sticky top-0 z-10 transition-colors">
-        <div className="flex overflow-x-auto no-scrollbar px-2 py-3 gap-2">
+        <div className="flex overflow-x-auto no-scrollbar px-2 py-3 gap-2 max-w-7xl mx-auto">
           {SCHEDULE.map((day, index) => (
             <button
               key={day.date}
@@ -180,7 +183,7 @@ const ProgramView: React.FC<ProgramViewProps> = ({ onBack }) => {
         </div>
 
         {/* Filters */}
-        <div className="flex gap-2 px-4 pb-3 overflow-x-auto no-scrollbar">
+        <div className="flex gap-2 px-4 pb-3 overflow-x-auto no-scrollbar max-w-7xl mx-auto">
           <button
             onClick={() => setFilter(null)}
             className={`px-3 py-1 rounded-full text-xs font-medium transition ${
@@ -206,7 +209,7 @@ const ProgramView: React.FC<ProgramViewProps> = ({ onBack }) => {
 
       {/* Events List with Pull-to-Refresh */}
       <PullToRefreshWrapper onRefresh={handleRefresh} className="flex-1">
-        <div className="px-4 py-4 space-y-3">
+        <div className="px-4 md:px-6 lg:px-8 py-4 space-y-3 max-w-7xl mx-auto">
           {filteredEvents.length === 0 ? (
             <div className="text-center py-12 text-gray-400">
               <Calendar size={48} className="mx-auto mb-3 opacity-50" />

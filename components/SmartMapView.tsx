@@ -223,8 +223,8 @@ const SmartMapView: React.FC<SmartMapViewProps> = ({ onBack }) => {
   return (
     <div className="h-full bg-gray-50 dark:bg-gray-950 flex flex-col">
       {/* Header */}
-      <div className="bg-gradient-to-r from-oaxaca-sky to-oaxaca-purple text-white px-4 py-4">
-        <div className="flex items-center gap-3 mb-3">
+      <div className="bg-gradient-to-r from-oaxaca-sky to-oaxaca-purple text-white px-4 md:px-6 lg:px-8 py-4">
+        <div className="flex items-center gap-3 mb-3 max-w-7xl mx-auto">
           <button onClick={onBack} className="p-2 hover:bg-white/10 rounded-full transition">
             <ArrowLeft size={20} />
           </button>
@@ -236,7 +236,7 @@ const SmartMapView: React.FC<SmartMapViewProps> = ({ onBack }) => {
         </div>
 
         {/* Transport Mode Selector */}
-        <div className="flex gap-2">
+        <div className="flex gap-2 max-w-7xl mx-auto">
           {TRANSPORT_MODES.map(mode => (
             <button
               key={mode.id}
@@ -257,7 +257,7 @@ const SmartMapView: React.FC<SmartMapViewProps> = ({ onBack }) => {
       {/* Location Picker Modal */}
       {showLocationPicker && (
         <div className="flex-1 overflow-y-auto">
-          <div className="p-4">
+          <div className="p-4 md:p-6 lg:p-8 max-w-7xl mx-auto">
             <h2 className="font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
               <MapPin className="text-oaxaca-sky" size={20} />
               Donde estas o desde donde partes?
@@ -355,7 +355,7 @@ const SmartMapView: React.FC<SmartMapViewProps> = ({ onBack }) => {
       {!showLocationPicker && selectedOrigin && (
         <div className="flex-1 overflow-y-auto">
           {/* Origin Card */}
-          <div className="p-4 bg-white dark:bg-gray-800 border-b dark:border-gray-700">
+          <div className="p-4 md:p-6 lg:p-8 bg-white dark:bg-gray-800 border-b dark:border-gray-700 max-w-7xl mx-auto">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-full">
@@ -376,7 +376,7 @@ const SmartMapView: React.FC<SmartMapViewProps> = ({ onBack }) => {
           </div>
 
           {/* Tabs */}
-          <div className="flex border-b dark:border-gray-700">
+          <div className="flex border-b dark:border-gray-700 max-w-7xl mx-auto">
             <button
               onClick={() => setShowItinerary(false)}
               className={`flex-1 py-3 text-sm font-medium transition ${
@@ -406,7 +406,7 @@ const SmartMapView: React.FC<SmartMapViewProps> = ({ onBack }) => {
 
           {/* Nearby Locations */}
           {!showItinerary && (
-            <div className="p-4 space-y-3">
+            <div className="p-4 md:p-6 lg:p-8 space-y-3 max-w-7xl mx-auto">
               <p className="text-sm text-gray-500 dark:text-gray-400">
                 Lugares ordenados por cercania (modo: {TRANSPORT_MODES.find(m => m.id === selectedMode)?.name})
               </p>
@@ -462,7 +462,7 @@ const SmartMapView: React.FC<SmartMapViewProps> = ({ onBack }) => {
 
           {/* Itinerary */}
           {showItinerary && (
-            <div className="p-4">
+            <div className="p-4 md:p-6 lg:p-8 max-w-7xl mx-auto">
               {itinerary.length === 0 ? (
                 <div className="text-center py-12">
                   <Route size={48} className="mx-auto text-gray-300 dark:text-gray-600 mb-4" />
