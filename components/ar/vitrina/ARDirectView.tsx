@@ -1,3 +1,4 @@
+import type { CSSProperties } from 'react';
 import { useEffect, useState } from 'react';
 import { X, Share2, ExternalLink, Box } from 'lucide-react';
 import { ARTESANIAS_PREMIUM, VITRINA_TRELLIS, type ArtesaniaItem } from './artesanias-data';
@@ -122,7 +123,6 @@ export default function ARDirectView({ modelId, onClose }: ARDirectViewProps) {
 
       {/* 3D model — render immediately, auto-upgrades when model-viewer script loads */}
       <div className="flex-1 relative bg-gray-900">
-        {/* @ts-expect-error model-viewer web component */}
         <model-viewer
           src={item.glb}
           camera-controls
@@ -136,10 +136,20 @@ export default function ARDirectView({ modelId, onClose }: ARDirectViewProps) {
           exposure="1.1"
           ar
           ar-modes="webxr scene-viewer quick-look"
+          ar-scale="auto"
           reveal="auto"
           loading="eager"
-          style={{ display: 'block', width: '100%', height: '100%' }}
+          style={{ display: 'block', width: '100%', height: '100%', '--model-viewer-ar-prompt-display': 'block' } as CSSProperties}
         >
+          {/* Custom AR button - ensures it appears on mobile */}
+          <button
+            slot="ar-button"
+            className="absolute bottom-4 right-4 z-10 flex items-center justify-center rounded-full bg-amber-500 px-4 py-3 text-gray-950 shadow-lg active:scale-95 transition-transform"
+            style={{ position: 'absolute', bottom: '16px', right: '16px' }}
+          >
+            <Box className="size-5 mr-1.5" />
+            <span className="text-sm font-bold">Ver en AR</span>
+          </button>
           {/* Loading indicator inside model-viewer slot — visible until model loads */}
           <div slot="poster" className="flex h-full w-full items-center justify-center bg-gray-900">
             <div className="flex flex-col items-center gap-3">
