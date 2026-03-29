@@ -1,15 +1,35 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Mail, Lock, Eye, EyeOff, Scan, Camera, X, Loader2, ArrowRight, Sparkles } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { ViewState } from '../types';
+
+declare global {
+  interface Window {
+    google?: {
+      accounts: {
+        id: {
+          initialize: (config: {
+            client_id: string;
+            callback: (response: { credential: string }) => void;
+            auto_select?: boolean;
+            cancel_on_tap_outside?: boolean;
+          }) => void;
+          renderButton: (element: HTMLElement, config: Record<string, unknown>) => void;
+        };
+      };
+    };
+  }
+}
+
+const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
 
 interface LoginViewProps {
   setView: (view: ViewState) => void;
 }
 
 const LoginView: React.FC<LoginViewProps> = ({ setView }) => {
-  const { login, loginWithFace, loginAsDemo } = useAuth();
+  const { login, loginWithGoogle, loginWithFace, loginAsDemo } = useAuth();
   const { t } = useLanguage();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -21,6 +41,53 @@ const LoginView: React.FC<LoginViewProps> = ({ setView }) => {
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  // Load Google Identity Services SDK
+  useEffect(() => {
+    if (window.google?.accounts?.identity) return;
+
+    const script = document.createElement('script');
+    script.src = 'https://accounts.google.com/gsi/client';
+    script.async = true;
+    script.defer = true;
+    document.body.appendChild(script);
+  }, []);
+
+  const handleGoogleResponse = useCallback(async (response: { credential: string }) => {
+    setIsLoading(true);
+    setError('');
+
+    const success = await loginWithGoogle(response.credential);
+    if (success) {
+      setView(ViewState.HOME);
+    } else {
+      setError('Error al iniciar sesión con Google');
+    }
+    setIsLoading(false);
+  }, [loginWithGoogle, setView]);
+
+  // Initialize Google button
+  useEffect(() => {
+    if (!window.google?.accounts?.identity) return;
+
+    window.google.accounts.id.initialize({
+      client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID || 'YOUR_GOOGLE_CLIENT_ID',
+      callback: handleGoogleResponse,
+      auto_select: false,
+      cancel_on_tap_outside: false,
+    });
+
+    window.google.accounts.id.renderButton(
+      document.getElementById('google-button') as HTMLElement,
+      {
+        theme: 'outline',
+        size: 'large',
+        width: '100%',
+        text: 'continue_with',
+        shape: 'rectangle',
+      }
+    );
+  }, [handleGoogleResponse]);
 
   // Camera setup for Face ID
   useEffect(() => {
@@ -271,6 +338,9 @@ const LoginView: React.FC<LoginViewProps> = ({ setView }) => {
           <span className="text-gray-400 dark:text-gray-500 text-sm">o continúa con</span>
           <div className="flex-1 h-px bg-gray-200 dark:bg-gray-700" />
         </div>
+
+        {/* Google Button */}
+        <div id="google-button" className="mb-3" />
 
         {/* Face ID Button */}
         <button
