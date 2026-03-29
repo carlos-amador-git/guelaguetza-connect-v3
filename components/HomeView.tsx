@@ -280,7 +280,7 @@ const HomeView: React.FC<HomeViewProps> = ({ setView }) => {
               </div>
 
               <div
-                onClick={() => setView(ViewState.AR_SCANNER)}
+                onClick={() => setView(ViewState.AR_VITRINA)}
                 className="relative p-4 md:p-5 rounded-2xl shadow-lg active:scale-95 transition cursor-pointer hover:shadow-xl hover:-translate-y-0.5 overflow-hidden"
               >
                 <img src="/images/amarillo.png" alt="AR Guelaguetza" className="absolute inset-0 w-full h-full object-cover" />

@@ -128,7 +128,7 @@ const App: React.FC = () => {
   // AR module: selected AR point ID (numeric, stored as string)
   const [selectedArPointId, setSelectedArPointId] = useState<string | null>(null);
   const [selectedItemId, setSelectedItemId] = useState<string | null>(initialArModelId);
-  const [vitrinaSection, setVitrinaSection] = useState<VitrinaSection>('premium');
+  const [vitrinaSection, setVitrinaSection] = useState<VitrinaSection>('trellis');
   // AR module: selected Quest ID
   const [selectedQuestId, setSelectedQuestId] = useState<string | null>(null);
 
