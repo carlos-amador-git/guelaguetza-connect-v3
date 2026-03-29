@@ -82,7 +82,7 @@ export default function VitrinaDetalle({ itemId, onBack }: VitrinaDetalleProps) 
   };
 
   return (
-    <div className="relative h-dvh bg-gray-950">
+    <div className="relative h-svh bg-gray-950 overflow-hidden">
       {/* Top bar */}
       <div className="absolute inset-x-0 top-0 z-20 flex items-center justify-between p-4 bg-gradient-to-b from-gray-950/80 to-transparent">
         <button
@@ -141,7 +141,7 @@ export default function VitrinaDetalle({ itemId, onBack }: VitrinaDetalleProps) 
 
       {/* Bottom panel */}
       {showInfo && (
-        <div className="absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-gray-950 via-gray-950/95 to-transparent px-4 pb-6 pt-16">
+        <div className="absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-gray-950 via-gray-950 to-transparent px-4 pb-4 pt-16">
           <div className="mx-auto max-w-lg">
             <h2 className="text-2xl font-bold text-white">{item.nombre}</h2>
             <p className="mt-1 text-sm text-gray-300">{item.descripcion}</p>
