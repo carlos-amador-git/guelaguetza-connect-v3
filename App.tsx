@@ -103,7 +103,14 @@ const App: React.FC = () => {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [previousView, setPreviousView] = useState<ViewState>(ViewState.HOME);
-  const [showLanding, setShowLanding] = useState(!initialArModelId);
+  const [showLanding, setShowLanding] = useState(() => {
+    // Check if user is already authenticated
+    const savedToken = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+    const savedUser = typeof window !== 'undefined' ? localStorage.getItem('auth_user') : null;
+    // If authenticated, skip landing; otherwise show landing unless there's an AR model ID
+    if (savedToken && savedUser) return false;
+    return !initialArModelId;
+  });
   const [adminViewingAsUser, setAdminViewingAsUser] = useState(false);
   const [sidebarVisible, setSidebarVisible] = useState(true);
   const [sidebarStyle, setSidebarStyle] = useState<'amarillo' | 'verde' | 'rojo' | 'azul' | 'morado' | 'blanco'>('blanco');
