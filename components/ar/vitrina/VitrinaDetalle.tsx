@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { ArrowLeft, Eye, Download, X, MapPin, SlidersHorizontal } from 'lucide-react';
+import { ArrowLeft, Eye, Download, X, MapPin, SlidersHorizontal, Box } from 'lucide-react';
 import { ARTESANIAS } from './artesanias-data';
 
 /**
@@ -90,17 +90,18 @@ export default function VitrinaDetalle({ itemId, onBack }: VitrinaDetalleProps) 
           className="flex items-center gap-2 rounded-xl bg-gray-950/70 px-4 py-2.5 text-sm font-medium text-white shadow-lg backdrop-blur-sm active:scale-95 transition-transform hover:bg-gray-800 md:px-5 md:py-3 md:text-base"
         >
           <ArrowLeft className="size-4 md:size-5" />
-          <span className="hidden sm:inline">Artesanías</span>
-          <span className="sm:hidden">Volver</span>
+          <span>Artesanías</span>
         </button>
 
-        <button
-          onClick={() => setShowInfo(!showInfo)}
-          className="flex size-10 items-center justify-center rounded-xl bg-gray-950/70 text-gray-300 shadow-lg backdrop-blur-sm active:scale-95 transition-transform"
-          aria-label={showInfo ? 'Ocultar info' : 'Mostrar info'}
-        >
-          {showInfo ? <X className="size-4" /> : <SlidersHorizontal className="size-4" />}
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setShowInfo(!showInfo)}
+            className="flex size-10 items-center justify-center rounded-xl bg-gray-950/70 text-gray-300 shadow-lg backdrop-blur-sm active:scale-95 transition-transform"
+            aria-label={showInfo ? 'Ocultar info' : 'Mostrar info'}
+          >
+            {showInfo ? <X className="size-4" /> : <SlidersHorizontal className="size-4" />}
+          </button>
+        </div>
       </div>
 
       {/* 3D Viewer — full screen */}
@@ -124,10 +125,11 @@ export default function VitrinaDetalle({ itemId, onBack }: VitrinaDetalleProps) 
           >
             <button
               slot="ar-button"
-              className="absolute bottom-24 right-4 flex items-center gap-2 rounded-xl bg-[#E63946] px-5 py-3 text-sm font-semibold text-white shadow-xl active:scale-95 transition-transform"
+              class="absolute bottom-20 right-4 z-50 flex items-center gap-2 rounded-full bg-amber-500 px-5 py-3 text-sm font-bold text-gray-950 shadow-xl"
+              style={{ position: 'absolute', bottom: '80px', right: '16px' }}
             >
               <Eye className="size-4" />
-              Ver en AR
+              AR
             </button>
           </model-viewer>
         ) : (
@@ -193,6 +195,18 @@ export default function VitrinaDetalle({ itemId, onBack }: VitrinaDetalleProps) 
 
             {/* Actions */}
             <div className="mt-4 flex gap-2">
+              <button
+                onClick={() => {
+                  const mv = document.querySelector('model-viewer');
+                  if (mv && (mv as any).activateAR) {
+                    (mv as any).activateAR();
+                  }
+                }}
+                className="flex items-center gap-1.5 rounded-lg bg-amber-500 px-4 py-2.5 text-sm font-medium text-gray-950 transition-colors hover:bg-amber-400"
+              >
+                <Box className="size-3.5" />
+                Ver en AR
+              </button>
               <a
                 href={item.glb}
                 download={`${item.id}.glb`}
