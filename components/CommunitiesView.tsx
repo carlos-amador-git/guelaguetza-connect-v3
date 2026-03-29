@@ -116,19 +116,20 @@ const CommunitiesView: React.FC<CommunitiesViewProps> = ({ onCommunityClick, onB
       {/* Header */}
       <div className="relative overflow-hidden">
         <img src="/images/azul.png" alt="" className="absolute inset-0 w-full h-full object-cover" />
-        <div className="relative p-6 pt-4 md:px-6 lg:px-8 max-w-7xl mx-auto">
-          {/* Navigation Row */}
-          <div className="flex items-center justify-between mb-4">
+        <div className="relative p-4 pt-6 text-white max-w-7xl mx-auto w-full">
+          <div className="flex items-center justify-between mb-1">
             <div className="flex items-center gap-2">
               {onBack && (
                 <button
                   onClick={onBack}
-                  className="p-2 bg-white/20 hover:bg-white/30 rounded-full text-white transition-colors"
+                  className="p-2 -ml-2 bg-white/20 hover:bg-white/30 rounded-full text-white transition-colors"
                   aria-label="Volver"
                 >
                   <ArrowLeft size={20} />
                 </button>
               )}
+              <img src="/images/ui/icon_community.png" alt="Comunidades" className="w-10 h-10 md:w-12 md:h-12 object-contain drop-shadow-md" />
+              <h2 className="text-xl font-bold">Comunidades</h2>
             </div>
             {isAuthenticated && (
               <button
@@ -136,65 +137,56 @@ const CommunitiesView: React.FC<CommunitiesViewProps> = ({ onCommunityClick, onB
                 aria-label="Crear comunidad"
                 className="p-2 bg-white/20 hover:bg-white/30 rounded-full text-white transition-colors"
               >
-                <Plus size={24} aria-hidden="true" />
+                <Plus size={20} aria-hidden="true" />
               </button>
             )}
           </div>
-
-          {/* Title */}
-          <div className="flex items-center gap-3">
-            <img src="/images/ui/icon_community.png" alt="Comunidades" className="w-10 h-10 md:w-12 md:h-12 object-contain drop-shadow-md" />
-            <div>
-              <h1 className="text-white font-bold text-2xl">Comunidades</h1>
-              <p className="text-white/70 text-sm">
-                Conecta con personas con intereses similares
-              </p>
-            </div>
-          </div>
-
-          {/* Search */}
-          <div className="mt-4 relative">
-            <Search
-              size={18}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-white/70"
-              aria-hidden="true"
-            />
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Buscar comunidades..."
-              aria-label="Buscar comunidades"
-              className="w-full pl-10 pr-4 py-2.5 bg-white/20 text-white placeholder-white/70 rounded-full focus:outline-none focus:ring-2 focus:ring-white/50"
-            />
-          </div>
-
-          {/* Tabs */}
-          {isAuthenticated && (
-            <div className="flex gap-2 mt-4">
-              <button
-                onClick={() => setActiveTab('discover')}
-                className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
-                  activeTab === 'discover'
-                    ? 'bg-white text-oaxaca-purple'
-                    : 'bg-white/20 text-white hover:bg-white/30'
-                }`}
-              >
-                Descubrir
-              </button>
-              <button
-                onClick={() => setActiveTab('my')}
-                className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
-                  activeTab === 'my'
-                    ? 'bg-white text-oaxaca-purple'
-                    : 'bg-white/20 text-white hover:bg-white/30'
-                }`}
-              >
-                Mis comunidades
-              </button>
-            </div>
-          )}
+          <p className="text-sm text-white/70">Conecta con personas con intereses similares</p>
         </div>
+      </div>
+
+      {/* Search & Tabs */}
+      <div className="bg-oaxaca-blue dark:bg-gray-900 px-4 md:px-6 lg:px-8 py-4 max-w-7xl mx-auto w-full">
+        <div className="relative">
+          <Search
+            size={18}
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"
+            aria-hidden="true"
+          />
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Buscar comunidades..."
+            aria-label="Buscar comunidades"
+            className="w-full pl-10 pr-4 py-2.5 bg-gray-100 text-gray-900 placeholder-gray-400 rounded-full focus:outline-none focus:ring-2 focus:ring-oaxaca-sky"
+          />
+        </div>
+
+        {isAuthenticated && (
+          <div className="flex gap-2 mt-4">
+            <button
+              onClick={() => setActiveTab('discover')}
+              className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                activeTab === 'discover'
+                  ? 'bg-white text-oaxaca-blue font-semibold shadow-md'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600'
+              }`}
+            >
+              Descubrir
+            </button>
+            <button
+              onClick={() => setActiveTab('my')}
+              className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                activeTab === 'my'
+                  ? 'bg-white text-oaxaca-blue font-semibold shadow-md'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600'
+              }`}
+            >
+              Mis comunidades
+            </button>
+          </div>
+        )}
       </div>
 
       <PullToRefresh onRefresh={handleRefresh} className="flex-1">

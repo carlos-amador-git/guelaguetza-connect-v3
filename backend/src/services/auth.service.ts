@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import * as bcrypt from 'bcryptjs';
+import bcrypt from 'bcryptjs';
 import * as crypto from 'crypto';
 import { SignJWT, jwtVerify } from 'jose';
 import { v4 as uuidv4 } from 'uuid';
@@ -438,7 +438,7 @@ export class AuthService {
         nombre: data.nombre,
         apellido: data.apellido,
         region: data.region,
-        // role se asigna por defecto en Prisma schema
+        role: (data as any).role || 'USER',
       },
       select: {
         id: true,
@@ -451,6 +451,16 @@ export class AuthService {
         createdAt: true,
       },
     });
+
+    // Crear SellerProfile automáticamente si el rol es SELLER
+    if ((data as any).role === 'SELLER') {
+      await this.prisma.sellerProfile.create({
+        data: {
+          userId: user.id,
+          businessName: (data as any).businessName || data.nombre || 'Mi Tienda',
+        },
+      });
+    }
 
     // Generar tokens
     const tokens = await this.generateTokenPair(user.id, user.email, user.role);

@@ -80,12 +80,14 @@ export class StreamService {
   }
 
   async getUpcomingStreams() {
-    return this.prisma.liveStream.findMany({
+    console.log('[getUpcomingStreams] Querying for SCHEDULED streams...');
+    const streams = await this.prisma.liveStream.findMany({
       where: {
         status: 'SCHEDULED',
-        scheduledAt: {
-          gte: new Date(),
-        },
+        OR: [
+          { scheduledAt: { gte: new Date() } },
+          { scheduledAt: null },
+        ],
       },
       include: {
         user: {
@@ -98,8 +100,10 @@ export class StreamService {
         },
       },
       orderBy: { scheduledAt: 'asc' },
-      take: 10,
+      take: 20,
     });
+    console.log('[getUpcomingStreams] Found:', streams.length, 'streams');
+    return streams;
   }
 
   async getStreamById(id: string) {

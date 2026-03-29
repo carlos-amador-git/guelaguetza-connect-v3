@@ -107,70 +107,74 @@ export default function ProductDetailView({
     : [];
 
   return (
-    <div className="flex flex-col h-full bg-white">
+    <div className="flex flex-col h-full min-h-0 bg-white">
       {/* Header */}
-      <div className="bg-gradient-to-r from-oaxaca-yellow to-oaxaca-yellow text-white p-4 pt-8 md:pt-6">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <button onClick={onBack} className="p-2 hover:bg-white/20 rounded-full transition">
-                <ArrowLeft className="w-6 h-6" />
-              </button>
-              <div>
-                <h1 className="text-xl md:text-2xl font-bold">{product.name}</h1>
-                <p className="text-sm md:text-base text-white/80">{CATEGORY_LABELS[product.category]}</p>
+      <div className="flex-none relative overflow-hidden">
+        <img src="/images/amarillo.png" alt="" className="absolute inset-0 w-full h-full object-cover" />
+        <div className="relative p-4 pt-8 md:pt-6 text-white">
+          <div className="max-w-7xl mx-auto">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <button onClick={onBack} className="p-2 hover:bg-white/20 rounded-full transition">
+                  <ArrowLeft className="w-6 h-6" />
+                </button>
+                <div>
+                  <h1 className="text-xl md:text-2xl font-bold">{product.name}</h1>
+                  <p className="text-sm md:text-base text-white/80">{CATEGORY_LABELS[product.category]}</p>
+                </div>
               </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={handleToggleWishlist}
-                disabled={wishlistLoading}
-                className={`p-2 md:p-3 rounded-full transition ${
-                  inWishlist ? 'bg-oaxaca-pink text-white' : 'bg-white/20 hover:bg-white/30'
-                } ${wishlistLoading ? 'opacity-50' : ''}`}
-              >
-                <Heart className={`w-6 h-6 ${inWishlist ? 'fill-current' : ''}`} />
-              </button>
-              <button onClick={handleShare} className="p-2 md:p-3 bg-white/20 rounded-full hover:bg-white/30 transition">
-                <Share2 className="w-6 h-6" />
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handleToggleWishlist}
+                  disabled={wishlistLoading}
+                  className={`p-2 md:p-3 rounded-full transition ${
+                    inWishlist ? 'bg-oaxaca-pink text-white' : 'bg-white/20 hover:bg-white/30'
+                  } ${wishlistLoading ? 'opacity-50' : ''}`}
+                >
+                  <Heart className={`w-6 h-6 ${inWishlist ? 'fill-current' : ''}`} />
+                </button>
+                <button onClick={handleShare} className="p-2 md:p-3 bg-white/20 rounded-full hover:bg-white/30 transition">
+                  <Share2 className="w-6 h-6" />
+                </button>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Image Gallery */}
-      <div className="relative px-6 md:px-8 lg:px-12 py-4 max-w-7xl mx-auto w-full">
-        <div className="h-[30vh] sm:h-[35vh] md:h-[40vh] lg:h-[45vh] bg-gray-100 rounded-2xl overflow-hidden shadow-xl">
-          {images.length > 0 ? (
-            <img
-              src={images[activeImageIndex]}
-              alt={product.name}
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <GradientPlaceholder variant="shop" className="w-full h-full" alt={product.name} />
+      {/* Scrollable Content */}
+      <div className="flex-1 overflow-y-auto overscroll-contain min-h-0 pb-24">
+        {/* Image Gallery */}
+        <div className="relative px-6 md:px-8 lg:px-12 py-4 max-w-7xl mx-auto w-full">
+          <div className="h-[30vh] sm:h-[35vh] md:h-[40vh] lg:h-[45vh] bg-gray-100 rounded-2xl overflow-hidden shadow-xl">
+            {images.length > 0 ? (
+              <img
+                src={images[activeImageIndex]}
+                alt={product.name}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <GradientPlaceholder variant="shop" className="w-full h-full" alt={product.name} />
+            )}
+          </div>
+
+          {/* Thumbnails */}
+          {images.length > 1 && (
+            <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-2">
+              {images.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => setActiveImageIndex(index)}
+                  className={`w-2 h-2 rounded-full ${
+                    index === activeImageIndex ? 'bg-oaxaca-yellow' : 'bg-white/50'
+                  }`}
+                />
+              ))}
+            </div>
           )}
         </div>
 
-        {/* Thumbnails */}
-        {images.length > 1 && (
-          <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-2">
-            {images.map((_, index) => (
-              <button
-                key={index}
-                onClick={() => setActiveImageIndex(index)}
-                className={`w-2 h-2 rounded-full ${
-                  index === activeImageIndex ? 'bg-oaxaca-yellow' : 'bg-white/50'
-                }`}
-              />
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Content */}
-      <div className="flex-1 overflow-y-auto max-w-7xl mx-auto w-full">
+        {/* Content */}
         <div className="max-w-7xl mx-auto p-4">
           {/* Category & Price */}
           <div className="flex justify-between items-start mb-2">
@@ -207,10 +211,15 @@ export default function ProductDetailView({
             <div className="flex-1">
               <p className="font-medium text-gray-900">{product.seller.businessName}</p>
               {product.seller.location && (
-                <p className="text-sm text-gray-500 flex items-center gap-1">
+                <a
+                  href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(product.seller.location + ', Oaxaca, Mexico')}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm text-blue-600 hover:text-blue-800 flex items-center gap-1"
+                >
                   <MapPin className="w-4 h-4" />
                   {product.seller.location}
-                </p>
+                </a>
               )}
             </div>
             {product.seller.verified && (
@@ -292,15 +301,17 @@ export default function ProductDetailView({
         </div>
       </div>
 
-      {/* Contact Seller Bar */}
-      <div className="border-t bg-white p-4 max-w-7xl mx-auto w-full">
-        <button
-          onClick={() => onNavigate(ViewState.DIRECT_MESSAGES)}
-          className="w-full py-4 rounded-lg font-medium flex items-center justify-center gap-2 bg-oaxaca-yellow text-white hover:bg-oaxaca-yellow/90 transition"
-        >
-          <Phone className="w-5 h-5" />
-          Contactar vendedor
-        </button>
+      {/* Contact Seller Bar - Fixed above bottom nav */}
+      <div className="fixed bottom-16 left-0 right-0 bg-white border-t p-4 z-40">
+        <div className="max-w-md mx-auto px-4">
+          <button
+            onClick={() => onNavigate(ViewState.DIRECT_MESSAGES)}
+            className="w-full py-4 rounded-lg font-medium flex items-center justify-center gap-2 bg-oaxaca-yellow text-white hover:bg-oaxaca-yellow/90 transition shadow-lg"
+          >
+            <Phone className="w-5 h-5" />
+            Contactar vendedor
+          </button>
+        </div>
       </div>
     </div>
   );

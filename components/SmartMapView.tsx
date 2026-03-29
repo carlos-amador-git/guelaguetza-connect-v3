@@ -223,35 +223,38 @@ const SmartMapView: React.FC<SmartMapViewProps> = ({ onBack }) => {
   return (
     <div className="h-full bg-gray-50 dark:bg-gray-950 flex flex-col">
       {/* Header */}
-      <div className="bg-gradient-to-r from-oaxaca-sky to-oaxaca-purple text-white px-4 md:px-6 lg:px-8 py-4">
-        <div className="flex items-center gap-3 mb-3 max-w-7xl mx-auto">
-          <button onClick={onBack} className="p-2 hover:bg-white/10 rounded-full transition">
-            <ArrowLeft size={20} />
-          </button>
-          <img src="/images/ui/icon_plan.png" alt="Mapa" className="w-10 h-10 md:w-12 md:h-12 object-contain drop-shadow-md" />
-          <div>
-            <h1 className="font-bold text-lg">Mapa Cultural</h1>
-            <p className="text-xs text-white/70">Planifica tu recorrido por Oaxaca</p>
+      <div className="relative overflow-hidden">
+        <img src="/images/azul.png" alt="" className="absolute inset-0 w-full h-full object-cover" />
+        <div className="relative p-4 pt-6 text-white max-w-7xl mx-auto w-full">
+          <div className="flex items-center justify-between mb-1">
+            <div className="flex items-center gap-2">
+              <button onClick={onBack} className="p-2 -ml-2 rounded-full hover:bg-white/10 transition">
+                <ArrowLeft size={20} />
+              </button>
+              <img src="/images/ui/icon_plan.png" alt="Mapa" className="w-10 h-10 md:w-12 md:h-12 object-contain drop-shadow-md" />
+              <h2 className="text-xl font-bold">Mapa Cultural</h2>
+            </div>
           </div>
+          <p className="text-sm text-white/70">Planifica tu recorrido por Oaxaca</p>
         </div>
+      </div>
 
-        {/* Transport Mode Selector */}
-        <div className="flex gap-2 max-w-7xl mx-auto">
-          {TRANSPORT_MODES.map(mode => (
-            <button
-              key={mode.id}
-              onClick={() => setSelectedMode(mode.id)}
-              className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-medium transition ${
-                selectedMode === mode.id
-                  ? 'bg-white text-oaxaca-sky'
-                  : 'bg-white/20 hover:bg-white/30'
-              }`}
-            >
-              <mode.icon size={16} />
-              <span className="hidden sm:inline">{mode.name}</span>
-            </button>
-          ))}
-        </div>
+      {/* Transport Mode Selector */}
+      <div className="bg-oaxaca-blue dark:bg-oaxaca-blue flex gap-2 px-4 md:px-6 lg:px-8 py-3 max-w-7xl mx-auto w-full">
+        {TRANSPORT_MODES.map(mode => (
+          <button
+            key={mode.id}
+            onClick={() => setSelectedMode(mode.id)}
+            className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-medium transition ${
+              selectedMode === mode.id
+                ? 'bg-white text-oaxaca-sky'
+                : 'bg-white/20 hover:bg-white/30 text-white'
+            }`}
+          >
+            <mode.icon size={16} />
+            <span className="hidden sm:inline">{mode.name}</span>
+          </button>
+        ))}
       </div>
 
       {/* Location Picker Modal */}

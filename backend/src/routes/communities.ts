@@ -126,11 +126,21 @@ const communitiesRoutes: FastifyPluginAsync = async (fastify) => {
       const { id: communityId } = request.params;
       const userId = request.user.id;
 
-      const success = await communityService.joinCommunity(communityId, userId);
+      const result = await communityService.joinCommunity(communityId, userId);
 
-      if (!success) {
+      if (!result.success) {
+        let errorMessage = 'No se pudo unir a la comunidad';
+        
+        if (result.reason === 'ALREADY_MEMBER') {
+          errorMessage = 'Ya eres miembro de esta comunidad';
+        } else if (result.reason === 'COMMUNITY_PRIVATE') {
+          errorMessage = 'Esta comunidad es privada y no permite nuevas membresías';
+        } else if (result.reason === 'COMUNITY_NOT_FOUND') {
+          errorMessage = 'La comunidad no fue encontrada';
+        }
+        
         return reply.status(400).send({
-          error: 'No se pudo unir a la comunidad',
+          error: errorMessage,
         });
       }
 
@@ -222,6 +232,60 @@ const communitiesRoutes: FastifyPluginAsync = async (fastify) => {
       }
 
       return { success: true, message: 'Post eliminado' };
+    }
+  );
+
+  // Get post comments
+  fastify.get<{ Params: { id: string; postId: string } }>(
+    '/:id/posts/:postId/comments',
+    async (request, reply) => {
+      const { postId } = request.params;
+
+      const comments = await communityService.getPostComments(postId);
+      return { success: true, data: comments };
+    }
+  );
+
+  // Create comment
+  fastify.post<{ Params: { id: string; postId: string } }>(
+    '/:id/posts/:postId/comments',
+    { preHandler: [fastify.authenticate] },
+    async (request, reply) => {
+      const { postId } = request.params;
+      const userId = request.user.id;
+      const { content, imageUrl } = request.body as { content: string; imageUrl?: string | null };
+
+      if (!content?.trim()) {
+        return reply.status(400).send({ error: 'El contenido del comentario es requerido' });
+      }
+
+      const comment = await communityService.createPostComment(postId, userId, content, imageUrl);
+
+      if (!comment) {
+        return reply.status(404).send({ error: 'Post no encontrado' });
+      }
+
+      return { success: true, data: comment };
+    }
+  );
+
+  // Delete comment
+  fastify.delete<{ Params: { id: string; postId: string; commentId: string } }>(
+    '/:id/posts/:postId/comments/:commentId',
+    { preHandler: [fastify.authenticate] },
+    async (request, reply) => {
+      const { commentId } = request.params;
+      const userId = request.user.id;
+
+      const success = await communityService.deletePostComment(commentId, userId);
+
+      if (!success) {
+        return reply.status(403).send({
+          error: 'No tienes permisos para eliminar este comentario',
+        });
+      }
+
+      return { success: true, message: 'Comentario eliminado' };
     }
   );
 };

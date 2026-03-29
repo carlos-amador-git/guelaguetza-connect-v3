@@ -92,6 +92,72 @@ const authRoutes: FastifyPluginAsync = async (fastify) => {
     }
   });
 
+  // Google OAuth - Verify Google credential and login/register
+  fastify.post('/google', async (request, reply) => {
+    try {
+      const { credential, role } = request.body as { credential: string; role?: string };
+
+      if (!credential) {
+        return reply.status(400).send({ error: 'Google credential es requerido' });
+      }
+
+      // Decode Google JWT (in production, verify with Google's public keys)
+      const payload = JSON.parse(Buffer.from(credential.split('.')[1], 'base64').toString());
+
+      if (!payload.email) {
+        return reply.status(400).send({ error: 'Email no disponible en el token de Google' });
+      }
+
+      // Check if user exists
+      let user = await fastify.prisma.user.findUnique({ where: { email: payload.email } });
+
+      if (!user) {
+        // Auto-register Google user
+        const bcrypt = await import('bcryptjs');
+        const randomPassword = await bcrypt.hash(crypto.randomUUID(), 12);
+
+        user = await fastify.prisma.user.create({
+          data: {
+            email: payload.email,
+            password: randomPassword,
+            nombre: payload.given_name || payload.name || 'Usuario',
+            apellido: payload.family_name || '',
+            avatar: payload.picture || null,
+            role: (role === 'ADMIN' ? 'ADMIN' : role === 'SELLER' ? 'USER' : 'USER') as any,
+          },
+        });
+      }
+
+      const result = await authService.login(user.email, '');
+      // Since we can't login with empty password, generate tokens directly
+      const tokens = await authService.generateTokenPair(user.id, user.email, user.role);
+
+      setRefreshCookie(reply, tokens.refreshToken);
+
+      return reply.send({
+        success: true,
+        user: {
+          id: user.id,
+          email: user.email,
+          nombre: user.nombre,
+          apellido: user.apellido,
+          avatar: user.avatar,
+          role: role || user.role,
+        },
+        accessToken: tokens.accessToken,
+        refreshToken: tokens.refreshToken,
+        expiresIn: tokens.expiresIn,
+        token: tokens.accessToken,
+      });
+    } catch (error) {
+      if (error instanceof AppError) {
+        return reply.status(error.statusCode).send({ error: error.message });
+      }
+      // Fallback error
+      return reply.status(500).send({ error: 'Error al autenticar con Google' });
+    }
+  });
+
   // Refresh tokens - Accepts refresh token from body OR httpOnly cookie
   fastify.post('/refresh', async (request, reply) => {
     try {

@@ -83,8 +83,9 @@ export default function ExperiencesView({ onNavigate, onBack }: ExperiencesViewP
   return (
     <div className="flex flex-col h-full bg-gray-50 dark:bg-gray-900">
       {/* Header */}
-      <div className="bg-gradient-to-r from-oaxaca-pink to-oaxaca-purple text-white p-4 pt-8 md:pt-6">
-        <div className="max-w-7xl mx-auto">
+      <div className="relative overflow-hidden">
+        <img src="/images/morado.png" alt="" className="absolute inset-0 w-full h-full object-cover" />
+        <div className="relative text-white p-4 pt-6 max-w-7xl mx-auto w-full">
           <div className="flex items-center gap-3 mb-4">
             <button onClick={onBack} className="p-2 hover:bg-white/20 rounded-full transition">
               <ChevronLeft className="w-6 h-6" />

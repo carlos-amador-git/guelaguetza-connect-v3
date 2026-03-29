@@ -228,17 +228,17 @@ const SearchView: React.FC<SearchViewProps> = ({
       {/* Header con imagen */}
       <div className="relative overflow-hidden">
         <img src="/images/morado.png" alt="" className="absolute inset-0 w-full h-full object-cover" />
-        <div className="relative p-4 pt-8 md:pt-6 md:px-6 lg:px-8 text-white">
-          <div className="flex items-center gap-3 max-w-7xl mx-auto">
-            <button
-              onClick={onBack}
-              className="p-2 -ml-2 rounded-full hover:bg-white/20 transition-colors"
-            >
-              <ArrowLeft size={24} />
-            </button>
-            <Search size={22} />
-            <h1 className="text-xl font-bold">Buscar</h1>
+        <div className="relative p-4 pt-6 text-white max-w-7xl mx-auto w-full">
+          <div className="flex items-center justify-between mb-1">
+            <div className="flex items-center gap-2">
+              <button onClick={onBack} aria-label="Volver" className="p-2 -ml-2 rounded-full hover:bg-white/10 transition">
+                <ArrowLeft size={20} aria-hidden="true" />
+              </button>
+              <img src="/images/ui/icon_search.png" alt="Buscar" className="w-10 h-10 md:w-12 md:h-12 object-contain drop-shadow-md" />
+              <h2 className="text-xl font-bold">Buscar</h2>
+            </div>
           </div>
+          <p className="text-sm text-white/70">Explora usuarios, historias y mas</p>
         </div>
       </div>
 

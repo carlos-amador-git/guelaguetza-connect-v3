@@ -478,7 +478,7 @@ export async function exportDashboardData(
 // Legacy Types (kept for compatibility)
 // ==========================================
 
-export type UserRole = 'USER' | 'MODERATOR' | 'ADMIN';
+export type UserRole = 'USER' | 'SELLER' | 'MODERATOR' | 'ADMIN';
 
 export interface DashboardStats {
   totalUsers: number;
@@ -651,6 +651,21 @@ export async function unbanUser(userId: string, token: string): Promise<void> {
 
   if (!response.ok) {
     throw new Error('Error al desbanear usuario');
+  }
+}
+
+export async function resetUserPassword(userId: string, newPassword: string, token: string): Promise<void> {
+  const response = await fetch(`${API_BASE}/admin/users/${userId}/reset-password`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+    body: JSON.stringify({ newPassword }),
+  });
+
+  if (!response.ok) {
+    throw new Error('Error al resetear contraseña');
   }
 }
 

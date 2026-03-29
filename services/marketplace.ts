@@ -231,6 +231,78 @@ export async function createSellerProfile(data: {
   return response;
 }
 
+export async function updateSellerProfile(data: {
+  businessName?: string;
+  description?: string;
+  location?: string;
+}) {
+  const response = await api.put<SellerProfile>('/marketplace/seller/profile', data);
+  return response;
+}
+
+// Seller product CRUD
+export async function getMyProducts(params: { category?: string; status?: string; page?: number; limit?: number } = {}) {
+  const query = new URLSearchParams();
+  if (params.category) query.set('category', params.category);
+  if (params.status) query.set('status', params.status);
+  query.set('page', String(params.page || 1));
+  query.set('limit', String(params.limit || 50));
+  query.set('sellerId', 'me');
+
+  const response = await api.get<{ products: Product[]; pagination: { total: number; page: number; totalPages: number } }>(`/marketplace/products?${query}`);
+  return response;
+}
+
+export async function createProduct(data: {
+  name: string;
+  description: string;
+  price: number;
+  category: ProductCategory;
+  stock?: number;
+  images?: string[];
+}) {
+  const response = await api.post<Product>('/marketplace/products', data);
+  return response;
+}
+
+export async function updateProduct(id: string, data: Partial<{
+  name: string;
+  description: string;
+  price: number;
+  category: ProductCategory;
+  stock: number;
+  status: string;
+  images: string[];
+}>) {
+  const response = await api.put<Product>(`/marketplace/products/${id}`, data);
+  return response;
+}
+
+export async function deleteProduct(id: string) {
+  await api.delete(`/marketplace/products/${id}`);
+}
+
+// Image upload
+export async function uploadProductImage(file: File): Promise<string> {
+  const token = localStorage.getItem('auth_token');
+  const formData = new FormData();
+  formData.append('file', file);
+
+  const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:3001') + '/api';
+  const res = await fetch(`${API_URL}/upload/image`, {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${token}` },
+    body: formData,
+  });
+
+  if (!res.ok) throw new Error('Error al subir imagen');
+  const data = await res.json();
+  // Return full URL so images work across ports
+  const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+  const url = data.data.url;
+  return url.startsWith('http') ? url : `${apiUrl}${url}`;
+}
+
 // Reviews
 export async function createProductReview(productId: string, data: { rating: number; comment?: string }) {
   const response = await api.post<ProductReview>(`/marketplace/products/${productId}/reviews`, data);

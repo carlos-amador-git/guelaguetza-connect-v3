@@ -256,7 +256,7 @@ const App: React.FC = () => {
       case ViewState.REGISTER:
         return <RegisterView setView={setCurrentView} />;
       case ViewState.PROFILE:
-        return <ProfileView setView={setCurrentView} />;
+        return <ProfileView setView={setCurrentView} onLogout={() => setShowLanding(true)} />;
       case ViewState.BADGES:
         return <BadgesView onBack={() => setCurrentView(ViewState.PROFILE)} />;
       case ViewState.LEADERBOARD:
@@ -635,7 +635,10 @@ const App: React.FC = () => {
               className="absolute inset-0 bg-black/50 backdrop-blur-sm"
               onClick={() => setMobileSidebarOpen(false)}
             />
-            <div className="absolute left-0 top-0 bottom-0 w-72 animate-slide-right">
+            <div 
+              className="absolute left-0 top-0 h-full w-72 max-w-[85vw] animate-slide-right"
+              style={{ overflowY: 'auto', overflowX: 'hidden' }}
+            >
               <Navigation
                 currentView={currentView}
                 setView={(view) => { setCurrentView(view); setMobileSidebarOpen(false); }}

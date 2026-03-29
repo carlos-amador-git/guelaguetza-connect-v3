@@ -168,6 +168,24 @@ const Navigation: React.FC<NavigationProps> = ({ currentView, setView, onUserPro
         role="complementary"
         aria-label="Barra lateral de navegación"
       >
+        <style>{`
+          @media (max-width: 768px) {
+            aside[aria-label="Barra lateral de navegación"] nav button,
+            aside[aria-label="Barra lateral de navegación"] nav a {
+              justify-content: flex-start !important;
+            }
+            aside[aria-label="Barra lateral de navegación"] > div.relative {
+              height: 100% !important;
+              max-height: 100vh !important;
+              overflow: visible !important;
+            }
+            aside[aria-label="Barra lateral de navegación"] > div.relative > nav {
+              flex: 1 !important;
+              min-height: 0 !important;
+              overflow-y: auto !important;
+            }
+          }
+        `}</style>
         {bgImage && (
           <img src={bgImage} alt="" className="absolute inset-0 w-full h-full object-cover" />
         )}
@@ -255,7 +273,7 @@ const Navigation: React.FC<NavigationProps> = ({ currentView, setView, onUserPro
           </nav>
 
           {/* Theme Toggle & User Info - Fixed at bottom */}
-          <div className="p-4 border-t border-gray-100 dark:border-gray-800 space-y-4 flex-shrink-0">
+          <div className="p-3 border-t border-gray-100 dark:border-gray-800 space-y-3 flex-shrink-0">
             {/* Theme Toggle */}
             <div className="flex items-center justify-between">
               <span className="text-sm text-gray-600 dark:text-gray-400">Tema</span>

@@ -27,6 +27,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { getDashboardStats, DashboardStats } from '../../services/admin';
 import { ViewState } from '../../types';
 import QRCodesPanel from './QRCodesPanel';
+import UsersManagement from './UsersManagement';
 
 interface MetricsDashboardProps {
   onBack: () => void;
@@ -77,7 +78,7 @@ const MetricsDashboard: React.FC<MetricsDashboardProps> = ({ onBack, onNavigate 
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [timeRange, setTimeRange] = useState<'today' | 'week' | 'month'>('today');
-  const [activeTab, setActiveTab] = useState<'metrics' | 'qrcodes'>('metrics');
+  const [activeTab, setActiveTab] = useState<'metrics' | 'qrcodes' | 'users'>('metrics');
 
   useEffect(() => {
     loadStats();
@@ -101,6 +102,30 @@ const MetricsDashboard: React.FC<MetricsDashboardProps> = ({ onBack, onNavigate 
   };
 
   const maxWeeklyUsers = Math.max(...WEEKLY_USERS.map(d => d.users));
+
+  if (activeTab === 'users') {
+    return (
+      <div className="h-full flex flex-col">
+        <div className="bg-gradient-to-br from-oaxaca-purple via-oaxaca-pink to-oaxaca-purple text-white px-4 md:px-6 lg:px-8 py-3 flex-shrink-0">
+          <div className="flex items-center gap-3 max-w-7xl mx-auto">
+            <button
+              onClick={() => setActiveTab('metrics')}
+              className="p-2 hover:bg-white/10 rounded-full transition"
+            >
+              <ArrowLeft size={20} />
+            </button>
+            <div className="flex-1">
+              <h1 className="font-bold text-lg">Gestión de Usuarios</h1>
+              <p className="text-xs text-white/70">Administrar roles y permisos</p>
+            </div>
+          </div>
+        </div>
+        <div className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
+          <UsersManagement onBack={() => setActiveTab('metrics')} />
+        </div>
+      </div>
+    );
+  }
 
   if (activeTab === 'qrcodes') {
     return (
@@ -139,7 +164,7 @@ const MetricsDashboard: React.FC<MetricsDashboardProps> = ({ onBack, onNavigate 
     <div className="h-full bg-gray-50 dark:bg-gray-950 overflow-y-auto">
       {/* Header */}
       <div className="bg-gradient-to-br from-oaxaca-purple via-oaxaca-pink to-oaxaca-purple text-white">
-        <div className="px-4 py-4">
+        <div className="px-4 md:px-6 lg:px-8 py-4 max-w-7xl mx-auto">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
               <button
@@ -154,6 +179,14 @@ const MetricsDashboard: React.FC<MetricsDashboardProps> = ({ onBack, onNavigate 
               </div>
             </div>
             <div className="flex items-center gap-2">
+              <button
+                onClick={() => setActiveTab('users')}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-white/20 hover:bg-white/30 rounded-full transition"
+                title="Gestión de usuarios"
+              >
+                <Users size={16} />
+                <span className="text-xs font-medium hidden sm:inline">Usuarios</span>
+              </button>
               <button
                 onClick={() => setActiveTab('qrcodes')}
                 className="flex items-center gap-1.5 px-3 py-1.5 bg-white/20 hover:bg-white/30 rounded-full transition"
@@ -250,7 +283,7 @@ const MetricsDashboard: React.FC<MetricsDashboardProps> = ({ onBack, onNavigate 
       </div>
 
       {/* Content */}
-      <div className="p-4 space-y-4">
+      <div className="p-4 md:p-6 lg:p-8 space-y-4 max-w-7xl mx-auto">
         {/* Real-time Activity */}
         <div className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm">
           <div className="flex items-center justify-between mb-4">

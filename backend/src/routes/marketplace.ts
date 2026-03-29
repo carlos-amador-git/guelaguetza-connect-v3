@@ -28,7 +28,29 @@ const marketplaceRoutes: FastifyPluginAsync = async (fastify) => {
       },
     },
     async (request) => {
-      return marketplaceService.getProducts(request.query);
+      const query = { ...request.query } as any;
+
+      // Resolve sellerId=me to actual seller profile ID
+      if (query.sellerId === 'me') {
+        try {
+          await fastify.authenticate(request, {} as any);
+          const userId = (request as any).user?.id || (request as any).user?.userId;
+          if (userId) {
+            const sellerProfile = await fastify.prisma.sellerProfile.findUnique({ where: { userId } });
+            if (sellerProfile) {
+              query.sellerId = sellerProfile.id;
+              // Show all statuses for own products
+              delete query.status;
+            } else {
+              return { products: [], pagination: { page: 1, limit: 20, total: 0, totalPages: 0 } };
+            }
+          }
+        } catch {
+          return { products: [], pagination: { page: 1, limit: 20, total: 0, totalPages: 0 } };
+        }
+      }
+
+      return marketplaceService.getProducts(query);
     }
   );
 

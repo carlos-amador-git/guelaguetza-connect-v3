@@ -107,6 +107,15 @@ class ApiClient {
     });
     return this.handleResponse<T>(res);
   }
+
+  async patch<T>(path: string, data: unknown): Promise<T> {
+    const res = await fetch(`${this.baseUrl}${path}`, {
+      method: 'PATCH',
+      headers: this.getHeaders(),
+      body: JSON.stringify(data),
+    });
+    return this.handleResponse<T>(res);
+  }
 }
 
 export const api = new ApiClient(API_BASE);

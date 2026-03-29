@@ -570,75 +570,80 @@ export function ARHomeView({ onNavigate, onBack }: ARHomeViewProps) {
 
   return (
     <div className="flex flex-col h-full bg-gradient-to-b from-purple-50 to-gray-50 overflow-hidden" data-testid="ar-home-view">
-      {/* Banner destacado */}
-      <div className="mt-4 bg-gradient-to-r from-purple-600 via-violet-500 to-purple-600 p-4 shadow-lg">
-        <div className="flex items-center justify-between max-w-7xl mx-auto">
-          <div>
-            <h2 className="text-white font-bold text-lg">🎨 Vitrina Digital 3D</h2>
-            <p className="text-purple-100 text-sm">Explora artesanías y alebrijes en realidad aumentada</p>
+      {/* Header with image */}
+      <div className="relative overflow-hidden">
+        <img src="/images/verde.png" alt="" className="absolute inset-0 w-full h-full object-cover" />
+        <div className="relative">
+          {/* Banner destacado */}
+          <div className="p-4 pt-8 shadow-lg bg-transparent">
+            <div className="flex items-center justify-between max-w-7xl mx-auto">
+              <div className="text-white">
+                <h2 className="font-bold text-lg">🎨 Vitrina Digital 3D</h2>
+                <p className="text-white/70 text-sm">Explora artesanías y alebrijes en realidad aumentada</p>
+              </div>
+              <button
+                onClick={() => onNavigate(ViewState.AR_VITRINA, { vitrinaSection: 'trellis' })}
+                className="bg-white text-oaxaca-purple px-4 py-2 rounded-xl font-bold text-sm shadow-md active:scale-95 transition-transform"
+              >
+                Ver Alebrijes →
+              </button>
+            </div>
           </div>
-          <button
-            onClick={() => onNavigate(ViewState.AR_VITRINA, { vitrinaSection: 'trellis' })}
-            className="bg-white text-purple-700 px-4 py-2 rounded-xl font-bold text-sm shadow-md active:scale-95 transition-transform"
-          >
-            Ver Alebrijes →
-          </button>
+          
+          {/* ── Header ─────────────────────────────────────────────────────────── */}
+          <header className="bg-transparent z-10 shrink-0">
+            <div className="flex items-center justify-between px-4 md:px-6 lg:px-8 py-3 max-w-7xl mx-auto">
+              {/* Back + Title */}
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={onBack}
+                  aria-label="Volver"
+                  className="p-3 -ml-1 rounded-full bg-white/20 backdrop-blur-sm shadow-md hover:bg-white/30 focus:outline-none
+                             focus:ring-2 focus:ring-white/60 transition-colors"
+                >
+                  <ChevronLeft className="w-7 h-7 text-white" />
+                </button>
+                <div className="text-white">
+                  <h1 className="text-xl font-bold leading-tight">
+                    Guelaguetza AR
+                  </h1>
+                  <p className="text-white/70 text-xs leading-tight">
+                    Explora las 8 regiones de Oaxaca
+                  </p>
+                </div>
+              </div>
+
+              {/* Right side: Audio toggle + Points badge */}
+              <div className="flex items-center gap-2">
+                {/* Audio guide toggle */}
+                <button
+                  onClick={audioGuide.toggle}
+                  data-testid="audio-guide-toggle"
+                  aria-label={audioGuide.isEnabled ? 'Desactivar guia de audio' : 'Activar guia de audio'}
+                  aria-pressed={audioGuide.isEnabled}
+                  className="p-2 rounded-full bg-white/20 backdrop-blur-sm hover:bg-white/30 focus:outline-none
+                             focus:ring-2 focus:ring-white/60 transition-colors"
+                >
+                  {audioGuide.isEnabled ? (
+                    <Volume2 className="w-5 h-5 text-white" aria-hidden="true" />
+                  ) : (
+                    <VolumeX className="w-5 h-5 text-white/70" aria-hidden="true" />
+                  )}
+                </button>
+
+                {/* Points badge */}
+                <div className="flex items-center gap-1.5 bg-white/20 backdrop-blur-sm border border-white/30
+                                rounded-full px-3 py-1.5">
+                  <Trophy className="w-4 h-4 text-oaxaca-yellow" aria-hidden="true" />
+                  <span className="text-sm font-bold text-white" aria-label={`${totalUserPoints} puntos`}>
+                    {totalUserPoints.toLocaleString()}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </header>
         </div>
       </div>
-      
-      {/* ── Header ─────────────────────────────────────────────────────────── */}
-      <header className="bg-white shadow-sm z-10 shrink-0">
-        <div className="flex items-center justify-between px-4 md:px-6 lg:px-8 pt-8 pb-4 md:pt-5 max-w-7xl mx-auto">
-          {/* Back + Title */}
-          <div className="flex items-center gap-3">
-            <button
-              onClick={onBack}
-              aria-label="Volver"
-              className="p-3 -ml-1 rounded-full bg-white shadow-md hover:bg-gray-50 focus:outline-none
-                         focus:ring-2 focus:ring-red-500 transition-colors"
-            >
-              <ChevronLeft className="w-7 h-7 text-gray-700" />
-            </button>
-            <div>
-              <h1 className="text-xl font-bold bg-gradient-to-r from-red-600 to-amber-500
-                             bg-clip-text text-transparent leading-tight">
-                Guelaguetza AR
-              </h1>
-              <p className="text-xs text-gray-500 leading-tight">
-                Explora las 8 regiones de Oaxaca
-              </p>
-            </div>
-          </div>
-
-          {/* Right side: Audio toggle + Points badge */}
-          <div className="flex items-center gap-2">
-            {/* Audio guide toggle */}
-            <button
-              onClick={audioGuide.toggle}
-              data-testid="audio-guide-toggle"
-              aria-label={audioGuide.isEnabled ? 'Desactivar guia de audio' : 'Activar guia de audio'}
-              aria-pressed={audioGuide.isEnabled}
-              className="p-2 rounded-full hover:bg-gray-100 focus:outline-none
-                         focus:ring-2 focus:ring-red-500 transition-colors"
-            >
-              {audioGuide.isEnabled ? (
-                <Volume2 className="w-5 h-5 text-red-600" aria-hidden="true" />
-              ) : (
-                <VolumeX className="w-5 h-5 text-gray-400" aria-hidden="true" />
-              )}
-            </button>
-
-            {/* Points badge */}
-            <div className="flex items-center gap-1.5 bg-amber-50 border border-amber-200
-                            rounded-full px-3 py-1.5">
-              <Trophy className="w-4 h-4 text-amber-500" aria-hidden="true" />
-              <span className="text-sm font-bold text-amber-700" aria-label={`${totalUserPoints} puntos`}>
-                {totalUserPoints.toLocaleString()}
-              </span>
-            </div>
-          </div>
-        </div>
-      </header>
 
       {/* ── Scrollable body ────────────────────────────────────────────────── */}
       <main className="flex-1 overflow-y-auto max-w-7xl mx-auto w-full">

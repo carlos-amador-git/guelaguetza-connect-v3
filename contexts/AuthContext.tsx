@@ -19,7 +19,8 @@ interface AuthContextType {
   isLoading: boolean;
   isAuthenticated: boolean;
   isDemoMode: boolean;
-  login: (email: string, password: string) => Promise<boolean>;
+  login: (email: string, password: string, role?: UserRole) => Promise<boolean>;
+  loginWithGoogle: (credential: string, role?: UserRole) => Promise<boolean>;
   loginWithFace: (faceImage: string) => Promise<boolean>;
   loginAsDemo: (userType?: 'user' | 'seller' | 'admin') => Promise<boolean>;
   register: (data: RegisterData) => Promise<boolean>;
@@ -34,6 +35,8 @@ interface RegisterData {
   apellido?: string;
   region?: string;
   faceData?: string;
+  role?: UserRole;
+  businessName?: string;
 }
 
 const API_BASE = (import.meta.env.VITE_API_URL || 'http://localhost:3001') + '/api';
@@ -64,6 +67,14 @@ const DEMO_USERS = {
     role: 'ADMIN' as UserRole,
   },
 };
+
+// Simple password hashing for demo mode (NOT for production — use bcrypt on the server)
+async function hashPassword(password: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(password + 'guelaguetza_salt_2026');
+  const hash = await crypto.subtle.digest('SHA-256', data);
+  return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -132,33 +143,43 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   }, [token, user]);
 
-  const login = async (email: string, password: string): Promise<boolean> => {
+  const login = async (email: string, password: string, role?: UserRole): Promise<boolean> => {
     try {
       const res = await fetch(`${API_BASE}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email, password, role }),
       });
 
       if (!res.ok) {
-        const error = await res.json();
-        throw new Error(error.message || 'Login failed');
+        const errorData = await res.json().catch(() => ({}));
+        // Server responded — don't fall through to demo mode
+        throw Object.assign(new Error(errorData.error || errorData.message || 'Login failed'), { serverError: true });
       }
 
       const data = await res.json();
       setToken(data.token);
-      setUser(data.user);
+      setUser({ ...data.user, role: role || data.user.role });
       return true;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Login error:', error);
 
-      // Demo mode: Check local registered users (by email only) when backend unavailable.
-      // Passwords are never stored in localStorage — match by email as demo identity only.
+      // If server explicitly rejected (banned, wrong password), don't try demo fallback
+      if (error?.serverError) {
+        return false;
+      }
+
+      // Demo fallback only for network errors (backend unreachable)
       const savedUsers = localStorage.getItem('demo_users');
       if (savedUsers) {
         const users = JSON.parse(savedUsers);
         const foundUser = users.find((u: { email: string }) => u.email === email);
         if (foundUser) {
+          // Validate password hash — reject if no hash stored (legacy data)
+          const inputHash = await hashPassword(password);
+          if (!foundUser.passwordHash || foundUser.passwordHash !== inputHash) {
+            return false;
+          }
           const demoToken = 'demo_token_' + Date.now();
           setToken(demoToken);
           setUser({
@@ -168,12 +189,51 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             apellido: foundUser.apellido,
             region: foundUser.region,
             faceData: foundUser.faceData,
+            role: role || foundUser.role || 'USER',
           });
           return true;
         }
       }
 
       return false;
+    }
+  };
+
+  const loginWithGoogle = async (credential: string, role?: UserRole): Promise<boolean> => {
+    try {
+      const res = await fetch(`${API_BASE}/auth/google`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ credential, role }),
+      });
+
+      if (!res.ok) throw new Error('Google login failed');
+
+      const data = await res.json();
+      setToken(data.token);
+      setUser({ ...data.user, role: role || data.user.role });
+      return true;
+    } catch (error) {
+      console.error('Google login error:', error);
+
+      // Demo fallback: decode Google JWT payload for basic user info
+      try {
+        const payload = JSON.parse(atob(credential.split('.')[1]));
+        const demoToken = 'demo_google_' + Date.now();
+        setToken(demoToken);
+        setUser({
+          id: 'google_' + payload.sub,
+          email: payload.email,
+          nombre: payload.given_name || payload.name || 'Usuario',
+          apellido: payload.family_name || '',
+          avatar: payload.picture,
+          role: role || 'USER',
+        });
+        setIsDemoMode(true);
+        return true;
+      } catch {
+        return false;
+      }
     }
   };
 
@@ -206,7 +266,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           if (res.ok) {
             const data = await res.json();
             setToken(data.token);
-            setUser({ ...data.user, faceData: matchedFace.faceData });
+            setUser({ ...data.user, role: data.user.role });
             return true;
           }
         } catch {
@@ -251,6 +311,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           nombre: data.nombre,
           apellido: data.apellido,
           region: data.region,
+          role: data.role,
+          businessName: data.businessName,
         }),
       });
 
@@ -276,7 +338,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       console.error('Register error:', error);
 
       // Demo mode: Save user locally when backend unavailable.
-      // Passwords are never stored in localStorage.
+      const passwordHash = await hashPassword(data.password);
       const newUser = {
         id: 'demo_' + Date.now(),
         email: data.email,
@@ -284,6 +346,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         apellido: data.apellido,
         region: data.region,
         faceData: data.faceData,
+        role: data.role || 'USER',
+        passwordHash,
       };
 
       // Save to demo users
@@ -315,6 +379,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         apellido: newUser.apellido,
         region: newUser.region,
         faceData: newUser.faceData,
+        role: newUser.role as UserRole,
       });
       return true;
     }
@@ -359,6 +424,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         isAuthenticated: !!user && !!token,
         isDemoMode,
         login,
+        loginWithGoogle,
         loginWithFace,
         loginAsDemo,
         register,

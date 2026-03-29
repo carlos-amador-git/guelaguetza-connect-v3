@@ -386,64 +386,65 @@ const TransportView: React.FC<TransportViewProps> = ({ onBack }) => {
   };
 
   return (
-    <div className="h-[100dvh] flex flex-col bg-gray-50 dark:bg-gray-900 overflow-hidden max-w-7xl mx-auto w-full">
-      {/* Header */}
-      <div className="bg-white dark:bg-gray-800 px-4 md:px-6 lg:px-8 py-3 shadow-sm z-20 sticky top-0 flex-shrink-0">
-        <div className="flex items-center justify-between mb-2 max-w-7xl mx-auto">
-          <div className="flex items-center gap-3">
-            {onBack && (
-              <button
-                onClick={onBack}
-                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition"
-              >
-                <ArrowLeft size={20} className="text-gray-600 dark:text-gray-300" />
-              </button>
-            )}
-            <div>
-              <h2 className="text-xl font-bold text-oaxaca-purple dark:text-oaxaca-pink flex items-center gap-2">
-                <img src="/images/ui/icon_transport.png" alt="BinniBus" className="w-8 h-8 object-contain drop-shadow-md" />
-                BinniBus
-              </h2>
-              <p className="text-xs text-gray-500 dark:text-gray-400">Transporte oficial Guelaguetza 2025</p>
+    <div className="h-[100dvh] flex flex-col overflow-hidden">
+      {/* Header - full width */}
+      <div className="relative overflow-hidden z-20 flex-shrink-0 bg-gray-50 dark:bg-gray-900">
+        <img src="/images/azul.png" alt="" className="absolute inset-0 w-full h-full object-cover" />
+        <div className="relative p-4 pt-6 text-white max-w-7xl mx-auto w-full">
+          <div className="flex items-center justify-between mb-1">
+            <div className="flex items-center gap-2">
+              {onBack && (
+                <button
+                  onClick={onBack}
+                  className="p-2 -ml-2 rounded-full hover:bg-white/10 transition"
+                >
+                  <ArrowLeft size={20} aria-hidden="true" />
+                </button>
+              )}
+              <img src="/images/ui/icon_transport.png" alt="BinniBus" className="w-10 h-10 md:w-12 md:h-12 object-contain drop-shadow-md" />
+              <div>
+                <h2 className="text-xl font-bold">BinniBus</h2>
+                <p className="text-white/70 text-sm">Transporte oficial Guelaguetza 2025</p>
+              </div>
             </div>
-          </div>
-          <button
-            onClick={locateUser}
-            className="p-2 bg-oaxaca-pink text-white rounded-full shadow-md hover:bg-oaxaca-purple transition-colors"
-          >
-            <Locate size={20} />
-          </button>
-        </div>
-
-        {/* Route Selector */}
-        <div className="flex gap-2 overflow-x-auto py-2 no-scrollbar max-w-7xl mx-auto">
-          <button
-            onClick={() => setShowAllRoutes(true)}
-            className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
-              showAllRoutes ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-600'
-            }`}
-          >
-            Todas
-          </button>
-          {ROUTES.map((route) => (
             <button
-              key={route.id}
-              onClick={() => selectRoute(route)}
-              className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-all flex items-center gap-1.5 ${
-                selectedRoute.id === route.id && !showAllRoutes
-                  ? 'bg-gray-900 text-white shadow-md'
-                  : 'bg-gray-100 text-gray-600'
+              onClick={locateUser}
+              className="p-2 rounded-full hover:bg-white/10 transition-colors"
+            >
+              <Locate size={20} />
+            </button>
+          </div>
+
+          {/* Route Selector */}
+          <div className="flex gap-2 overflow-x-auto py-2 no-scrollbar">
+            <button
+              onClick={() => setShowAllRoutes(true)}
+              className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
+                showAllRoutes ? 'bg-white text-gray-900' : 'bg-white/20 text-white'
               }`}
             >
-              <div className="w-2 h-2 rounded-full" style={{ backgroundColor: route.color }} />
-              {route.shortName}
+              Todas
             </button>
-          ))}
+            {ROUTES.map((route) => (
+              <button
+                key={route.id}
+                onClick={() => selectRoute(route)}
+                className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-all flex items-center gap-1.5 ${
+                  selectedRoute.id === route.id && !showAllRoutes
+                    ? 'bg-white text-gray-900 shadow-md'
+                    : 'bg-white/20 text-white'
+                }`}
+              >
+                <div className="w-2 h-2 rounded-full" style={{ backgroundColor: route.color }} />
+                {route.shortName}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
-      {/* Map Container */}
-      <div className="flex-1 relative min-h-[400px]">
+      {/* Map Container - constrained */}
+      <div className="flex-1 relative min-h-[400px] max-w-7xl mx-auto w-full">
         <MapContainer
           center={mapCenter}
           zoom={14}

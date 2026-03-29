@@ -9,9 +9,10 @@ import { ThemeSegmentControl } from './ui/ThemeToggle';
 
 interface ProfileViewProps {
   setView: (view: ViewState) => void;
+  onLogout?: () => void;
 }
 
-const ProfileView: React.FC<ProfileViewProps> = ({ setView }) => {
+const ProfileView: React.FC<ProfileViewProps> = ({ setView, onLogout }) => {
   const { user, logout, isAuthenticated, token } = useAuth();
   const { isDark } = useTheme();
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
@@ -50,7 +51,7 @@ const ProfileView: React.FC<ProfileViewProps> = ({ setView }) => {
 
   const handleLogout = () => {
     logout();
-    setView(ViewState.HOME);
+    onLogout?.();
   };
 
   // Not logged in state
@@ -90,9 +91,10 @@ const ProfileView: React.FC<ProfileViewProps> = ({ setView }) => {
   return (
     <div className="h-full flex flex-col bg-gray-50 dark:bg-gray-950 pb-20 transition-colors">
       {/* Header */}
-      <div className="bg-gradient-to-br from-oaxaca-purple to-oaxaca-pink p-6 md:px-6 lg:px-8 pt-8 pb-20 relative">
-        <div className="max-w-7xl mx-auto">
-          <h2 className="text-white font-bold text-xl mb-1">Mi Perfil</h2>
+      <div className="relative overflow-hidden">
+        <img src="/images/verde.png" alt="" className="absolute inset-0 w-full h-full object-cover" />
+        <div className="relative p-6 md:px-6 lg:px-8 pt-8 pb-20 text-white max-w-7xl mx-auto w-full">
+          <h2 className="font-bold text-xl mb-1">Mi Perfil</h2>
           <p className="text-white/70 text-sm">Gestiona tu cuenta</p>
         </div>
       </div>

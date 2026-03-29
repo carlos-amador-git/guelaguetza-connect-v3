@@ -95,7 +95,11 @@
       "Bash(gh repo:*)",
       "Bash(gh api:*)",
       "Bash(vercel --yes --prod --force)",
-      "Bash(cd:*)"
+      "Bash(cd:*)",
+      "Bash(DATABASE_URL=\"postgresql://postgres:postgres@localhost:5433/guelaguetza_db\" npx prisma migrate deploy)",
+      "Bash(DATABASE_URL=\"postgresql://postgres:postgres@localhost:5433/guelaguetza_db\" npx tsx prisma/seed.ts)",
+      "Bash(DATABASE_URL=\"postgresql://postgres:postgres@localhost:5433/guelaguetza_db\" REDIS_URL=\"redis://localhost:6379\" JWT_SECRET=\"dev-secret-change-in-production\" PORT=3001 npx tsx src/index.ts)",
+      "Bash(DATABASE_URL=\"postgresql://postgres:postgres@localhost:5433/guelaguetza_db\" npx tsx -e \":*)"
     ]
   }
 }

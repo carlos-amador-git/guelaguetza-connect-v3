@@ -5,7 +5,7 @@ import { UserRole } from '@prisma/client';
 import { z } from 'zod';
 
 const changeRoleSchema = z.object({
-  role: z.enum(['USER', 'MODERATOR', 'ADMIN']),
+  role: z.enum(['USER', 'SELLER', 'MODERATOR', 'ADMIN']),
 });
 
 const banUserSchema = z.object({
@@ -104,6 +104,30 @@ const adminRoutes: FastifyPluginAsync = async (fastify) => {
       const { id: userId } = request.params;
       await adminService.unbanUser(userId);
       return { success: true, message: 'Usuario desbaneado' };
+    }
+  );
+
+  // Reset user password (admin only)
+  fastify.post<{ Params: { id: string }; Body: { newPassword: string } }>(
+    '/users/:id/reset-password',
+    { preHandler: [fastify.authenticate, requireAdmin] },
+    async (request, reply) => {
+      const { id: userId } = request.params;
+      const { newPassword } = request.body as { newPassword: string };
+
+      if (!newPassword || newPassword.length < 6) {
+        return reply.status(400).send({ error: 'La contraseña debe tener al menos 6 caracteres' });
+      }
+
+      const bcrypt = await import('bcryptjs');
+      const hashedPassword = await bcrypt.default.hash(newPassword, 12);
+
+      await fastify.prisma.user.update({
+        where: { id: userId },
+        data: { password: hashedPassword },
+      });
+
+      return { success: true, message: 'Contraseña reseteada' };
     }
   );
 

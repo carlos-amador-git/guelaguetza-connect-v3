@@ -343,25 +343,29 @@ Puedo ayudarte con:
 
   return (
     <div className={`flex flex-col bg-gradient-to-b from-oaxaca-purple to-oaxaca-purple ${embedded ? 'h-full' : 'h-full pb-20'}`}>
-      {/* Header */}
-      <div className="px-4 md:px-6 lg:px-8 py-3 pt-8 md:pt-4 text-white bg-black/20">
-        <div className="flex items-center justify-between max-w-7xl mx-auto">
-        <div className="flex items-center gap-3">
-          {(onBack || onClose) && (
-            <button onClick={onBack || onClose} className="p-2 hover:bg-white/10 rounded-full transition">
-              <ChevronLeft size={24} />
+      {/* Header with image */}
+      <div className="relative overflow-hidden">
+        <img src="/images/morado.png" alt="" className="absolute inset-0 w-full h-full object-cover" />
+        <div className="relative p-4 pt-6 text-white max-w-7xl mx-auto w-full">
+          <div className="flex items-center justify-between mb-1">
+            <div className="flex items-center gap-2">
+              {(onBack || onClose) && (
+                <button onClick={onBack || onClose} className="p-2 -ml-2 rounded-full hover:bg-white/10 transition">
+                  <ChevronLeft size={20} aria-hidden="true" />
+                </button>
+              )}
+              <img src="/images/ui/icon_bot.png" alt="GuelaBot" className="w-10 h-10 md:w-12 md:h-12 object-contain drop-shadow-md" />
+              <h2 className="text-xl font-bold">GuelaBot</h2>
+            </div>
+            <button
+              onClick={clearHistory}
+              className="p-2 hover:bg-white/10 rounded-full transition-colors"
+              title="Borrar conversación"
+            >
+              <Trash2 size={18} />
             </button>
-          )}
-          <Sparkles size={20} className="text-oaxaca-yellow" />
-          <h2 className="font-bold text-lg">GuelaBot</h2>
-        </div>
-        <button
-          onClick={clearHistory}
-          className="p-2 hover:bg-white/10 rounded-full transition-colors"
-          title="Borrar conversación"
-        >
-          <Trash2 size={18} />
-        </button>
+          </div>
+          <p className="text-sm text-white/70">Tu guia virtual de la Guelaguetza</p>
         </div>
       </div>
 

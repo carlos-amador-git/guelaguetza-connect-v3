@@ -61,9 +61,29 @@ export class MarketplaceService {
         where,
         skip,
         take: limit,
-        include: {
+        orderBy: { createdAt: 'desc' },
+        select: {
+          id: true,
+          sellerId: true,
+          name: true,
+          description: true,
+          price: true,
+          category: true,
+          status: true,
+          stock: true,
+          images: true,
+          createdAt: true,
           seller: {
-            include: {
+            select: {
+              id: true,
+              userId: true,
+              businessName: true,
+              description: true,
+              bannerUrl: true,
+              location: true,
+              rating: true,
+              reviewCount: true,
+              verified: true,
               user: {
                 select: { id: true, nombre: true, avatar: true },
               },
@@ -73,7 +93,6 @@ export class MarketplaceService {
             select: { reviews: true },
           },
         },
-        orderBy: { createdAt: 'desc' },
       }),
       this.prisma.product.count({ where }),
     ]);

@@ -1,7 +1,7 @@
 // Communities Service - API calls
 import { MOCK_COMMUNITIES, MOCK_USERS } from './mockData';
 
-const API_BASE = (import.meta as { env: { VITE_API_URL?: string } }).env.VITE_API_URL || 'http://localhost:3001/api';
+const API_BASE = (import.meta.env.VITE_API_URL || 'http://localhost:3001') + '/api';
 
 export type CommunityRole = 'MEMBER' | 'MODERATOR' | 'ADMIN';
 
@@ -231,7 +231,7 @@ export async function getCommunityPosts(
 export async function createPost(
   communityId: string,
   content: string,
-  imageUrl: string | null,
+  imageUrl: string | null | undefined,
   token: string
 ): Promise<CommunityPost> {
   const response = await fetch(`${API_BASE}/communities/${communityId}/posts`, {
@@ -240,7 +240,7 @@ export async function createPost(
       'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ content, imageUrl }),
+    body: JSON.stringify({ content, imageUrl: imageUrl || null }),
   });
 
   if (!response.ok) {

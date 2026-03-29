@@ -6,6 +6,16 @@ export const registerSchema = z.object({
   nombre: z.string().min(2, 'El nombre debe tener al menos 2 caracteres'),
   apellido: z.string().optional(),
   region: z.string().optional(),
+  role: z.enum(['USER', 'SELLER', 'ADMIN']).optional().default('USER'),
+  businessName: z.string().min(2, 'El nombre de tienda debe tener al menos 2 caracteres').optional(),
+}).refine((data) => {
+  if (data.role === 'SELLER' && !data.businessName) {
+    return false;
+  }
+  return true;
+}, {
+  message: 'El nombre de la tienda es requerido para vendedores',
+  path: ['businessName'],
 });
 
 export const loginSchema = z.object({

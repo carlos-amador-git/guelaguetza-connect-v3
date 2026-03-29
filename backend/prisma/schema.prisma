@@ -12,6 +12,7 @@ datasource db {
 // ============================================
 enum UserRole {
   USER
+  SELLER
   MODERATOR
   ADMIN
 }
@@ -62,9 +63,10 @@ model User {
   activityLogs ActivityLog[]
 
   // Community relations
-  createdCommunities Community[]       @relation("CommunityCreator")
+  createdCommunities Community[]           @relation("CommunityCreator")
   communityMembers   CommunityMember[]
   communityPosts     CommunityPost[]
+  postComments       CommunityPostComment[]
 
   // Vitrina Digital relations
   sellerProfile   SellerProfile?
@@ -491,10 +493,26 @@ model CommunityPost {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  community Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
-  author    User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  community Community              @relation(fields: [communityId], references: [id], onDelete: Cascade)
+  author    User                 @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  comments  CommunityPostComment[]
 
   @@index([communityId, createdAt])
+}
+
+model CommunityPostComment {
+  id        String   @id @default(cuid())
+  postId    String
+  authorId  String
+  content   String
+  imageUrl  String?
+  createdAt DateTime @default(now())
+
+  post   CommunityPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  author User          @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@index([postId, createdAt])
+  @@index([authorId])
 }
 
 // ============================================

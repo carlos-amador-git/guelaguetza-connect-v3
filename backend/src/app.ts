@@ -4,6 +4,8 @@ import cors from '@fastify/cors';
 import cookie from '@fastify/cookie';
 import helmet from '@fastify/helmet';
 import multipart from '@fastify/multipart';
+import fastifyStatic from '@fastify/static';
+import { join } from 'path';
 import websocket from '@fastify/websocket';
 import {
   serializerCompiler,
@@ -34,6 +36,7 @@ import bookingsRoutes from './routes/bookings.js';
 import poiRoutes from './routes/poi.js';
 import marketplaceRoutes from './routes/marketplace.js';
 import uploadRoutes from './routes/upload.js';
+import uploadLocalRoutes from './routes/upload-local.js';
 import streamsRoutes from './routes/streams.js';
 import arRoutes from './routes/ar.js';
 import metricsRoutes from './routes/metrics.js';
@@ -102,6 +105,17 @@ export async function buildApp(): Promise<FastifyInstance> {
   // Register WebSocket support
   await app.register(websocket);
 
+  // Serve uploaded files with permissive headers
+  await app.register(fastifyStatic, {
+    root: join(process.cwd(), '..', 'public', 'uploads'),
+    prefix: '/uploads/',
+    decorateReply: false,
+    setHeaders: (res) => {
+      res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+      res.setHeader('Access-Control-Allow-Origin', '*');
+    },
+  });
+
   // Register plugins
   await app.register(sentryPlugin);
   await app.register(prismaPlugin);
@@ -162,7 +176,7 @@ export async function buildApp(): Promise<FastifyInstance> {
   await app.register(bookingsRoutes, { prefix: '/api/bookings' });
   await app.register(poiRoutes, { prefix: '/api/poi' });
   await app.register(marketplaceRoutes, { prefix: '/api/marketplace' });
-  await app.register(uploadRoutes, { prefix: '/api/upload' });
+  await app.register(uploadLocalRoutes, { prefix: '/api/upload' });
   await app.register(streamsRoutes, { prefix: '/api/streams' });
   await app.register(arRoutes, { prefix: '/api/ar' });
 

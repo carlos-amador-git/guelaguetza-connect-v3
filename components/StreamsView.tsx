@@ -7,6 +7,9 @@ import {
   Clock,
   Play,
   Filter,
+  Plus,
+  Pencil,
+  Trash2,
 } from 'lucide-react';
 import EmptyState from './ui/EmptyState';
 import { SkeletonGrid } from './ui/LoadingSpinner';
@@ -15,12 +18,15 @@ import {
   getLiveStreams,
   getUpcomingStreams,
   getStreams,
+  createStream,
   LiveStream,
   StreamCategory,
   CATEGORY_LABELS,
   STATUS_COLORS,
 } from '../services/streams';
 import { ViewState } from '../types';
+import { useAuth } from '../contexts/AuthContext';
+import Modal, { ModalHeader } from './ui/Modal';
 
 interface StreamsViewProps {
   onNavigate: (view: ViewState, data?: unknown) => void;
@@ -30,6 +36,7 @@ interface StreamsViewProps {
 const CATEGORIES: StreamCategory[] = ['DANZA', 'MUSICA', 'ARTESANIA', 'COCINA', 'CHARLA', 'OTRO'];
 
 export default function StreamsView({ onNavigate, onBack }: StreamsViewProps) {
+  const { user } = useAuth();
   const [liveStreams, setLiveStreams] = useState<LiveStream[]>([]);
   const [upcomingStreams, setUpcomingStreams] = useState<LiveStream[]>([]);
   const [pastStreams, setPastStreams] = useState<LiveStream[]>([]);
@@ -37,6 +44,17 @@ export default function StreamsView({ onNavigate, onBack }: StreamsViewProps) {
   const [activeTab, setActiveTab] = useState<'live' | 'upcoming' | 'past'>('live');
   const [selectedCategory, setSelectedCategory] = useState<StreamCategory | ''>('');
   const [showFilters, setShowFilters] = useState(false);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [creating, setCreating] = useState(false);
+  const [newStream, setNewStream] = useState({
+    title: '',
+    description: '',
+    category: 'DANZA' as StreamCategory,
+    scheduledAt: '',
+    thumbnailUrl: '',
+  });
+  
+  const canManageStreams = !!user;
 
   useEffect(() => {
     loadStreams();
@@ -64,6 +82,60 @@ export default function StreamsView({ onNavigate, onBack }: StreamsViewProps) {
     onNavigate(ViewState.STREAM_WATCH, { streamId: stream.id });
   };
 
+  const handleCreateStream = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newStream.title.trim()) return;
+    
+    try {
+      setCreating(true);
+      
+      let scheduledAt: string | undefined;
+      if (newStream.scheduledAt) {
+        scheduledAt = new Date(newStream.scheduledAt).toISOString();
+      }
+      
+      const streamData = {
+        title: newStream.title,
+        description: newStream.description || undefined,
+        category: newStream.category,
+        thumbnailUrl: newStream.thumbnailUrl || undefined,
+        scheduledAt,
+      };
+      let embedUrl: string | undefined;
+      let thumbnailUrl = newStream.thumbnailUrl;
+      
+      if (thumbnailUrl) {
+        const youtubeMatch = thumbnailUrl.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&]+)/);
+        if (youtubeMatch) {
+          embedUrl = `https://www.youtube.com/embed/${youtubeMatch[1]}`;
+          thumbnailUrl = `https://img.youtube.com/vi/${youtubeMatch[1]}/maxresdefault.jpg`;
+        }
+      }
+      
+      const streamDataToSend = {
+        title: newStream.title,
+        description: newStream.description || undefined,
+        category: newStream.category,
+        thumbnailUrl: thumbnailUrl || undefined,
+        scheduledAt,
+        embedUrl,
+      };
+      
+      const created = await createStream(streamDataToSend);
+      setShowCreateModal(false);
+      setNewStream({ title: '', description: '', category: 'DANZA', scheduledAt: '', thumbnailUrl: '' });
+      loadStreams();
+      
+      if (created.status === 'SCHEDULED' || created.status === 'LIVE') {
+        setActiveTab('upcoming');
+      }
+    } catch (error) {
+      console.error('Error creating stream:', error);
+    } finally {
+      setCreating(false);
+    }
+  };
+
   const getDisplayedStreams = () => {
     let streams: LiveStream[] = [];
     switch (activeTab) {
@@ -88,8 +160,9 @@ export default function StreamsView({ onNavigate, onBack }: StreamsViewProps) {
   return (
     <div className="flex flex-col h-full bg-gray-900">
       {/* Header */}
-      <div className="bg-gradient-to-r from-red-600 to-oaxaca-pink text-white p-4 pt-8 md:pt-6 w-full">
-        <div className="max-w-7xl mx-auto">
+      <div className="relative overflow-hidden">
+        <img src="/images/rojo.png" alt="" className="absolute inset-0 w-full h-full object-cover" />
+        <div className="relative text-white p-4 pt-6 max-w-7xl mx-auto w-full">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
               <button onClick={onBack} className="p-2 hover:bg-white/20 rounded-full transition">
@@ -103,12 +176,22 @@ export default function StreamsView({ onNavigate, onBack }: StreamsViewProps) {
                 </p>
               </div>
             </div>
-            <button
-              onClick={() => setShowFilters(!showFilters)}
-              className={`p-2.5 md:p-3 rounded-full ${showFilters ? 'bg-white text-red-600' : 'bg-white/20'}`}
-            >
-              <Filter className="w-5 h-5" />
-            </button>
+            <div className="flex items-center gap-2">
+              {canManageStreams && (
+                <button
+                  onClick={() => setShowCreateModal(true)}
+                  className="p-2.5 md:p-3 bg-oaxaca-yellow rounded-full hover:bg-oaxaca-yellow/80 transition"
+                >
+                  <Plus className="w-5 h-5" />
+                </button>
+              )}
+              <button
+                onClick={() => setShowFilters(!showFilters)}
+                className={`p-2.5 md:p-3 rounded-full ${showFilters ? 'bg-white text-red-600' : 'bg-white/20'}`}
+              >
+                <Filter className="w-5 h-5" />
+              </button>
+            </div>
           </div>
 
           {/* Tabs */}
@@ -194,16 +277,98 @@ export default function StreamsView({ onNavigate, onBack }: StreamsViewProps) {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
               {displayedStreams.map((stream) => (
-                <StreamCard
-                  key={stream.id}
-                  stream={stream}
-                  onClick={() => handleStreamClick(stream)}
-                />
+                <React.Fragment key={stream.id}>
+                  <StreamCard
+                    stream={stream}
+                    onClick={() => handleStreamClick(stream)}
+                    canManage={canManageStreams}
+                    isOwner={user?.id === stream.userId}
+                    onEdit={() => {}}
+                    onDelete={() => {}}
+                  />
+                </React.Fragment>
               ))}
             </div>
           )}
         </div>
       </div>
+
+      {/* Create Stream Modal */}
+      {showCreateModal && (
+        <Modal isOpen={showCreateModal} onClose={() => setShowCreateModal(false)} size="lg">
+          <ModalHeader>Crear Stream</ModalHeader>
+          <form onSubmit={handleCreateStream} className="px-6 pb-6 space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Titulo *</label>
+              <input
+                type="text"
+                value={newStream.title}
+                onChange={(e) => setNewStream({ ...newStream, title: e.target.value })}
+                className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-oaxaca-yellow focus:border-transparent"
+                placeholder="Titulo del stream"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Descripcion</label>
+              <textarea
+                value={newStream.description}
+                onChange={(e) => setNewStream({ ...newStream, description: e.target.value })}
+                className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-oaxaca-yellow focus:border-transparent"
+                placeholder="Descripcion opcional"
+                rows={3}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Categoria *</label>
+              <select
+                value={newStream.category}
+                onChange={(e) => setNewStream({ ...newStream, category: e.target.value as StreamCategory })}
+                className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-oaxaca-yellow focus:border-transparent"
+              >
+                {CATEGORIES.map((cat) => (
+                  <option key={cat} value={cat}>{CATEGORY_LABELS[cat]}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">URL de YouTube (opcional)</label>
+              <input
+                type="url"
+                value={newStream.thumbnailUrl}
+                onChange={(e) => setNewStream({ ...newStream, thumbnailUrl: e.target.value })}
+                className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-oaxaca-yellow focus:border-transparent"
+                placeholder="https://youtube.com/watch?v=..."
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Programar para</label>
+              <input
+                type="datetime-local"
+                value={newStream.scheduledAt}
+                onChange={(e) => setNewStream({ ...newStream, scheduledAt: e.target.value })}
+                className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-oaxaca-yellow focus:border-transparent"
+              />
+            </div>
+            <div className="flex gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setShowCreateModal(false)}
+                className="flex-1 px-4 py-2.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl font-medium hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                disabled={creating || !newStream.title.trim()}
+                className="flex-1 px-4 py-2.5 bg-oaxaca-yellow text-black font-medium rounded-xl hover:bg-oaxaca-yellow/80 transition-colors disabled:opacity-50"
+              >
+                {creating ? 'Creando...' : 'Crear Stream'}
+              </button>
+            </div>
+          </form>
+        </Modal>
+      )}
     </div>
   );
 }
@@ -211,17 +376,39 @@ export default function StreamsView({ onNavigate, onBack }: StreamsViewProps) {
 interface StreamCardProps {
   stream: LiveStream;
   onClick: () => void;
+  canManage: boolean;
+  isOwner: boolean;
+  onEdit: () => void;
+  onDelete: () => void;
 }
 
-function StreamCard({ stream, onClick }: StreamCardProps) {
+function StreamCard({ stream, onClick, canManage, isOwner, onEdit, onDelete }: StreamCardProps) {
   const isLive = stream.status === 'LIVE';
   const isScheduled = stream.status === 'SCHEDULED';
+  const showManageButtons = canManage || isOwner;
 
   return (
     <div
       onClick={onClick}
-      className="bg-gray-800 rounded-xl overflow-hidden cursor-pointer hover:bg-gray-700 hover:scale-[1.02] transition-all"
+      className="bg-gray-800 rounded-xl overflow-hidden cursor-pointer hover:bg-gray-700 hover:scale-[1.02] transition-all relative group"
     >
+      {/* Manage buttons */}
+      {showManageButtons && (
+        <div className="absolute top-3 right-3 flex gap-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+          <button
+            onClick={(e) => { e.stopPropagation(); onEdit(); }}
+            className="p-2 bg-white/90 rounded-full hover:bg-white transition"
+          >
+            <Pencil className="w-4 h-4 text-gray-700" />
+          </button>
+          <button
+            onClick={(e) => { e.stopPropagation(); onDelete(); }}
+            className="p-2 bg-red-500 rounded-full hover:bg-red-600 transition"
+          >
+            <Trash2 className="w-4 h-4 text-white" />
+          </button>
+        </div>
+      )}
       {/* Thumbnail */}
       <div className="relative aspect-video">
         {stream.thumbnailUrl ? (

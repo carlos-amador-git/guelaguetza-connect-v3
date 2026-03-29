@@ -350,14 +350,27 @@ export class CommunityService {
     };
   }
 
-  // Join community
-  async joinCommunity(communityId: string, userId: string): Promise<boolean> {
+  // Join community - returns: { success: boolean, reason?: string }
+  async joinCommunity(communityId: string, userId: string): Promise<{ success: boolean; reason?: string }> {
     const community = await this.prisma.community.findUnique({
       where: { id: communityId },
     });
 
-    if (!community || !community.isPublic) {
-      return false;
+    if (!community) {
+      return { success: false, reason: 'COMUNITY_NOT_FOUND' };
+    }
+
+    if (!community.isPublic) {
+      return { success: false, reason: 'COMMUNITY_PRIVATE' };
+    }
+
+    // Check if already a member
+    const existingMember = await this.prisma.communityMember.findUnique({
+      where: { userId_communityId: { userId, communityId } },
+    });
+
+    if (existingMember) {
+      return { success: false, reason: 'ALREADY_MEMBER' };
     }
 
     try {
@@ -368,10 +381,9 @@ export class CommunityService {
           role: 'MEMBER',
         },
       });
-      return true;
+      return { success: true };
     } catch {
-      // Already a member
-      return false;
+      return { success: false, reason: 'ALREADY_MEMBER' };
     }
   }
 
@@ -504,6 +516,100 @@ export class CommunityService {
 
     await this.prisma.communityPost.delete({
       where: { id: postId },
+    });
+
+    return true;
+  }
+
+  // Get post comments
+  async getPostComments(postId: string) {
+    const comments = await this.prisma.communityPostComment.findMany({
+      where: { postId },
+      orderBy: { createdAt: 'asc' },
+      include: {
+        author: {
+          select: { id: true, nombre: true, avatar: true },
+        },
+      },
+    });
+
+    return comments.map(c => ({
+      id: c.id,
+      content: c.content,
+      imageUrl: c.imageUrl,
+      createdAt: c.createdAt.toISOString(),
+      author: c.author,
+    }));
+  }
+
+  // Create post comment
+  async createPostComment(
+    postId: string,
+    authorId: string,
+    content: string,
+    imageUrl?: string | null
+  ) {
+    const post = await this.prisma.communityPost.findUnique({
+      where: { id: postId },
+    });
+
+    if (!post) return null;
+
+    const comment = await this.prisma.communityPostComment.create({
+      data: {
+        postId,
+        authorId,
+        content,
+        imageUrl,
+      },
+      include: {
+        author: {
+          select: { id: true, nombre: true, avatar: true },
+        },
+      },
+    });
+
+    return {
+      id: comment.id,
+      content: comment.content,
+      imageUrl: comment.imageUrl,
+      createdAt: comment.createdAt.toISOString(),
+      author: comment.author,
+    };
+  }
+
+  // Delete post comment
+  async deletePostComment(commentId: string, userId: string): Promise<boolean> {
+    const comment = await this.prisma.communityPostComment.findUnique({
+      where: { id: commentId },
+      include: {
+        post: {
+          include: {
+            community: {
+              include: {
+                members: {
+                  where: { userId },
+                  select: { role: true },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!comment) return false;
+
+    const isAuthor = comment.authorId === userId;
+    const membership = comment.post.community.members[0];
+    const isModerator = membership && (membership.role === 'ADMIN' || membership.role === 'MODERATOR');
+
+    if (!isAuthor && !isModerator) {
+      return false;
+    }
+
+    await this.prisma.communityPostComment.delete({
+      where: { id: commentId },
     });
 
     return true;

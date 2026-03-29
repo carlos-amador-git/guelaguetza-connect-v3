@@ -8,6 +8,8 @@ import {
   CheckCircle,
   User,
   Crown,
+  ShoppingBag,
+  KeyRound,
   Loader2,
   ChevronLeft,
   ChevronRight,
@@ -19,24 +21,28 @@ import {
   changeUserRole,
   banUser,
   unbanUser,
+  resetUserPassword,
   AdminUser,
   UserRole,
 } from '../../services/admin';
 
 const ROLE_LABELS: Record<UserRole, string> = {
   USER: 'Usuario',
+  SELLER: 'Vendedor',
   MODERATOR: 'Moderador',
   ADMIN: 'Administrador',
 };
 
 const ROLE_COLORS: Record<UserRole, string> = {
   USER: 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300',
+  SELLER: 'bg-oaxaca-yellow/20 text-oaxaca-yellow dark:bg-oaxaca-yellow/20 dark:text-oaxaca-yellow',
   MODERATOR: 'bg-oaxaca-sky-light text-oaxaca-sky dark:bg-oaxaca-sky/20 dark:text-oaxaca-sky',
   ADMIN: 'bg-oaxaca-purple-light text-oaxaca-purple dark:bg-oaxaca-purple/20 dark:text-oaxaca-purple',
 };
 
 const ROLE_ICONS: Record<UserRole, React.ReactNode> = {
   USER: <User size={14} />,
+  SELLER: <ShoppingBag size={14} />,
   MODERATOR: <Shield size={14} />,
   ADMIN: <Crown size={14} />,
 };
@@ -58,6 +64,8 @@ const UsersManagement: React.FC<UsersManagementProps> = ({ onBack }) => {
   const [showActions, setShowActions] = useState<string | null>(null);
   const [showBanModal, setShowBanModal] = useState(false);
   const [banReason, setBanReason] = useState('');
+  const [showResetPasswordModal, setShowResetPasswordModal] = useState(false);
+  const [newPassword, setNewPassword] = useState('');
   const [actionLoading, setActionLoading] = useState(false);
 
   const LIMIT = 10;
@@ -130,6 +138,24 @@ const UsersManagement: React.FC<UsersManagementProps> = ({ onBack }) => {
     }
   };
 
+  const handleResetPassword = async () => {
+    if (!token || !selectedUser || !newPassword.trim()) return;
+    if (newPassword.length < 6) return;
+
+    setActionLoading(true);
+    try {
+      await resetUserPassword(selectedUser.id, newPassword, token);
+      setShowResetPasswordModal(false);
+      setSelectedUser(null);
+      setNewPassword('');
+      setShowActions(null);
+    } catch (error) {
+      console.error('Error resetting password:', error);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
   const handleUnbanUser = async (userId: string) => {
     if (!token) return;
 
@@ -150,7 +176,7 @@ const UsersManagement: React.FC<UsersManagementProps> = ({ onBack }) => {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 max-w-7xl mx-auto">
       {/* Search and Filters */}
       <div className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm space-y-3">
         {/* Search */}
@@ -177,6 +203,7 @@ const UsersManagement: React.FC<UsersManagementProps> = ({ onBack }) => {
           >
             <option value="">Todos los roles</option>
             <option value="USER">Usuarios</option>
+            <option value="SELLER">Vendedores</option>
             <option value="MODERATOR">Moderadores</option>
             <option value="ADMIN">Administradores</option>
           </select>
@@ -198,7 +225,7 @@ const UsersManagement: React.FC<UsersManagementProps> = ({ onBack }) => {
       </div>
 
       {/* Users List */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden">
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-visible">
         {loading ? (
           <div className="flex justify-center py-12">
             <Loader2 className="animate-spin text-oaxaca-pink" size={32} />
@@ -264,7 +291,7 @@ const UsersManagement: React.FC<UsersManagementProps> = ({ onBack }) => {
                         {/* Change Role */}
                         <div className="p-2 border-b border-gray-100 dark:border-gray-700">
                           <p className="text-xs text-gray-500 px-2 mb-1">Cambiar rol</p>
-                          {(['USER', 'MODERATOR', 'ADMIN'] as UserRole[]).map((role) => (
+                          {(['USER', 'SELLER', 'MODERATOR', 'ADMIN'] as UserRole[]).map((role) => (
                             <button
                               key={role}
                               onClick={() => handleChangeRole(user.id, role)}
@@ -278,6 +305,21 @@ const UsersManagement: React.FC<UsersManagementProps> = ({ onBack }) => {
                               {user.role === role && <CheckCircle size={14} className="ml-auto text-green-500" />}
                             </button>
                           ))}
+                        </div>
+
+                        {/* Reset Password */}
+                        <div className="p-2 border-b border-gray-100 dark:border-gray-700">
+                          <button
+                            onClick={() => {
+                              setSelectedUser(user);
+                              setShowResetPasswordModal(true);
+                              setShowActions(null);
+                            }}
+                            className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-sm text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/20 transition"
+                          >
+                            <KeyRound size={16} />
+                            Resetear contraseña
+                          </button>
                         </div>
 
                         {/* Ban/Unban */}
@@ -407,6 +449,81 @@ const UsersManagement: React.FC<UsersManagementProps> = ({ onBack }) => {
                     <>
                       <Ban size={18} />
                       Banear
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Reset Password Modal */}
+      {showResetPasswordModal && selectedUser && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-md overflow-hidden">
+            <div className="p-4 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
+              <h3 className="font-bold text-gray-900 dark:text-gray-100">Resetear contraseña</h3>
+              <button
+                onClick={() => {
+                  setShowResetPasswordModal(false);
+                  setSelectedUser(null);
+                  setNewPassword('');
+                }}
+                className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="p-4">
+              <div className="flex items-center gap-3 mb-4 p-3 bg-gray-50 dark:bg-gray-700 rounded-xl">
+                <img
+                  src={selectedUser.avatar || `https://ui-avatars.com/api/?name=${selectedUser.nombre}&background=random`}
+                  alt={selectedUser.nombre}
+                  className="w-10 h-10 rounded-full"
+                />
+                <div>
+                  <p className="font-medium text-gray-900 dark:text-gray-100">{selectedUser.nombre}</p>
+                  <p className="text-sm text-gray-500">{selectedUser.email}</p>
+                </div>
+              </div>
+
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Nueva contraseña
+              </label>
+              <input
+                type="text"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                placeholder="Mínimo 6 caracteres"
+                className="w-full px-3 py-2.5 bg-gray-100 dark:bg-gray-700 rounded-lg text-sm focus:ring-2 focus:ring-amber-500 outline-none"
+              />
+              {newPassword && newPassword.length < 6 && (
+                <p className="text-red-500 text-xs mt-1">Mínimo 6 caracteres</p>
+              )}
+
+              <div className="flex gap-3 mt-4">
+                <button
+                  onClick={() => {
+                    setShowResetPasswordModal(false);
+                    setSelectedUser(null);
+                    setNewPassword('');
+                  }}
+                  className="flex-1 py-2.5 border border-gray-200 dark:border-gray-600 rounded-xl font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={handleResetPassword}
+                  disabled={!newPassword.trim() || newPassword.length < 6 || actionLoading}
+                  className="flex-1 py-2.5 bg-amber-500 text-white rounded-xl font-medium hover:bg-amber-600 transition disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {actionLoading ? (
+                    <Loader2 className="animate-spin" size={18} />
+                  ) : (
+                    <>
+                      <KeyRound size={18} />
+                      Resetear
                     </>
                   )}
                 </button>

@@ -37,11 +37,17 @@ const authPlugin: FastifyPluginAsync = async (fastify) => {
   fastify.decorate('authenticate', async (request: FastifyRequest, reply: FastifyReply) => {
     try {
       // First verify the JWT token
-      const decoded = await request.jwtVerify<{ userId: string }>();
+      const decoded = await request.jwtVerify<{ sub?: string; userId?: string }>();
+
+      // Support both 'sub' (new tokens) and 'userId' (legacy tokens)
+      const userId = decoded.sub || decoded.userId;
+      if (!userId) {
+        return reply.status(401).send({ error: 'Token inválido' });
+      }
 
       // Fetch full user data including role
       const user = await fastify.prisma.user.findUnique({
-        where: { id: decoded.userId },
+        where: { id: userId },
         select: { id: true, email: true, role: true, bannedAt: true },
       });
 

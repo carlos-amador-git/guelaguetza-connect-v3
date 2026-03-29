@@ -25,7 +25,7 @@ export const CreateProductSchema = z.object({
   price: z.number().positive(),
   category: ProductCategoryEnum,
   stock: z.number().int().nonnegative().default(0),
-  images: z.array(z.string().url()).optional().default([]),
+  images: z.array(z.string()).optional().default([]),
 });
 
 export const UpdateProductSchema = CreateProductSchema.partial().extend({
@@ -38,7 +38,7 @@ export const ProductQuerySchema = z.object({
   minPrice: z.coerce.number().optional(),
   maxPrice: z.coerce.number().optional(),
   status: ProductStatusEnum.optional(),
-  sellerId: z.string().cuid().optional(),
+  sellerId: z.string().optional(),
   search: z.string().optional(),
   page: z.coerce.number().int().positive().default(1),
   limit: z.coerce.number().int().positive().max(50).default(20),
