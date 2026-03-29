@@ -135,17 +135,17 @@ export default function ARDirectView({ modelId, onClose }: ARDirectViewProps) {
           shadow-intensity="1"
           exposure="1.1"
           ar
-          ar-modes="webxr scene-viewer quick-look"
+          ar-modes="quick-look scene-viewer webxr"
           ar-scale="auto"
+          ios-src=""
           reveal="auto"
           loading="eager"
-          style={{ display: 'block', width: '100%', height: '100%', '--model-viewer-ar-prompt-display': 'block' } as CSSProperties}
+          style={{ display: 'block', width: '100%', height: '100%' } as CSSProperties}
         >
           {/* Custom AR button - ensures it appears on mobile */}
           <button
             slot="ar-button"
-            className="absolute bottom-4 right-4 z-10 flex items-center justify-center rounded-full bg-amber-500 px-4 py-3 text-gray-950 shadow-lg active:scale-95 transition-transform"
-            style={{ position: 'absolute', bottom: '16px', right: '16px' }}
+            className="absolute bottom-4 right-4 z-50 flex items-center justify-center rounded-full bg-amber-500 px-4 py-3 text-gray-950 shadow-lg active:scale-95 transition-transform"
           >
             <Box className="size-5 mr-1.5" />
             <span className="text-sm font-bold">Ver en AR</span>
