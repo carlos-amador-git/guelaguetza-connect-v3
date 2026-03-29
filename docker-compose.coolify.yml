@@ -31,6 +31,8 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     restart: always
+    tmpfs:
+      - /app/public:mode=777
     environment:
       NODE_ENV: production
       PORT: 3001
@@ -44,6 +46,7 @@ services:
       ENABLE_NOTIFICATIONS: "false"
       ENABLE_ANALYTICS: "false"
       LOG_LEVEL: info
+    user: "root"
     depends_on:
       postgres:
         condition: service_healthy
