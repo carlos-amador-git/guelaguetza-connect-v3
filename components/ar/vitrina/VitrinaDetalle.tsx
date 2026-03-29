@@ -84,28 +84,26 @@ export default function VitrinaDetalle({ itemId, onBack }: VitrinaDetalleProps) 
   return (
     <div className="relative h-svh bg-gray-950 overflow-hidden">
       {/* Top bar */}
-      <div className="absolute inset-x-0 top-0 z-20 flex items-center justify-between p-4 bg-gradient-to-b from-gray-950/80 to-transparent">
+      <div className="absolute inset-x-0 top-0 z-30 flex items-center justify-between px-3 py-3 bg-gradient-to-b from-gray-950 via-gray-950/90 to-transparent">
         <button
           onClick={onBack}
-          className="flex items-center gap-2 rounded-full bg-amber-500 px-5 py-3 text-sm font-bold text-gray-950 shadow-lg active:scale-95 transition-transform"
+          className="flex items-center gap-1.5 rounded-full bg-amber-500 px-4 py-2.5 text-sm font-bold text-gray-950 shadow-lg active:scale-95 transition-transform"
         >
-          <ArrowLeft className="size-5" />
+          <ArrowLeft className="size-4" />
           <span>Artesanías</span>
         </button>
 
-        <div className="flex gap-2">
-          <button
-            onClick={() => setShowInfo(!showInfo)}
-            className="flex size-11 items-center justify-center rounded-full bg-gray-800/80 text-white shadow-lg backdrop-blur-sm active:scale-95 transition-transform"
-            aria-label={showInfo ? 'Ocultar info' : 'Mostrar info'}
-          >
-            {showInfo ? <X className="size-5" /> : <SlidersHorizontal className="size-5" />}
-          </button>
-        </div>
+        <button
+          onClick={() => setShowInfo(!showInfo)}
+          className="flex size-10 items-center justify-center rounded-full bg-gray-800/80 text-white shadow-lg backdrop-blur-sm active:scale-95 transition-transform"
+          aria-label={showInfo ? 'Ocultar info' : 'Mostrar info'}
+        >
+          {showInfo ? <X className="size-4" /> : <SlidersHorizontal className="size-4" />}
+        </button>
       </div>
 
       {/* 3D Viewer — full screen */}
-      <div className="absolute inset-0 bg-gray-900">
+      <div className="absolute inset-0 bg-gray-900 pt-16 pb-24">
         {mvReady ? (
           <model-viewer
             ref={viewerRef as any}
@@ -141,7 +139,7 @@ export default function VitrinaDetalle({ itemId, onBack }: VitrinaDetalleProps) 
 
       {/* Bottom panel */}
       {showInfo && (
-        <div className="absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-gray-950 via-gray-950 to-transparent px-4 pb-4 pt-16">
+        <div className="absolute inset-x-0 bottom-0 z-20 bg-gray-950 px-4 pb-4 pt-4">
           <div className="mx-auto max-w-lg">
             <h2 className="text-2xl font-bold text-white">{item.nombre}</h2>
             <p className="mt-1 text-sm text-gray-300">{item.descripcion}</p>
