@@ -84,22 +84,22 @@ export default function VitrinaDetalle({ itemId, onBack }: VitrinaDetalleProps) 
   return (
     <div className="relative h-dvh bg-gray-950">
       {/* Top bar */}
-      <div className="absolute inset-x-0 top-0 z-10 flex items-center justify-between p-4">
+      <div className="absolute inset-x-0 top-0 z-20 flex items-center justify-between p-4 bg-gradient-to-b from-gray-950/80 to-transparent">
         <button
           onClick={onBack}
-          className="flex items-center gap-2 rounded-xl bg-gray-950/70 px-4 py-2.5 text-sm font-medium text-white shadow-lg backdrop-blur-sm active:scale-95 transition-transform hover:bg-gray-800 md:px-5 md:py-3 md:text-base"
+          className="flex items-center gap-2 rounded-full bg-amber-500 px-5 py-3 text-sm font-bold text-gray-950 shadow-lg active:scale-95 transition-transform"
         >
-          <ArrowLeft className="size-4 md:size-5" />
+          <ArrowLeft className="size-5" />
           <span>Artesanías</span>
         </button>
 
         <div className="flex gap-2">
           <button
             onClick={() => setShowInfo(!showInfo)}
-            className="flex size-10 items-center justify-center rounded-xl bg-gray-950/70 text-gray-300 shadow-lg backdrop-blur-sm active:scale-95 transition-transform"
+            className="flex size-11 items-center justify-center rounded-full bg-gray-800/80 text-white shadow-lg backdrop-blur-sm active:scale-95 transition-transform"
             aria-label={showInfo ? 'Ocultar info' : 'Mostrar info'}
           >
-            {showInfo ? <X className="size-4" /> : <SlidersHorizontal className="size-4" />}
+            {showInfo ? <X className="size-5" /> : <SlidersHorizontal className="size-5" />}
           </button>
         </div>
       </div>
