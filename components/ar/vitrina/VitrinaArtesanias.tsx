@@ -1,3 +1,4 @@
+import type { CSSProperties } from 'react';
 import { useEffect, useState } from 'react';
 import { ArrowLeft, MapPin, Sparkles, Cpu } from 'lucide-react';
 import { ARTESANIAS_PREMIUM, VITRINA_TRELLIS, type ArtesaniaItem } from './artesanias-data';
@@ -156,7 +157,6 @@ function ModelCard({
         className="relative overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200"
         style={{ width: '100%', paddingBottom: '100%' }}
       >
-        {/* @ts-expect-error model-viewer web component */}
         <model-viewer
           src={item.glb}
           camera-controls
@@ -168,6 +168,8 @@ function ModelCard({
           tone-mapping="commerce"
           shadow-intensity="1"
           exposure="1.1"
+          ar
+          ar-modes="quick-look scene-viewer webxr"
           loading="lazy"
           reveal="auto"
           style={{
@@ -177,7 +179,7 @@ function ModelCard({
             width: '100%',
             height: '100%',
             '--poster-color': '#e5e7eb',
-          } as React.CSSProperties}
+          } as CSSProperties}
         />
       </div>
 
