@@ -79,13 +79,13 @@ export default function VitrinaArtesanias({ section, onSelect, onBack }: Vitrina
   return (
     <div className="min-h-dvh bg-gray-950">
       {/* Top bar — sticky so back button is always accessible */}
-      <div className="sticky top-0 z-20 px-4 md:px-6 lg:px-8 py-3 bg-gray-950/95 backdrop-blur-sm border-b border-gray-800/50">
-      <div className="flex items-center gap-3 max-w-7xl mx-auto">
+      <div className="sticky top-0 z-20 px-3 py-2 bg-gray-950 border-b border-gray-800/50">
+      <div className="flex items-center justify-between">
         <button
           onClick={onBack}
-          className="flex items-center gap-2 rounded-xl bg-white shadow-lg px-4 py-2.5 text-sm font-semibold text-gray-800 active:scale-95 transition-transform"
+          className="flex items-center gap-1.5 rounded-full bg-amber-500 shadow-lg px-3 py-2 text-sm font-bold text-gray-950 active:scale-95 transition-transform"
         >
-          <ArrowLeft className="size-5" />
+          <ArrowLeft className="size-4" />
           <span>Volver</span>
         </button>
       </div>
