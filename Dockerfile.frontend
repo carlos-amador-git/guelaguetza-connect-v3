@@ -16,8 +16,9 @@ RUN npm ci
 
 COPY . .
 
-ARG VITE_API_URL
-ARG VITE_STRIPE_PUBLISHABLE_KEY
+# Build args with default values for production
+ARG VITE_API_URL="https://guelaguetzav3.mdconsultoria-ti.org"
+ARG VITE_STRIPE_PUBLISHABLE_KEY=""
 
 ENV VITE_API_URL=${VITE_API_URL}
 ENV VITE_STRIPE_PUBLISHABLE_KEY=${VITE_STRIPE_PUBLISHABLE_KEY}
