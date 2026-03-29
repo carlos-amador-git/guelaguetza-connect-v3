@@ -38,7 +38,7 @@ services:
       REDIS_URL: redis://redis:6379
       JWT_SECRET: ${JWT_SECRET}
       COOKIE_SECRET: ${COOKIE_SECRET:-${JWT_SECRET}}
-      CORS_ORIGINS: ${CORS_ORIGINS:-https://mdconsultoria-ti.org,http://mdconsultoria-ti.org}
+      CORS_ORIGINS: ${CORS_ORIGINS:-https://guelaguetzav3.mdconsultoria-ti.org,http://guelaguetzav3.mdconsultoria-ti.org}
       AUTO_SEED: "true"
       ENABLE_PAYMENTS: "false"
       ENABLE_NOTIFICATIONS: "false"
@@ -61,12 +61,12 @@ services:
       context: .
       dockerfile: Dockerfile.frontend
       args:
-        VITE_API_URL: "https://guelaguetzav2.mdconsultoria-ti.org"
+        VITE_API_URL: "https://guelaguetzav3.mdconsultoria-ti.org"
     restart: always
     environment:
-      VITE_API_URL: "https://guelaguetzav2.mdconsultoria-ti.org"
+      VITE_API_URL: "https://guelaguetzav3.mdconsultoria-ti.org"
     ports:
-      - "3080:80"
+      - "3081:80"
     depends_on:
       - backend
     healthcheck:
