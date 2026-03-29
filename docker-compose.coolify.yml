@@ -6,8 +6,8 @@ services:
       POSTGRES_DB: guelaguetza_db
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
+    tmpfs:
+      - /var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d guelaguetza_db"]
       interval: 10s
@@ -18,8 +18,8 @@ services:
     image: redis:7-alpine
     restart: always
     command: redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru
-    volumes:
-      - redis_data:/data
+    tmpfs:
+      - /data
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
@@ -76,6 +76,4 @@ services:
       retries: 3
       start_period: 30s
 
-volumes:
-  postgres_data:
-  redis_data:
+
