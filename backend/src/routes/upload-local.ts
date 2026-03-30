@@ -3,8 +3,10 @@ import { randomUUID } from 'crypto';
 import { writeFile, mkdir } from 'fs/promises';
 import { join } from 'path';
 import sharp from 'sharp';
+import { resolve } from 'path';
 
-const UPLOAD_DIR = '/app/public/uploads';
+// Use UPLOAD_DIR env var, or default to ./public/uploads relative to cwd (works in Docker and local dev)
+const UPLOAD_DIR = process.env.UPLOAD_DIR || resolve(process.cwd(), 'public', 'uploads');
 
 // Compression settings
 const MAX_WIDTH = 1600;

@@ -6,6 +6,7 @@ import helmet from '@fastify/helmet';
 import multipart from '@fastify/multipart';
 import fastifyStatic from '@fastify/static';
 import { join } from 'path';
+import { mkdir } from 'fs/promises';
 import websocket from '@fastify/websocket';
 import {
   serializerCompiler,
@@ -105,9 +106,11 @@ export async function buildApp(): Promise<FastifyInstance> {
   // Register WebSocket support
   await app.register(websocket);
 
-  // Serve uploaded files with permissive headers (from shared volume)
+  // Serve uploaded files with permissive headers (from shared volume or local dir)
+  const uploadsDir = process.env.UPLOAD_DIR || join(process.cwd(), 'public', 'uploads');
+  await mkdir(uploadsDir, { recursive: true });
   await app.register(fastifyStatic, {
-    root: '/app/public/uploads',
+    root: uploadsDir,
     prefix: '/uploads/',
     decorateReply: false,
     setHeaders: (res) => {
