@@ -1,5 +1,4 @@
 import { api, getToken } from './api';
-import { MOCK_STREAMS } from './mockData';
 
 // Types
 export type StreamStatus = 'SCHEDULED' | 'LIVE' | 'ENDED';
@@ -56,250 +55,36 @@ export interface StreamQuery {
 
 // API Functions
 export async function getStreams(query: StreamQuery = {}) {
-  try {
-    const params = new URLSearchParams();
-    Object.entries(query).forEach(([key, value]) => {
-      if (value !== undefined) params.append(key, String(value));
-    });
+  const params = new URLSearchParams();
+  Object.entries(query).forEach(([key, value]) => {
+    if (value !== undefined) params.append(key, String(value));
+  });
 
-    const response = await api.get<{
-      streams: LiveStream[];
-      pagination: {
-        page: number;
-        limit: number;
-        total: number;
-        totalPages: number;
-      };
-    }>(`/streams?${params}`);
-    return response;
-  } catch {
-    // Return mock data when backend is unavailable
-    const { page = 1, limit = 20, status, category } = query;
-    let filtered = MOCK_STREAMS.map(s => ({
-      ...s,
-      description: s.description,
-      category: 'DANZA' as StreamCategory,
-      status: s.isLive ? 'LIVE' as StreamStatus : 'ENDED' as StreamStatus,
-      scheduledAt: null,
-      startedAt: s.startedAt,
-      endedAt: s.isLive ? null : s.startedAt,
-      peakViewers: s.viewerCount,
-      streamKey: 'demo_key',
-      playbackUrl: null,
-      vodUrl: null,
-      embedUrl: (s as any).embedUrl || null,
-      createdAt: s.startedAt,
-      user: {
-        ...s.host,
-        apellido: s.host.apellido || '',
-      },
-    }));
-
-    if (status) {
-      filtered = filtered.filter(s => s.status === status);
-    }
-    if (category) {
-      filtered = filtered.filter(s => s.category === category);
-    }
-
-    const start = (page - 1) * limit;
-    const paginated = filtered.slice(start, start + limit);
-
-    return {
-      streams: paginated,
-      pagination: {
-        page,
-        limit,
-        total: filtered.length,
-        totalPages: Math.ceil(filtered.length / limit),
-      },
+  const response = await api.get<{
+    streams: LiveStream[];
+    pagination: {
+      page: number;
+      limit: number;
+      total: number;
+      totalPages: number;
     };
-  }
+  }>(`/streams?${params}`);
+  return response;
 }
 
 export async function getLiveStreams() {
-  try {
-    const response = await api.get<LiveStream[]>('/streams/live');
-    return response;
-  } catch {
-    // Return mock live streams
-    return MOCK_STREAMS.filter(s => s.isLive).map(s => ({
-      ...s,
-      description: s.description,
-      category: 'DANZA' as StreamCategory,
-      status: 'LIVE' as StreamStatus,
-      scheduledAt: null,
-      startedAt: s.startedAt,
-      endedAt: null,
-      peakViewers: s.viewerCount,
-      streamKey: 'demo_key',
-      playbackUrl: null,
-      vodUrl: null,
-      embedUrl: (s as any).embedUrl || null,
-      createdAt: s.startedAt,
-      user: {
-        ...s.host,
-        apellido: s.host.apellido || '',
-      },
-    }));
-  }
+  const response = await api.get<LiveStream[]>('/streams/live');
+  return response;
 }
 
 export async function getUpcomingStreams() {
-  try {
-    const response = await api.get<LiveStream[]>('/streams/upcoming');
-    return response;
-  } catch {
-    // Return mock upcoming streams
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-
-    return [
-      {
-        id: 'upcoming_1',
-        userId: 'host_1',
-        title: 'Clase de Baile Folklórico - Flor de Piña',
-        description: 'Aprende los pasos básicos del tradicional baile Flor de Piña de Tuxtepec',
-        thumbnailUrl: '',
-        category: 'DANZA' as StreamCategory,
-        status: 'SCHEDULED' as StreamStatus,
-        scheduledAt: tomorrow.toISOString(),
-        startedAt: null,
-        endedAt: null,
-        viewerCount: 0,
-        peakViewers: 0,
-        streamKey: 'demo_key',
-        playbackUrl: null,
-        vodUrl: null,
-        createdAt: new Date().toISOString(),
-        user: {
-          id: 'host_1',
-          nombre: 'María',
-          apellido: 'López',
-          avatar: '',
-        },
-      },
-      {
-        id: 'upcoming_2',
-        userId: 'host_2',
-        title: 'Taller de Mezcal - Destilación Tradicional',
-        description: 'Conoce el proceso artesanal de elaboración del mezcal oaxaqueño',
-        thumbnailUrl: '',
-        category: 'ARTESANIA' as StreamCategory,
-        status: 'SCHEDULED' as StreamStatus,
-        scheduledAt: new Date(tomorrow.getTime() + 3 * 60 * 60 * 1000).toISOString(),
-        startedAt: null,
-        endedAt: null,
-        viewerCount: 0,
-        peakViewers: 0,
-        streamKey: 'demo_key',
-        playbackUrl: null,
-        vodUrl: null,
-        createdAt: new Date().toISOString(),
-        user: {
-          id: 'host_2',
-          nombre: 'José',
-          apellido: 'García',
-          avatar: '',
-        },
-      },
-    ];
-  }
+  const response = await api.get<LiveStream[]>('/streams/upcoming');
+  return response;
 }
 
 export async function getStream(id: string) {
-  try {
-    const response = await api.get<LiveStream & { messages: StreamMessage[] }>(`/streams/${id}`);
-    return response;
-  } catch {
-    // Return mock stream
-    const mockStream = MOCK_STREAMS.find(s => s.id === id);
-
-    const baseStream = mockStream ? {
-      ...mockStream,
-      description: mockStream.description,
-      category: 'DANZA' as StreamCategory,
-      status: mockStream.isLive ? 'LIVE' as StreamStatus : 'ENDED' as StreamStatus,
-      scheduledAt: null,
-      startedAt: mockStream.startedAt,
-      endedAt: mockStream.isLive ? null : mockStream.startedAt,
-      peakViewers: mockStream.viewerCount,
-      streamKey: 'demo_key',
-      playbackUrl: null,
-      vodUrl: null,
-      createdAt: mockStream.startedAt,
-      user: {
-        ...mockStream.host,
-        apellido: mockStream.host.apellido || '',
-      },
-    } : {
-      id,
-      userId: 'host_1',
-      title: 'Stream Demo',
-      description: 'Una transmisión de demostración',
-      thumbnailUrl: '',
-      category: 'OTRO' as StreamCategory,
-      status: 'LIVE' as StreamStatus,
-      scheduledAt: null,
-      startedAt: new Date().toISOString(),
-      endedAt: null,
-      viewerCount: 127,
-      peakViewers: 156,
-      streamKey: 'demo_key',
-      playbackUrl: null,
-      vodUrl: null,
-      embedUrl: null,
-      createdAt: new Date().toISOString(),
-      user: {
-        id: 'host_1',
-        nombre: 'Host',
-        apellido: 'Demo',
-        avatar: '',
-      },
-    };
-
-    return {
-      ...baseStream,
-      messages: [
-        {
-          id: 'msg_1',
-          streamId: id,
-          userId: 'user_1',
-          content: '¡Qué bonito! 🎉',
-          createdAt: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
-          user: {
-            id: 'user_1',
-            nombre: 'Ana',
-            avatar: '',
-          },
-        },
-        {
-          id: 'msg_2',
-          streamId: id,
-          userId: 'user_2',
-          content: 'Excelente transmisión',
-          createdAt: new Date(Date.now() - 3 * 60 * 1000).toISOString(),
-          user: {
-            id: 'user_2',
-            nombre: 'Carlos',
-            avatar: '',
-          },
-        },
-        {
-          id: 'msg_3',
-          streamId: id,
-          userId: 'user_3',
-          content: '¡Saludos desde CDMX! 👋',
-          createdAt: new Date(Date.now() - 1 * 60 * 1000).toISOString(),
-          user: {
-            id: 'user_3',
-            nombre: 'Laura',
-            avatar: '',
-          },
-        },
-      ],
-    };
-  }
+  const response = await api.get<LiveStream & { messages: StreamMessage[] }>(`/streams/${id}`);
+  return response;
 }
 
 export async function createStream(data: {
