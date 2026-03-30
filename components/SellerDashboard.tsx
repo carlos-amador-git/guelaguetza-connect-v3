@@ -120,12 +120,19 @@ const SellerDashboard: React.FC<SellerDashboardProps> = ({ onBack, onNavigate })
   useEffect(() => {
     // Check seller profile first
     const init = async () => {
+      if (!token) {
+        setLoading(false);
+        return;
+      }
       try {
         const profile = await getSellerProfile();
         setSellerProfile(profile);
         setHasSellerProfile(true);
         loadProducts();
-      } catch {
+      } catch (error: any) {
+        if (error?.statusCode === 401) {
+          console.error('No autorizado - token inválido o expirado');
+        }
         setHasSellerProfile(false);
         setLoading(false);
       }
