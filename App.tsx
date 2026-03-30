@@ -106,11 +106,15 @@ const App: React.FC = () => {
         const user = JSON.parse(savedUser);
         const savedView = localStorage.getItem('last_view');
         if (savedView && Object.values(ViewState).includes(savedView as ViewState)) {
+          // Admin can access any view
+          if (user.role === 'ADMIN') {
+            return savedView as ViewState;
+          }
           // Validate saved view against user's role
-          if (savedView === ViewState.ADMIN && user.role !== 'ADMIN') {
-            // Redirect admin-only view to role-appropriate view
+          if (savedView === ViewState.ADMIN) {
+            // non-admin can't access admin view
           } else if (savedView === ViewState.SELLER_DASHBOARD && user.role !== 'SELLER' && user.role !== 'HOST') {
-            // Redirect seller-only view to role-appropriate view
+            // non-seller can't access seller view
           } else {
             return savedView as ViewState;
           }
@@ -133,7 +137,9 @@ const App: React.FC = () => {
     if (savedToken && savedUser) return false;
     return !initialArModelId;
   });
-  const [adminViewingAsUser, setAdminViewingAsUser] = useState(false);
+  const [adminViewingAsUser, setAdminViewingAsUser] = useState(() => {
+    return typeof window !== 'undefined' && localStorage.getItem('admin_viewing_as_user') === 'true';
+  });
   const [sidebarVisible, setSidebarVisible] = useState(true);
   const [sidebarStyle, setSidebarStyle] = useState<'amarillo' | 'verde' | 'rojo' | 'azul' | 'morado' | 'blanco'>('blanco');
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
@@ -178,6 +184,11 @@ const App: React.FC = () => {
   useEffect(() => {
     localStorage.setItem('last_view', currentView);
   }, [currentView]);
+
+  // Persist admin viewing mode across refreshes
+  useEffect(() => {
+    localStorage.setItem('admin_viewing_as_user', adminViewingAsUser ? 'true' : 'false');
+  }, [adminViewingAsUser]);
 
   // Redirect to landing when token becomes null (logout or invalid)
   useEffect(() => {

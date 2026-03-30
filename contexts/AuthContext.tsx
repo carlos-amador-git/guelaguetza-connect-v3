@@ -475,6 +475,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setIsDemoMode(false);
     localStorage.removeItem('auto_demo_mode');
     localStorage.removeItem('last_view');
+    localStorage.removeItem('admin_viewing_as_user');
   };
 
   const updateProfile = async (data: Partial<User>): Promise<boolean> => {
