@@ -409,7 +409,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const validateToken = async (authToken: string): Promise<boolean> => {
     try {
-      const res = await fetch(`${API_BASE}/auth/me`, {
+      const res = await fetch(`${API_BASE}/auth/validate`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${authToken}`,

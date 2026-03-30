@@ -189,6 +189,35 @@ const authRoutes: FastifyPluginAsync = async (fastify) => {
     }
   });
 
+  // Validate token (public - just verifies token is valid)
+  fastify.get('/validate', async (request, reply) => {
+    try {
+      const authHeader = request.headers.authorization;
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return reply.status(401).send({ valid: false, error: 'Token requerido' });
+      }
+
+      const token = authHeader.substring(7);
+      const { jwtVerify } = await import('jose');
+      const secret = process.env.JWT_ACCESS_SECRET || process.env.JWT_SECRET;
+      
+      try {
+        const { payload } = await jwtVerify(token, new TextEncoder().encode(secret));
+        const userId = (payload as any).sub || (payload as any).userId;
+        
+        if (!userId) {
+          return reply.status(401).send({ valid: false, error: 'Token inválido' });
+        }
+
+        return reply.send({ valid: true, userId });
+      } catch {
+        return reply.status(401).send({ valid: false, error: 'Token inválido o expirado' });
+      }
+    } catch (error) {
+      return reply.status(500).send({ valid: false, error: 'Error interno' });
+    }
+  });
+
   // Get profile (authenticated)
   fastify.get('/me', { preHandler: [fastify.authenticate] }, async (request, reply) => {
     try {
