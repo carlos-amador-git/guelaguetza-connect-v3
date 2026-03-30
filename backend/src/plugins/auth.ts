@@ -1,6 +1,6 @@
 import { FastifyPluginAsync, FastifyRequest, FastifyReply } from 'fastify';
 import fp from 'fastify-plugin';
-import fastifyJwt from '@fastify/jwt';
+import { jwtVerify } from 'jose';
 import { UserRole } from '@prisma/client';
 
 export interface AuthUser {
@@ -17,32 +17,39 @@ declare module 'fastify' {
   }
 }
 
-declare module '@fastify/jwt' {
-  interface FastifyJWT {
-    payload: { userId: string };
-    user: AuthUser;
+// Use JWT_ACCESS_SECRET or fallback to JWT_SECRET
+const getSecret = (): Uint8Array => {
+  const secret = process.env.JWT_ACCESS_SECRET || process.env.JWT_SECRET;
+  if (!secret) {
+    throw new Error('JWT_ACCESS_SECRET or JWT_SECRET environment variable is required');
   }
-}
+  return new TextEncoder().encode(secret);
+};
 
 const authPlugin: FastifyPluginAsync = async (fastify) => {
-  const JWT_SECRET = process.env.JWT_SECRET;
-  if (!JWT_SECRET) {
-    throw new Error('JWT_SECRET environment variable is required');
-  }
-
-  await fastify.register(fastifyJwt, {
-    secret: JWT_SECRET,
-  });
-
   fastify.decorate('authenticate', async (request: FastifyRequest, reply: FastifyReply) => {
     try {
-      // First verify the JWT token
-      const decoded = await request.jwtVerify<{ sub?: string; userId?: string }>();
+      const authHeader = request.headers.authorization;
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return reply.status(401).send({ error: 'Token requerido' });
+      }
+
+      const token = authHeader.substring(7);
+      
+      // Verify the JWT token using jose directly
+      const { payload } = await jwtVerify(token, getSecret(), {
+        algorithms: ['HS256'],
+      });
 
       // Support both 'sub' (new tokens) and 'userId' (legacy tokens)
-      const userId = decoded.sub || decoded.userId;
+      const userId = (payload as any).sub || (payload as any).userId;
       if (!userId) {
         return reply.status(401).send({ error: 'Token inválido' });
+      }
+
+      // Validate token type
+      if ((payload as any).type && (payload as any).type !== 'access') {
+        return reply.status(401).send({ error: 'Token inválido: tipo incorrecto' });
       }
 
       // Fetch full user data including role
@@ -66,7 +73,7 @@ const authPlugin: FastifyPluginAsync = async (fastify) => {
       };
     } catch (error: any) {
       fastify.log.error('Auth error:', error?.message, error?.code);
-      reply.status(401).send({ error: 'No autorizado' });
+      reply.status(401).send({ error: 'Token inválido o expirado' });
     }
   });
 };
