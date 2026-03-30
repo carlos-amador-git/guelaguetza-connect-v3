@@ -37,20 +37,21 @@ const authPlugin: FastifyPluginAsync = async (fastify) => {
   fastify.decorate('authenticate', async (request: FastifyRequest, reply: FastifyReply) => {
     console.log('[AUTH] authenticate called for:', request.url);
     try {
-      console.log('[AUTH] Inside try block');
+      console.log('[AUTH] Inside try block, getting header');
       const authHeader = request.headers.authorization;
+      console.log('[AUTH] Header:', authHeader ? 'present' : 'missing', authHeader?.substring(0, 20));
       if (!authHeader || !authHeader.startsWith('Bearer ')) {
         return reply.status(401).send({ error: 'Token requerido' });
       }
 
       const token = authHeader.substring(7);
-      console.log('[AUTH DEBUG] Verifying token, length:', token.length);
+      console.log('[AUTH] About to verify token, length:', token.length, 'secret env check:', !!process.env.JWT_SECRET);
       
       // Verify the JWT token using jose directly
       const { payload } = await jwtVerify(token, getSecret(), {
         algorithms: ['HS256'],
       });
-      console.log('[AUTH DEBUG] Token verified successfully, payload:', payload);
+      console.log('[AUTH] Token verified successfully');
 
       // Support both 'sub' (new tokens) and 'userId' (legacy tokens)
       const userId = (payload as any).sub || (payload as any).userId;
