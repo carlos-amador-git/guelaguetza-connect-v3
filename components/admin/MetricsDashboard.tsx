@@ -22,6 +22,7 @@ import {
   RefreshCw,
   ChevronRight,
   QrCode,
+  LogOut,
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { getDashboardStats, DashboardStats } from '../../services/admin';
@@ -73,7 +74,7 @@ const GEOGRAPHIC_DATA = [
 ];
 
 const MetricsDashboard: React.FC<MetricsDashboardProps> = ({ onBack, onNavigate }) => {
-  const { token } = useAuth();
+  const { token, logout } = useAuth();
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -212,6 +213,14 @@ const MetricsDashboard: React.FC<MetricsDashboardProps> = ({ onBack, onNavigate 
                   <span className="text-xs font-medium hidden sm:inline">Ver App</span>
                 </button>
               )}
+              <button
+                onClick={() => { logout(); onBack(); }}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-white/20 hover:bg-red-500/80 rounded-full transition"
+                title="Cerrar sesión"
+              >
+                <LogOut size={16} />
+                <span className="text-xs font-medium hidden sm:inline">Salir</span>
+              </button>
             </div>
           </div>
 
