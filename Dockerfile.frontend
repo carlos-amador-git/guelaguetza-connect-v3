@@ -93,8 +93,8 @@ http {
             add_header Cache-Control "public, immutable";
         }
 
-        # Uploaded images - proxy to backend (fastify-static serves /uploads/)
-        location /uploads/ {
+        # Uploaded images - proxy to backend (^~ gives priority over regex location)
+        location ^~ /uploads/ {
             proxy_pass http://backend:3001/uploads/;
             proxy_set_header Host $host;
             proxy_set_header X-Real-IP $remote_addr;
