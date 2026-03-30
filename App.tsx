@@ -97,9 +97,24 @@ const App: React.FC = () => {
 
   const initialArModelId = typeof window !== 'undefined' ? parseArHash(window.location.hash) : null;
 
-  const [currentView, setCurrentView] = useState<ViewState>(
-    initialArModelId ? ViewState.AR_DIRECT : ViewState.HOME
-  );
+  const [currentView, setCurrentView] = useState<ViewState>(() => {
+    // Restore last view from localStorage if user is authenticated
+    const savedToken = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+    const savedUser = typeof window !== 'undefined' ? localStorage.getItem('auth_user') : null;
+    if (savedToken && savedUser) {
+      try {
+        const user = JSON.parse(savedUser);
+        const savedView = localStorage.getItem('last_view');
+        if (savedView && Object.values(ViewState).includes(savedView as ViewState)) {
+          return savedView as ViewState;
+        }
+        // Default to role-specific view
+        if (user.role === 'SELLER' || user.role === 'HOST') return ViewState.SELLER_DASHBOARD;
+        if (user.role === 'ADMIN') return ViewState.ADMIN;
+      } catch {}
+    }
+    return initialArModelId ? ViewState.AR_DIRECT : ViewState.HOME;
+  });
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [previousView, setPreviousView] = useState<ViewState>(ViewState.HOME);
@@ -151,6 +166,11 @@ const App: React.FC = () => {
     window.addEventListener('hashchange', handleHashChange);
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
+
+  // Persist current view to localStorage for session restoration
+  useEffect(() => {
+    localStorage.setItem('last_view', currentView);
+  }, [currentView]);
 
   // Handle user selection from landing - receives role directly to avoid race condition
   const handleUserSelected = (selectedRole?: string) => {
