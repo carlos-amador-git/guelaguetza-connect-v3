@@ -37,6 +37,7 @@ const authPlugin: FastifyPluginAsync = async (fastify) => {
   fastify.decorate('authenticate', async (request: FastifyRequest, reply: FastifyReply) => {
     console.log('[AUTH] authenticate called for:', request.url);
     try {
+      console.log('[AUTH] Inside try block');
       const authHeader = request.headers.authorization;
       if (!authHeader || !authHeader.startsWith('Bearer ')) {
         return reply.status(401).send({ error: 'Token requerido' });
@@ -82,6 +83,7 @@ const authPlugin: FastifyPluginAsync = async (fastify) => {
         userId: user.id,
       };
     } catch (error: any) {
+      console.error('[AUTH CATCH] Error:', error?.message, error?.stack);
       fastify.log.error('Auth error:', error?.message, error?.code, error?.cause);
       reply.status(401).send({ error: 'Token inválido o expirado', details: error?.message });
     }
