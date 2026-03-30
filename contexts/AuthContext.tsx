@@ -144,6 +144,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   }, [token, user]);
 
   const login = async (email: string, password: string, role?: UserRole): Promise<boolean> => {
+    let serverResponded = false;
     try {
       const res = await fetch(`${API_BASE}/auth/login`, {
         method: 'POST',
@@ -151,19 +152,27 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         body: JSON.stringify({ email, password, role }),
       });
 
+      serverResponded = true;
+
       if (!res.ok) {
         const errorData = await res.json().catch(() => ({}));
         throw Object.assign(new Error(errorData.error || errorData.message || 'Login failed'), { serverError: true });
       }
 
       const data = await res.json();
+      const userData = { ...data.user, role: role || data.user.role };
+
+      // --- FIX: persist immediately so api.ts getToken() finds it synchronously ---
+      localStorage.setItem('auth_token', data.token);
+      localStorage.setItem('auth_user', JSON.stringify(userData));
+
       setToken(data.token);
-      setUser({ ...data.user, role: role || data.user.role });
+      setUser(userData);
       return true;
     } catch (error: any) {
       console.error('Login error:', error);
 
-      if (error?.serverError) {
+      if (serverResponded || error?.serverError) {
         return false;
       }
 
@@ -178,8 +187,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             return false;
           }
           const demoToken = 'demo_token_' + Date.now();
-          setToken(demoToken);
-          setUser({
+          const demoUserData = {
             id: foundUser.id,
             email: foundUser.email,
             nombre: foundUser.nombre,
@@ -187,7 +195,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             region: foundUser.region,
             faceData: foundUser.faceData,
             role: role || foundUser.role || 'USER',
-          });
+          };
+
+          localStorage.setItem('auth_token', demoToken);
+          localStorage.setItem('auth_user', JSON.stringify(demoUserData));
+
+          setToken(demoToken);
+          setUser(demoUserData);
           return true;
         }
       }
