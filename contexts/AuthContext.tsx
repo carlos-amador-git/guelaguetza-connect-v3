@@ -174,7 +174,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const serverRole = data.user.role as UserRole;
 
       // Reject login if the user's actual role doesn't match the selected section
-      if (role && serverRole !== role) {
+      // Admin can enter any section
+      if (role && serverRole !== role && serverRole !== 'ADMIN') {
         const actualName = ROLE_NAMES[serverRole] || serverRole;
         const expectedName = ROLE_NAMES[role] || role;
         return `Esta cuenta es de ${actualName}. Usa la seccion "${expectedName === 'Visitante' ? 'Soy Visitante' : expectedName === 'Vendedor' ? 'Soy Vendedor' : 'Administrador'}" para ingresar, o selecciona "Soy ${actualName}" en la pantalla anterior.`;
@@ -208,8 +209,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
           const foundRole = (foundUser.role || 'USER') as UserRole;
 
-          // Reject if role doesn't match in demo mode too
-          if (role && foundRole !== role) {
+          // Reject if role doesn't match in demo mode too (admin can enter any section)
+          if (role && foundRole !== role && foundRole !== 'ADMIN') {
             const actualName = ROLE_NAMES[foundRole] || foundRole;
             return `Esta cuenta es de ${actualName}. Selecciona "Soy ${actualName}" en la pantalla anterior.`;
           }
@@ -251,8 +252,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const data = await res.json();
       const serverRole = data.user.role as UserRole;
 
-      // Reject if role doesn't match the selected section
-      if (role && serverRole !== role) {
+      // Reject if role doesn't match the selected section (admin can enter any)
+      if (role && serverRole !== role && serverRole !== 'ADMIN') {
         const actualName = ROLE_NAMES[serverRole] || serverRole;
         return `Esta cuenta es de ${actualName}. Selecciona "Soy ${actualName}" en la pantalla anterior.`;
       }

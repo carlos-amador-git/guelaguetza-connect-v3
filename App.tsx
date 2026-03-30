@@ -240,10 +240,8 @@ const App: React.FC = () => {
     const role = getActualRole();
     if (!role) return false;
 
-    // Admin in "viewing as user" mode can access user views
-    if (role === 'ADMIN' && adminViewingAsUser) {
-      return ROLE_ALLOWED_VIEWS['USER'].includes(view) || view === ViewState.ADMIN;
-    }
+    // Admin can access ALL views (any section)
+    if (role === 'ADMIN') return true;
 
     const allowed = ROLE_ALLOWED_VIEWS[role];
     if (!allowed) return false;
@@ -267,23 +265,33 @@ const App: React.FC = () => {
     }
   };
 
-  // Handle user selection from landing - always use actual stored role for security
-  const handleUserSelected = (_selectedRole?: string) => {
+  // Handle user selection from landing - route to the appropriate section
+  const handleUserSelected = (selectedRole?: string) => {
     setShowLanding(false);
-    setAdminViewingAsUser(false); // Reset admin view mode
-    
+    setAdminViewingAsUser(false);
+
     const actualRole = getActualRole();
-    
-    // Fallback to HOME if no role found
+
     if (!actualRole) {
       setCurrentView(ViewState.HOME);
       return;
     }
-    
-    // Enforce role-based access: only allow views matching user's actual role
+
+    // Admin can enter any section — route based on what they selected in the landing
     if (actualRole === 'ADMIN') {
-      setCurrentView(ViewState.ADMIN);
-    } else if (actualRole === 'SELLER' || actualRole === 'HOST') {
+      if (selectedRole === 'USER') {
+        setAdminViewingAsUser(true);
+        setCurrentView(ViewState.HOME);
+      } else if (selectedRole === 'SELLER') {
+        setCurrentView(ViewState.SELLER_DASHBOARD);
+      } else {
+        setCurrentView(ViewState.ADMIN);
+      }
+      return;
+    }
+
+    // Other roles go to their own section
+    if (actualRole === 'SELLER' || actualRole === 'HOST') {
       setCurrentView(ViewState.SELLER_DASHBOARD);
     } else {
       setCurrentView(ViewState.HOME);
