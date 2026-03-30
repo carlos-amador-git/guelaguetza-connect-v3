@@ -160,7 +160,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       }
 
       const data = await res.json();
-      const userData = { ...data.user, role: role || data.user.role };
+      // Always use the role from the server (database) — never override with the landing card selection
+      const userData = { ...data.user, role: data.user.role };
 
       // --- FIX: persist immediately so api.ts getToken() finds it synchronously ---
       localStorage.setItem('auth_token', data.token);
@@ -194,7 +195,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             apellido: foundUser.apellido,
             region: foundUser.region,
             faceData: foundUser.faceData,
-            role: role || foundUser.role || 'USER',
+            role: foundUser.role || 'USER',
           };
 
           localStorage.setItem('auth_token', demoToken);
@@ -222,7 +223,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
       const data = await res.json();
       setToken(data.token);
-      setUser({ ...data.user, role: role || data.user.role });
+      setUser({ ...data.user, role: data.user.role });
       return true;
     } catch (error) {
       console.error('Google login error:', error);
@@ -237,7 +238,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           nombre: payload.given_name || payload.name || 'Usuario',
           apellido: payload.family_name || '',
           avatar: payload.picture,
-          role: role || 'USER',
+          role: role || 'USER', // Google fallback: no server role available, use card selection
         });
         setIsDemoMode(true);
         return true;

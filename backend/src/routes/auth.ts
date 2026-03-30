@@ -123,7 +123,7 @@ const authRoutes: FastifyPluginAsync = async (fastify) => {
             nombre: payload.given_name || payload.name || 'Usuario',
             apellido: payload.family_name || '',
             avatar: payload.picture || null,
-            role: (role === 'ADMIN' ? 'ADMIN' : role === 'SELLER' ? 'USER' : 'USER') as any,
+            role: (role === 'ADMIN' ? 'ADMIN' : role === 'SELLER' ? 'SELLER' : 'USER') as any,
           },
         });
       }
@@ -142,7 +142,7 @@ const authRoutes: FastifyPluginAsync = async (fastify) => {
           nombre: user.nombre,
           apellido: user.apellido,
           avatar: user.avatar,
-          role: role || user.role,
+          role: user.role, // Always use the role from the database
         },
         accessToken: tokens.accessToken,
         refreshToken: tokens.refreshToken,
