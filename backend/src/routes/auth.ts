@@ -201,19 +201,28 @@ const authRoutes: FastifyPluginAsync = async (fastify) => {
       const { jwtVerify } = await import('jose');
       const secret = process.env.JWT_ACCESS_SECRET || process.env.JWT_SECRET;
       
+      if (!secret) {
+        fastify.log.error('JWT_SECRET not configured');
+        return reply.status(500).send({ valid: false, error: 'Server config error' });
+      }
+      
       try {
         const { payload } = await jwtVerify(token, new TextEncoder().encode(secret));
         const userId = (payload as any).sub || (payload as any).userId;
         
         if (!userId) {
+          console.error('Token missing userId:', payload);
           return reply.status(401).send({ valid: false, error: 'Token inválido' });
         }
 
+        console.log('Token validated for user:', userId);
         return reply.send({ valid: true, userId });
-      } catch {
+      } catch (verifyError: any) {
+        console.error('Token verify error:', verifyError?.message, verifyError?.code);
         return reply.status(401).send({ valid: false, error: 'Token inválido o expirado' });
       }
-    } catch (error) {
+    } catch (error: any) {
+      console.error('Validate endpoint error:', error?.message);
       return reply.status(500).send({ valid: false, error: 'Error interno' });
     }
   });
