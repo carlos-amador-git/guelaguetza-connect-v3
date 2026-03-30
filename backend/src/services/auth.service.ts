@@ -56,7 +56,9 @@ const getAccessTokenSecret = (): Uint8Array => {
     }
     throw new Error('JWT_ACCESS_SECRET or JWT_SECRET environment variable is required');
   }
-  return new TextEncoder().encode(secret);
+  const encoded = new TextEncoder().encode(secret);
+  console.log('[AUTH SERVICE] Access token secret length:', secret.length, 'Encoded length:', encoded.length);
+  return encoded;
 };
 
 const getRefreshTokenSecret = (): Uint8Array => {

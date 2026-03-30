@@ -23,7 +23,9 @@ const getSecret = (): Uint8Array => {
   if (!secret) {
     throw new Error('JWT_ACCESS_SECRET or JWT_SECRET environment variable is required');
   }
-  return new TextEncoder().encode(secret);
+  const encoded = new TextEncoder().encode(secret);
+  console.log('[AUTH DEBUG] Secret length:', secret.length, 'Encoded length:', encoded.length);
+  return encoded;
 };
 
 const authPlugin: FastifyPluginAsync = async (fastify) => {
@@ -35,11 +37,13 @@ const authPlugin: FastifyPluginAsync = async (fastify) => {
       }
 
       const token = authHeader.substring(7);
+      console.log('[AUTH DEBUG] Verifying token, length:', token.length);
       
       // Verify the JWT token using jose directly
       const { payload } = await jwtVerify(token, getSecret(), {
         algorithms: ['HS256'],
       });
+      console.log('[AUTH DEBUG] Token verified successfully, payload:', payload);
 
       // Support both 'sub' (new tokens) and 'userId' (legacy tokens)
       const userId = (payload as any).sub || (payload as any).userId;
@@ -72,8 +76,8 @@ const authPlugin: FastifyPluginAsync = async (fastify) => {
         userId: user.id,
       };
     } catch (error: any) {
-      fastify.log.error('Auth error:', error?.message, error?.code);
-      reply.status(401).send({ error: 'Token inválido o expirado' });
+      fastify.log.error('Auth error:', error?.message, error?.code, error?.cause);
+      reply.status(401).send({ error: 'Token inválido o expirado', details: error?.message });
     }
   });
 };

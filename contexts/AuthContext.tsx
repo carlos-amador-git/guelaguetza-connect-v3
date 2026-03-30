@@ -95,32 +95,18 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   // Load saved auth on mount OR auto-login as demo user
   useEffect(() => {
-    const loadAuth = async () => {
-      const savedToken = localStorage.getItem('auth_token');
-      const savedUser = localStorage.getItem('auth_user');
-      const autoDemo = localStorage.getItem('auto_demo_mode');
+    const savedToken = localStorage.getItem('auth_token');
+    const savedUser = localStorage.getItem('auth_user');
+    const autoDemo = localStorage.getItem('auto_demo_mode');
 
-      if (savedToken && savedUser) {
-        // Validate token with backend (skip for demo tokens)
-        if (!savedToken.startsWith('demo_')) {
-          const isValid = await validateToken(savedToken);
-          if (!isValid) {
-            // Token invalid - clear auth and show login
-            logout();
-            setIsLoading(false);
-            return;
-          }
-        }
-        setToken(savedToken);
-        setUser(JSON.parse(savedUser));
-        setIsDemoMode(savedToken.startsWith('demo_'));
-      } else if (autoDemo === 'true') {
-        // Auto-login as demo user
-        loginAsDemo('user');
-      }
-      setIsLoading(false);
-    };
-    loadAuth();
+    if (savedToken && savedUser) {
+      setToken(savedToken);
+      setUser(JSON.parse(savedUser));
+      setIsDemoMode(savedToken.startsWith('demo_'));
+    } else if (autoDemo === 'true') {
+      loginAsDemo('user');
+    }
+    setIsLoading(false);
   }, []);
 
   // Function to login as demo user.
