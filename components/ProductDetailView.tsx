@@ -204,7 +204,7 @@ export default function ProductDetailView({
           {/* Seller */}
           <div className="flex items-center gap-3 py-4 border-y">
             <img
-              src={product.seller.user.avatar || '/default-avatar.png'}
+              src={product.seller.user.avatar || 'https://ui-avatars.com/api/?name=User&background=random&color=fff'}
               alt={product.seller.user.nombre}
               className="w-12 h-12 rounded-full"
             />
@@ -271,7 +271,7 @@ export default function ProductDetailView({
                     <div key={review.id} className="border-b pb-4">
                       <div className="flex items-center gap-3 mb-2">
                         <img
-                          src={review.user.avatar || '/default-avatar.png'}
+                          src={review.user.avatar || 'https://ui-avatars.com/api/?name=User&background=random&color=fff'}
                           alt={review.user.nombre}
                           className="w-10 h-10 rounded-full"
                         />

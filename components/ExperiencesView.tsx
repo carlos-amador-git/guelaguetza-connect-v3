@@ -266,7 +266,7 @@ function ExperienceCard({ experience, onClick }: ExperienceCardProps) {
         {/* Host */}
         <div className="flex items-center gap-2 mt-3 pt-3 border-t dark:border-gray-700">
           <img
-            src={experience.host.avatar || '/default-avatar.png'}
+            src={experience.host.avatar || 'https://ui-avatars.com/api/?name=User&background=random&color=fff'}
             alt={experience.host.nombre}
             className="w-8 h-8 rounded-full object-cover"
           />

@@ -68,6 +68,7 @@ export default function StreamWatchView({
         embedUrl: data.embedUrl,
         playbackUrl: data.playbackUrl,
         vodUrl: data.vodUrl,
+        thumbnailUrl: data.thumbnailUrl,
         status: data.status,
       });
 
@@ -226,7 +227,7 @@ export default function StreamWatchView({
       <div className="p-4 bg-gray-800 border-b border-gray-700">
         <div className="flex gap-3">
           <img
-            src={stream.user.avatar || '/default-avatar.png'}
+            src={stream.user.avatar || 'https://ui-avatars.com/api/?name=User&background=random&color=fff'}
             alt={stream.user.nombre}
             className="w-12 h-12 rounded-full"
           />

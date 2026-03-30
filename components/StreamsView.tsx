@@ -452,7 +452,7 @@ function StreamCard({ stream, onClick, canManage, isOwner, onEdit, onDelete }: S
       <div className="p-4">
         <div className="flex gap-3">
           <img
-            src={stream.user.avatar || '/default-avatar.png'}
+            src={stream.user.avatar || 'https://ui-avatars.com/api/?name=User&background=random&color=fff'}
             alt={stream.user.nombre}
             className="w-10 h-10 rounded-full"
           />

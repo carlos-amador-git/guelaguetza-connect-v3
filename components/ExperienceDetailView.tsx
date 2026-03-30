@@ -295,7 +295,7 @@ export default function ExperienceDetailView({
           {/* Host */}
           <div className="flex items-center gap-2 sm:gap-3 py-3 sm:py-4 border-b border-gray-200 dark:border-gray-700">
             <img
-              src={experience.host.avatar || '/default-avatar.png'}
+              src={experience.host.avatar || 'https://ui-avatars.com/api/?name=User&background=random&color=fff'}
               alt=""
               className="w-10 sm:w-12 h-10 sm:h-12 rounded-full object-cover"
             />
@@ -376,7 +376,7 @@ export default function ExperienceDetailView({
                     <article key={review.id} className="border-b border-gray-100 dark:border-gray-700 pb-3 sm:pb-4 last:border-b-0">
                       <div className="flex items-center gap-2 sm:gap-3 mb-2">
                         <img
-                          src={review.user.avatar || '/default-avatar.png'}
+                          src={review.user.avatar || 'https://ui-avatars.com/api/?name=User&background=random&color=fff'}
                           alt=""
                           className="w-8 sm:w-10 h-8 sm:h-10 rounded-full"
                         />
