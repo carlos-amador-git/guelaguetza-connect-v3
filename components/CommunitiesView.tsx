@@ -128,7 +128,7 @@ const CommunitiesView: React.FC<CommunitiesViewProps> = ({ onCommunityClick, onB
                   <ArrowLeft size={20} />
                 </button>
               )}
-              <img src="/images/ui/icon_community.png" alt="Comunidades" className="w-10 h-10 md:w-12 md:h-12 object-contain drop-shadow-md" />
+              <img src="/images/textil_huipil_istmo.png" alt="Comunidades" className="w-10 h-10 md:w-12 md:h-12 rounded-lg object-cover drop-shadow-md" />
               <h2 className="text-xl font-bold">Comunidades</h2>
             </div>
             {isAuthenticated && (
