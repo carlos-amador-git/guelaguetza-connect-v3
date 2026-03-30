@@ -303,22 +303,26 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const register = async (data: RegisterData): Promise<boolean> => {
     try {
+      const registerData = {
+        email: data.email,
+        password: data.password,
+        nombre: data.nombre,
+        apellido: data.apellido,
+        region: data.region,
+        role: data.role,
+        businessName: data.businessName,
+      };
+      console.log('[AUTH] Register request data:', registerData);
+      
       const res = await fetch(`${API_BASE}/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: data.email,
-          password: data.password,
-          nombre: data.nombre,
-          apellido: data.apellido,
-          region: data.region,
-          role: data.role,
-          businessName: data.businessName,
-        }),
+        body: JSON.stringify(registerData),
       });
 
       if (!res.ok) {
         const error = await res.json();
+        console.log('[AUTH] Register failed with status:', res.status, 'error:', error);
         throw new Error(error.message || 'Registration failed');
       }
 
@@ -339,6 +343,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       return true;
     } catch (error) {
       console.error('Register error:', error);
+      // Clear any old tokens on registration failure
+      setToken(null);
+      setUser(null);
 
       // Demo mode: Save user locally when backend unavailable.
       const passwordHash = await hashPassword(data.password);
