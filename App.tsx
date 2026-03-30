@@ -214,19 +214,40 @@ const App: React.FC = () => {
     return user?.role;
   };
 
+  // Define which views each role can access
+  const ROLE_ALLOWED_VIEWS: Record<string, ViewState[]> = {
+    USER: [
+      ViewState.HOME, ViewState.TRANSPORT, ViewState.AR_SCANNER, ViewState.STORIES,
+      ViewState.CHAT, ViewState.PROGRAM, ViewState.LOGIN, ViewState.REGISTER,
+      ViewState.PROFILE, ViewState.USER_PROFILE, ViewState.BADGES, ViewState.LEADERBOARD,
+      ViewState.DIRECT_MESSAGES, ViewState.DIRECT_CHAT, ViewState.SEARCH,
+      ViewState.EVENTS, ViewState.EVENT_DETAIL, ViewState.ANALYTICS,
+      ViewState.COMMUNITIES, ViewState.COMMUNITY_DETAIL,
+      ViewState.TIENDA, ViewState.PRODUCT_DETAIL, ViewState.WISHLIST,
+      ViewState.STREAMS, ViewState.STREAM_WATCH, ViewState.SMART_MAP,
+      ViewState.AR_HOME, ViewState.AR_POINT_DETAIL, ViewState.AR_QUEST,
+      ViewState.AR_VITRINA, ViewState.AR_VITRINA_DETALLE,
+      ViewState.EXPERIENCES, ViewState.EXPERIENCE_DETAIL, ViewState.MY_BOOKINGS,
+      ViewState.AR_DIRECT,
+    ],
+    SELLER: [ViewState.SELLER_DASHBOARD],
+    HOST: [ViewState.SELLER_DASHBOARD],
+    ADMIN: [ViewState.ADMIN],
+  };
+
   // Check if user can access a specific view based on their role
   const canAccessView = (view: ViewState): boolean => {
     const role = getActualRole();
     if (!role) return false;
-    
-    switch (view) {
-      case ViewState.ADMIN:
-        return role === 'ADMIN';
-      case ViewState.SELLER_DASHBOARD:
-        return role === 'SELLER' || role === 'HOST';
-      default:
-        return true; // All users can access other views
+
+    // Admin in "viewing as user" mode can access user views
+    if (role === 'ADMIN' && adminViewingAsUser) {
+      return ROLE_ALLOWED_VIEWS['USER'].includes(view) || view === ViewState.ADMIN;
     }
+
+    const allowed = ROLE_ALLOWED_VIEWS[role];
+    if (!allowed) return false;
+    return allowed.includes(view);
   };
 
   // Handle navigation with role-based access control
@@ -293,6 +314,19 @@ const App: React.FC = () => {
 
   // Phase 6 handlers
   const handleNavigate = (view: ViewState, data?: unknown) => {
+    // Enforce role-based access control on all navigations
+    if (!canAccessView(view)) {
+      const role = getActualRole();
+      if (role === 'ADMIN') {
+        setCurrentView(ViewState.ADMIN);
+      } else if (role === 'SELLER' || role === 'HOST') {
+        setCurrentView(ViewState.SELLER_DASHBOARD);
+      } else {
+        setCurrentView(ViewState.HOME);
+      }
+      return;
+    }
+
     const d = data as Record<string, unknown> | undefined;
     if (d?.experienceId) setSelectedExperienceId(d.experienceId as string);
     if (d?.poiId) setSelectedPoiId(d.poiId as string);
@@ -334,7 +368,7 @@ const App: React.FC = () => {
   const renderView = () => {
     switch (currentView) {
       case ViewState.HOME:
-        return <HomeView setView={setCurrentView} />;
+        return <HomeView setView={handleNavigation} />;
       case ViewState.TRANSPORT:
         return <TransportView onBack={() => setCurrentView(ViewState.HOME)} />;
       case ViewState.AR_SCANNER:
@@ -364,7 +398,7 @@ const App: React.FC = () => {
       case ViewState.REGISTER:
         return <RegisterView setView={setCurrentView} />;
       case ViewState.PROFILE:
-        return <ProfileView setView={setCurrentView} onLogout={() => setShowLanding(true)} />;
+        return <ProfileView setView={handleNavigation} onLogout={() => setShowLanding(true)} />;
       case ViewState.BADGES:
         return <BadgesView onBack={() => setCurrentView(ViewState.PROFILE)} />;
       case ViewState.LEADERBOARD:
@@ -433,9 +467,12 @@ const App: React.FC = () => {
             onBack={() => setShowLanding(true)}
             onNavigate={(view: ViewState) => {
               if (view === ViewState.HOME) {
+                // Admin "view as user" mode — allow navigating to user views
                 setAdminViewingAsUser(true);
+                setCurrentView(view);
+              } else {
+                handleNavigation(view);
               }
-              setCurrentView(view);
             }}
           />
         );
@@ -443,7 +480,7 @@ const App: React.FC = () => {
         return (
           <SellerDashboard
             onBack={() => setShowLanding(true)}
-            onNavigate={(view: ViewState) => setCurrentView(view)}
+            onNavigate={(view: ViewState) => handleNavigation(view)}
           />
         );
       case ViewState.COMMUNITIES:
