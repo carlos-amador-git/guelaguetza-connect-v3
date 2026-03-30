@@ -137,8 +137,9 @@ export default function StreamsView({ onNavigate, onBack }: StreamsViewProps) {
       if (created.status === 'SCHEDULED' || created.status === 'LIVE') {
         setActiveTab('upcoming');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error creating stream:', error);
+      alert(`Error al crear stream: ${error?.message || 'Error desconocido'}`);
     } finally {
       setCreating(false);
     }

@@ -308,8 +308,16 @@ export async function createStream(data: {
   thumbnailUrl?: string;
   category: StreamCategory;
   scheduledAt?: string;
+  embedUrl?: string;
 }) {
-  const response = await api.post<LiveStream>('/streams', data);
+  // Clean undefined/empty fields to avoid Zod validation errors
+  const cleanData: Record<string, unknown> = { title: data.title, category: data.category };
+  if (data.description) cleanData.description = data.description;
+  if (data.thumbnailUrl) cleanData.thumbnailUrl = data.thumbnailUrl;
+  if (data.scheduledAt) cleanData.scheduledAt = data.scheduledAt;
+  if (data.embedUrl) cleanData.embedUrl = data.embedUrl;
+
+  const response = await api.post<LiveStream>('/streams', cleanData);
   return response;
 }
 
