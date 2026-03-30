@@ -6,14 +6,17 @@ import { useGeolocation } from '../../hooks/ar/useGeolocation';
 const TARGET = {
   lat: 19.370198,
   lng: -99.577324,
-  altitude: 50, // meters above ground — makes the marker float in the sky
+  altitude: 8, // meters above ground — visible floating marker
   name: 'Punto de Interés',
   description: 'Toluca, Estado de México',
 };
 
-// Camera field of view (approximate for most phone cameras)
-const CAMERA_HFOV = 60; // horizontal degrees
-const CAMERA_VFOV = 80; // vertical degrees
+// Camera field of view (wide to be forgiving on different devices)
+const CAMERA_HFOV = 70; // horizontal degrees
+const CAMERA_VFOV = 100; // vertical degrees
+
+// Distance threshold: when closer than this, show "arrived" state
+const ARRIVED_DISTANCE = 15; // meters
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -171,38 +174,54 @@ export default function ARLocationView({ onBack }: ARLocationViewProps) {
     ? calculateDistance(position.lat, position.lng, TARGET.lat, TARGET.lng)
     : null;
 
+  // Has the user arrived?
+  const hasArrived = distance != null && distance < ARRIVED_DISTANCE;
+
   // Elevation angle to target (considering altitude above ground)
   const elevationAngle = distance != null && distance > 0
     ? toDeg(Math.atan2(TARGET.altitude, distance))
-    : 0;
+    : 45; // when on top of target, look up ~45°
 
   // Screen position of the marker
   let markerX = 50; // percentage from left (50 = center)
-  let markerY = 50; // percentage from top (50 = center)
+  let markerY = 30; // percentage from top
   let isVisible = false;
 
   if (orientation && bearing != null) {
     // Horizontal: difference between compass heading and target bearing
     const hAngle = normalizeAngle(bearing - orientation.alpha);
 
-    // Vertical: device tilt (beta=90 means phone vertical, looking at horizon)
-    // When phone is vertical, beta≈90. Camera points at horizon.
-    // elevation angle of camera center = 90 - beta (when beta=90, looking at horizon=0°)
-    const cameraPitch = 90 - orientation.beta; // angle above/below horizon camera is pointing
+    // Vertical: device tilt
+    // beta≈90 → phone vertical, camera at horizon
+    // beta≈0 → phone flat face-up, camera at sky
+    const cameraPitch = 90 - orientation.beta;
     const vAngle = elevationAngle - cameraPitch;
 
     // Map angles to screen position
     markerX = 50 + (hAngle / CAMERA_HFOV) * 100;
-    markerY = 50 - (vAngle / CAMERA_VFOV) * 100; // invert: up on screen = negative Y
+    markerY = 50 - (vAngle / CAMERA_VFOV) * 100;
 
-    // Visible if within camera FOV bounds (with some margin)
-    isVisible = markerX > -20 && markerX < 120 && markerY > -20 && markerY < 120;
+    // Clamp to screen edges (always show marker, just at the edge if out of FOV)
+    const clampedX = Math.max(8, Math.min(92, markerX));
+    const clampedY = Math.max(12, Math.min(85, markerY));
+
+    // Check if in natural FOV
+    const inFov = markerX > 5 && markerX < 95 && markerY > 5 && markerY < 95;
+
+    // Always show marker but clamped to edges
+    markerX = clampedX;
+    markerY = clampedY;
+    isVisible = true; // always show — clamped to edges when off-screen
   }
 
   // Scale marker based on distance (closer = bigger)
   const markerScale = distance != null
-    ? Math.max(0.5, Math.min(2, 5000 / Math.max(distance, 100)))
+    ? Math.max(0.6, Math.min(2.5, 3000 / Math.max(distance, 50)))
     : 1;
+
+  // Is the target roughly centered on screen? (user is pointing at it)
+  const isPointingAt = orientation && bearing != null &&
+    Math.abs(normalizeAngle(bearing - orientation.alpha)) < 25;
 
   const hasOrientation = orientation != null;
   const hasPosition = position != null;
@@ -223,59 +242,67 @@ export default function ARLocationView({ onBack }: ARLocationViewProps) {
         <div className="absolute inset-0 bg-gradient-to-b from-gray-900 via-gray-900 to-black" />
       )}
 
-      {/* ── AR Marker projected on camera ─────────────────────────────────── */}
-      {isReady && isVisible && (
-        <div
-          className="absolute z-20 pointer-events-none transition-all duration-100"
-          style={{
-            left: `${markerX}%`,
-            top: `${markerY}%`,
-            transform: `translate(-50%, -50%) scale(${markerScale})`,
-          }}
-        >
-          {/* Pin + pulse ring */}
-          <div className="relative flex flex-col items-center">
-            {/* Pulse rings */}
-            <div className="absolute w-24 h-24 rounded-full border-2 border-red-400/40 animate-ping" />
-            <div className="absolute w-16 h-16 rounded-full border-2 border-red-400/60 animate-pulse" />
-
-            {/* Main marker */}
-            <div className="relative w-14 h-14 rounded-full bg-red-500 shadow-[0_0_30px_rgba(239,68,68,0.7)] flex items-center justify-center border-3 border-white">
-              <MapPin size={24} className="text-white" />
+      {/* ── "Arrived" overlay when very close ─────────────────────────────── */}
+      {isReady && hasArrived && (
+        <div className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none">
+          <div className="text-center">
+            {/* Large pulsing ring */}
+            <div className="relative w-40 h-40 mx-auto mb-4">
+              <div className="absolute inset-0 rounded-full border-4 border-green-400/30 animate-ping" />
+              <div className="absolute inset-4 rounded-full border-4 border-green-400/50 animate-pulse" />
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="w-20 h-20 rounded-full bg-green-500 shadow-[0_0_50px_rgba(34,197,94,0.6)] flex items-center justify-center border-4 border-white">
+                  <MapPin size={32} className="text-white" />
+                </div>
+              </div>
             </div>
-
-            {/* Pin tail */}
-            <div className="w-0.5 h-8 bg-gradient-to-b from-red-500 to-transparent" />
-
-            {/* Label */}
-            <div className="mt-1 bg-black/70 backdrop-blur-md rounded-xl px-4 py-2 text-center border border-white/20 whitespace-nowrap">
-              <p className="text-white font-bold text-sm">{TARGET.name}</p>
-              <p className="text-red-300 text-xs font-medium">
-                {distance != null ? formatDistance(distance) : '...'}
-              </p>
+            <div className="bg-green-500/80 backdrop-blur-md rounded-2xl px-8 py-4 border border-white/20">
+              <p className="text-white font-bold text-lg">Has llegado!</p>
+              <p className="text-white/80 text-sm">{TARGET.name}</p>
+              <p className="text-white/60 text-xs mt-1">{distance != null ? formatDistance(distance) : ''} de distancia</p>
             </div>
           </div>
         </div>
       )}
 
-      {/* ── Direction indicator (edge arrow when marker is off-screen) ──── */}
-      {isReady && !isVisible && bearing != null && (
-        <div className="absolute inset-0 z-20 pointer-events-none">
-          <div
-            className="absolute"
-            style={{
-              left: `${Math.max(5, Math.min(95, markerX))}%`,
-              top: markerY < 0 ? '5%' : markerY > 100 ? '90%' : `${Math.max(5, Math.min(95, markerY))}%`,
-              transform: 'translate(-50%, -50%)',
-            }}
-          >
-            <div className="flex flex-col items-center gap-1 animate-bounce">
-              <div className="w-10 h-10 rounded-full bg-red-500/80 backdrop-blur-sm flex items-center justify-center border-2 border-white/50">
-                <MapPin size={18} className="text-white" />
-              </div>
-              <span className="text-[10px] text-white bg-black/60 rounded-full px-2 py-0.5">
-                {distance != null ? formatDistance(distance) : ''}
-              </span>
+      {/* ── AR Marker projected on camera (when not arrived) ──────────────── */}
+      {isReady && !hasArrived && isVisible && (
+        <div
+          className="absolute z-20 pointer-events-none transition-all duration-150"
+          style={{
+            left: `${markerX}%`,
+            top: `${markerY}%`,
+            transform: `translate(-50%, -100%) scale(${markerScale})`,
+          }}
+        >
+          <div className="relative flex flex-col items-center">
+            {/* Pulse rings — only when pointing at target */}
+            {isPointingAt && (
+              <>
+                <div className="absolute -inset-4 rounded-full border-2 border-red-400/40 animate-ping" />
+                <div className="absolute -inset-2 rounded-full border-2 border-red-400/60 animate-pulse" />
+              </>
+            )}
+
+            {/* Main marker pin */}
+            <div className={`relative w-16 h-16 rounded-full flex items-center justify-center border-4 border-white transition-colors ${
+              isPointingAt
+                ? 'bg-red-500 shadow-[0_0_40px_rgba(239,68,68,0.8)]'
+                : 'bg-red-500/70 shadow-[0_0_20px_rgba(239,68,68,0.4)]'
+            }`}>
+              <MapPin size={28} className="text-white" />
+            </div>
+
+            {/* Pin tail line */}
+            <div className="w-0.5 h-10 bg-gradient-to-b from-red-500 to-transparent" />
+            <div className="w-2 h-2 rounded-full bg-red-500/50" />
+
+            {/* Label */}
+            <div className="mt-2 bg-black/70 backdrop-blur-md rounded-xl px-4 py-2 text-center border border-white/20 whitespace-nowrap">
+              <p className="text-white font-bold text-sm">{TARGET.name}</p>
+              <p className="text-red-300 text-xs font-medium">
+                {distance != null ? formatDistance(distance) : '...'}
+              </p>
             </div>
           </div>
         </div>
@@ -357,7 +384,7 @@ export default function ARLocationView({ onBack }: ARLocationViewProps) {
           </div>
 
           {/* Mini compass + stats */}
-          <div className="grid grid-cols-4 gap-2">
+          <div className="grid grid-cols-3 gap-2">
             <div className="bg-white/5 rounded-lg p-1.5 text-center">
               <p className="text-white font-bold text-xs">
                 {bearing != null ? `${Math.round(bearing)}°` : '--'}
@@ -370,17 +397,11 @@ export default function ARLocationView({ onBack }: ARLocationViewProps) {
               </p>
               <p className="text-white/30 text-[8px]">BRUJULA</p>
             </div>
-            <div className="bg-white/5 rounded-lg p-1.5 text-center">
-              <p className="text-white font-bold text-xs">
-                {`${TARGET.altitude}m`}
+            <div className={`rounded-lg p-1.5 text-center ${isPointingAt ? 'bg-green-500/20' : 'bg-white/5'}`}>
+              <p className={`font-bold text-xs ${isPointingAt ? 'text-green-400' : 'text-white'}`}>
+                {isPointingAt ? '✓' : hasArrived ? '📍' : '←→'}
               </p>
-              <p className="text-white/30 text-[8px]">ALTITUD</p>
-            </div>
-            <div className="bg-white/5 rounded-lg p-1.5 text-center">
-              <p className="text-white font-bold text-xs">
-                {isVisible ? '✓' : '←→'}
-              </p>
-              <p className="text-white/30 text-[8px]">{isVisible ? 'VISIBLE' : 'GIRAR'}</p>
+              <p className="text-white/30 text-[8px]">{isPointingAt ? 'APUNTANDO' : hasArrived ? 'AQUI' : 'GIRAR'}</p>
             </div>
           </div>
         </div>
