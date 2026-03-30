@@ -33,24 +33,22 @@ const Navigation: React.FC<NavigationProps> = ({ currentView, setView, onUserPro
   ];
 
   // Items shown in desktop sidebar - all main items
-  // Icons match the header icon of each page
   const mainNavItems = [
-    { view: ViewState.HOME, icon: '/images/ui/icon_home.png', label: 'Inicio', isImage: true },
-    { view: ViewState.PROGRAM, icon: '/images/ui/icon_events.png', label: 'Programa', isImage: true },
-    { view: ViewState.TIENDA, icon: '/images/ui/icon_market.png', label: 'Tienda', isImage: true },
+    { view: ViewState.HOME, icon: '/images/poi_auditorio_guelaguetza.png', label: 'Inicio', isImage: true },
+    { view: ViewState.PROGRAM, icon: '/images/poi_auditorio_guelaguetza.png', label: 'Programa', isImage: true },
+    { view: ViewState.TIENDA, icon: '/images/product_barro_negro.png', label: 'Tienda', isImage: true },
     { view: ViewState.SEARCH, icon: '/images/poi_santo_domingo.png', label: 'Buscar', isImage: true },
     { view: ViewState.PROFILE, icon: '/images/dance_tehuana.png', label: 'Perfil', isImage: true },
   ];
 
   // Extra items for sidebar "Explorar" section
-  // Icons match the header icon of each page
   const extraNavItems = [
-    { view: ViewState.TRANSPORT, icon: '/images/ui/icon_transport.png', label: 'BinniBus', isImage: true },
-    { view: ViewState.STREAMS, icon: '/images/ui/icon_live.png', label: 'En Vivo', isImage: true },
-    { view: ViewState.SMART_MAP, icon: '/images/ui/icon_plan.png', label: 'Itinerario', isImage: true },
-    { view: ViewState.EXPERIENCES, icon: '/images/ui/icon_events.png', label: 'Tours', isImage: true },
-    { view: ViewState.COMMUNITIES, icon: '/images/ui/icon_community.png', label: 'Comunidad', isImage: true },
-    { view: ViewState.AR_HOME, icon: '/images/ui/icon_ar.png', label: 'AR Guelaguetza', isImage: true },
+    { view: ViewState.TRANSPORT, icon: '/images/poi_santo_domingo.png', label: 'BinniBus', isImage: true },
+    { view: ViewState.STREAMS, icon: '/images/poi_auditorio_guelaguetza.png', label: 'En Vivo', isImage: true },
+    { view: ViewState.SMART_MAP, icon: '/images/poi_monte_alban.png', label: 'Itinerario', isImage: true },
+    { view: ViewState.EXPERIENCES, icon: '/images/experience_mezcal_tasting.png', label: 'Tours', isImage: true },
+    { view: ViewState.COMMUNITIES, icon: '/images/textil_huipil_istmo.png', label: 'Comunidad', isImage: true },
+    { view: ViewState.AR_HOME, icon: '/images/product_alebrije.png', label: 'AR Guelaguetza', isImage: true },
     { view: ViewState.CHAT, icon: '/images/dance_pluma.png', label: 'GuelaBot', isImage: true },
   ];
 
