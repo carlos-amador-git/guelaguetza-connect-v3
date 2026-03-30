@@ -157,25 +157,25 @@ function PointSkeleton() {
 // ============================================================================
 
 interface QuickActionProps {
-  emoji: string;
+  image: string;
   label: string;
   sublabel: string;
   color: string;
   onClick: () => void;
 }
 
-function QuickActionCard({ emoji, label, sublabel, color, onClick }: QuickActionProps) {
+function QuickActionCard({ image, label, sublabel, color, onClick }: QuickActionProps) {
   return (
     <button
       onClick={onClick}
-      className="flex flex-col items-start gap-2 p-5 bg-white rounded-2xl shadow-lg 
-                 border-2 border-transparent hover:border-purple-400 hover:shadow-xl 
+      className="flex flex-col items-start gap-2 p-5 bg-white rounded-2xl shadow-lg
+                 border-2 border-transparent hover:border-purple-400 hover:shadow-xl
                  focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500
                  active:scale-95 transition-all duration-200 w-full text-left"
       style={{ borderTop: `4px solid ${color}`, background: 'linear-gradient(135deg, white 0%, #faf5ff 100%)' }}
     >
       <div className="flex items-center justify-between w-full">
-        <span className="text-3xl" role="img" aria-hidden="true">{emoji}</span>
+        <img src={image} alt={label} className="w-12 h-12 rounded-lg object-cover" />
         <span className="text-xs font-bold text-white bg-purple-600 px-2 py-1 rounded-full">
           3D
         </span>
@@ -570,79 +570,61 @@ export function ARHomeView({ onNavigate, onBack }: ARHomeViewProps) {
 
   return (
     <div className="flex flex-col h-full bg-gradient-to-b from-purple-50 to-gray-50 overflow-hidden" data-testid="ar-home-view">
-      {/* Header with image */}
+      {/* Header */}
       <div className="relative overflow-hidden">
         <img src="/images/verde.png" alt="" className="absolute inset-0 w-full h-full object-cover" />
-        <div className="relative">
-          {/* Banner destacado */}
-          <div className="p-4 pt-8 shadow-lg bg-transparent">
-            <div className="flex items-center justify-between max-w-7xl mx-auto">
-              <div className="text-white">
-                <h2 className="font-bold text-lg">🎨 Vitrina Digital 3D</h2>
-                <p className="text-white/70 text-sm">Explora artesanías y alebrijes en realidad aumentada</p>
-              </div>
+        <header className="relative z-10 shrink-0">
+          <div className="flex items-center justify-between px-4 md:px-6 lg:px-8 py-4 pt-8 max-w-7xl mx-auto">
+            {/* Back + Image + Title */}
+            <div className="flex items-center gap-3">
               <button
-                onClick={() => onNavigate(ViewState.AR_VITRINA, { vitrinaSection: 'trellis' })}
-                className="bg-white text-oaxaca-purple px-4 py-2 rounded-xl font-bold text-sm shadow-md active:scale-95 transition-transform"
+                onClick={onBack}
+                aria-label="Volver"
+                className="p-3 -ml-1 rounded-full bg-white/20 backdrop-blur-sm shadow-md hover:bg-white/30 focus:outline-none
+                           focus:ring-2 focus:ring-white/60 transition-colors"
               >
-                Ver Alebrijes →
+                <ChevronLeft className="w-7 h-7 text-white" />
               </button>
+              <img src="/images/product_alebrije.png" alt="AR Guelaguetza" className="w-10 h-10 md:w-12 md:h-12 rounded-lg object-cover drop-shadow-md" />
+              <div className="text-white">
+                <h1 className="text-xl font-bold leading-tight">
+                  AR Guelaguetza
+                </h1>
+                <p className="text-white/70 text-xs leading-tight">
+                  Explora artesanias y alebrijes en realidad aumentada
+                </p>
+              </div>
+            </div>
+
+            {/* Right side: Audio toggle + Points badge */}
+            <div className="flex items-center gap-2">
+              {/* Audio guide toggle */}
+              <button
+                onClick={audioGuide.toggle}
+                data-testid="audio-guide-toggle"
+                aria-label={audioGuide.isEnabled ? 'Desactivar guia de audio' : 'Activar guia de audio'}
+                aria-pressed={audioGuide.isEnabled}
+                className="p-2 rounded-full bg-white/20 backdrop-blur-sm hover:bg-white/30 focus:outline-none
+                           focus:ring-2 focus:ring-white/60 transition-colors"
+              >
+                {audioGuide.isEnabled ? (
+                  <Volume2 className="w-5 h-5 text-white" aria-hidden="true" />
+                ) : (
+                  <VolumeX className="w-5 h-5 text-white/70" aria-hidden="true" />
+                )}
+              </button>
+
+              {/* Points badge */}
+              <div className="flex items-center gap-1.5 bg-white/20 backdrop-blur-sm border border-white/30
+                              rounded-full px-3 py-1.5">
+                <Trophy className="w-4 h-4 text-oaxaca-yellow" aria-hidden="true" />
+                <span className="text-sm font-bold text-white" aria-label={`${totalUserPoints} puntos`}>
+                  {totalUserPoints.toLocaleString()}
+                </span>
+              </div>
             </div>
           </div>
-          
-          {/* ── Header ─────────────────────────────────────────────────────────── */}
-          <header className="bg-transparent z-10 shrink-0">
-            <div className="flex items-center justify-between px-4 md:px-6 lg:px-8 py-3 max-w-7xl mx-auto">
-              {/* Back + Title */}
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={onBack}
-                  aria-label="Volver"
-                  className="p-3 -ml-1 rounded-full bg-white/20 backdrop-blur-sm shadow-md hover:bg-white/30 focus:outline-none
-                             focus:ring-2 focus:ring-white/60 transition-colors"
-                >
-                  <ChevronLeft className="w-7 h-7 text-white" />
-                </button>
-                <div className="text-white">
-                  <h1 className="text-xl font-bold leading-tight">
-                    Guelaguetza AR
-                  </h1>
-                  <p className="text-white/70 text-xs leading-tight">
-                    Explora las 8 regiones de Oaxaca
-                  </p>
-                </div>
-              </div>
-
-              {/* Right side: Audio toggle + Points badge */}
-              <div className="flex items-center gap-2">
-                {/* Audio guide toggle */}
-                <button
-                  onClick={audioGuide.toggle}
-                  data-testid="audio-guide-toggle"
-                  aria-label={audioGuide.isEnabled ? 'Desactivar guia de audio' : 'Activar guia de audio'}
-                  aria-pressed={audioGuide.isEnabled}
-                  className="p-2 rounded-full bg-white/20 backdrop-blur-sm hover:bg-white/30 focus:outline-none
-                             focus:ring-2 focus:ring-white/60 transition-colors"
-                >
-                  {audioGuide.isEnabled ? (
-                    <Volume2 className="w-5 h-5 text-white" aria-hidden="true" />
-                  ) : (
-                    <VolumeX className="w-5 h-5 text-white/70" aria-hidden="true" />
-                  )}
-                </button>
-
-                {/* Points badge */}
-                <div className="flex items-center gap-1.5 bg-white/20 backdrop-blur-sm border border-white/30
-                                rounded-full px-3 py-1.5">
-                  <Trophy className="w-4 h-4 text-oaxaca-yellow" aria-hidden="true" />
-                  <span className="text-sm font-bold text-white" aria-label={`${totalUserPoints} puntos`}>
-                    {totalUserPoints.toLocaleString()}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </header>
-        </div>
+        </header>
       </div>
 
       {/* ── Scrollable body ────────────────────────────────────────────────── */}
@@ -773,7 +755,7 @@ export function ARHomeView({ onNavigate, onBack }: ARHomeViewProps) {
           <div className="grid grid-cols-2 gap-3" role="list">
             <div role="listitem">
               <QuickActionCard
-                emoji="🏺"
+                image="/images/product_barro_negro.png"
                 label="Artesanias 3D"
                 sublabel="Piezas artesanales en alta calidad"
                 color="#2A9D8F"
@@ -782,7 +764,7 @@ export function ARHomeView({ onNavigate, onBack }: ARHomeViewProps) {
             </div>
             <div role="listitem">
               <QuickActionCard
-                emoji="🦌"
+                image="/images/product_alebrije.png"
                 label="Vitrina de Alebrijes"
                 sublabel="Alebrijes generados con IA"
                 color="#7C3AED"
