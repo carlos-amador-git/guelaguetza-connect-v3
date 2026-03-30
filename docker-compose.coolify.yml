@@ -31,8 +31,8 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     restart: always
-    tmpfs:
-      - /app/public:mode=777
+    volumes:
+      - backend-uploads:/app/public
     environment:
       NODE_ENV: production
       PORT: 3001
@@ -76,5 +76,8 @@ services:
       timeout: 10s
       retries: 3
       start_period: 30s
+
+volumes:
+  backend-uploads:
 
 

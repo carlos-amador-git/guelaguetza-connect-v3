@@ -118,7 +118,6 @@ const SellerDashboard: React.FC<SellerDashboardProps> = ({ onBack, onNavigate })
   }, [token, productFilter]);
 
   useEffect(() => {
-    // Check seller profile first
     const init = async () => {
       if (!token) {
         setLoading(false);
@@ -130,10 +129,15 @@ const SellerDashboard: React.FC<SellerDashboardProps> = ({ onBack, onNavigate })
         setHasSellerProfile(true);
         loadProducts();
       } catch (error: any) {
+        console.log('Profile fetch error:', error?.statusCode, error?.message);
         if (error?.statusCode === 401) {
-          console.error('No autorizado - token inválido o expirado');
+          console.error('Token inválido o expirado');
+          setHasSellerProfile(false);
+        } else if (error?.statusCode === 404 || error?.message?.includes('perfil')) {
+          setHasSellerProfile(false);
+        } else {
+          setHasSellerProfile(false);
         }
-        setHasSellerProfile(false);
         setLoading(false);
       }
     };
@@ -158,8 +162,18 @@ const SellerDashboard: React.FC<SellerDashboardProps> = ({ onBack, onNavigate })
       setHasSellerProfile(true);
       setShowProfileForm(false);
       loadProducts();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error creating profile:', error);
+      if (error?.statusCode === 409 || error?.message?.includes('perfil') || error?.message?.includes('Ya tienes')) {
+        try {
+          const existingProfile = await getSellerProfile();
+          setSellerProfile(existingProfile);
+          setHasSellerProfile(true);
+          setShowProfileForm(false);
+        } catch (fetchError) {
+          console.error('Error fetching existing profile:', fetchError);
+        }
+      }
     } finally {
       setCreatingProfile(false);
     }

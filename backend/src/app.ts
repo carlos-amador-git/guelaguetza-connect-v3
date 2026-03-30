@@ -107,7 +107,7 @@ export async function buildApp(): Promise<FastifyInstance> {
 
   // Serve uploaded files with permissive headers
   await app.register(fastifyStatic, {
-    root: join(process.cwd(), '..', 'public', 'uploads'),
+    root: join(process.cwd(), 'public', 'uploads'),
     prefix: '/uploads/',
     decorateReply: false,
     setHeaders: (res) => {

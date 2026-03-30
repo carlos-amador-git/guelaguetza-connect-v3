@@ -126,6 +126,12 @@ health_check() {
 wait_for_db
 wait_for_redis
 
+if [ ! -d "/app/public/uploads" ]; then
+    echo "${YELLOW}📁 Creating uploads directory...${NC}"
+    mkdir -p /app/public/uploads
+    echo "${GREEN}✅ Uploads directory created!${NC}"
+fi
+
 run_migrations
 
 seed_database
