@@ -29,7 +29,9 @@ const getSecret = (): Uint8Array => {
 };
 
 const authPlugin: FastifyPluginAsync = async (fastify) => {
+  console.log('[AUTH PLUGIN] Registering authenticate decorator');
   fastify.decorate('authenticate', async (request: FastifyRequest, reply: FastifyReply) => {
+    console.log('[AUTH] authenticate called for:', request.url);
     try {
       const authHeader = request.headers.authorization;
       if (!authHeader || !authHeader.startsWith('Bearer ')) {
