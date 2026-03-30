@@ -135,6 +135,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   // Save auth changes
   useEffect(() => {
     if (token && user) {
+      console.log('[AUTH] useEffect: Saving to localStorage, token:', token.substring(0, 20) + '..., user role:', user.role);
       localStorage.setItem('auth_token', token);
       localStorage.setItem('auth_user', JSON.stringify(user));
     } else {
@@ -331,8 +332,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         localStorage.setItem('registered_faces', JSON.stringify(faces));
       }
 
+      console.log('[AUTH] Register success, token received:', result.token ? `present (${result.token.substring(0, 20)}...)` : 'NULL');
       setToken(result.token);
       setUser({ ...result.user, faceData: data.faceData, businessName: data.businessName });
+      console.log('[AUTH] Token set in state, user role:', result.user?.role);
       return true;
     } catch (error) {
       console.error('Register error:', error);

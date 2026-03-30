@@ -56,6 +56,7 @@ class ApiClient {
       'Content-Type': 'application/json',
     };
     const token = getToken();
+    console.log('[API] getHeaders called, token from localStorage:', token ? `present (${token.substring(0, 20)}...)` : 'NULL/UNDEFINED');
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
     }
@@ -76,8 +77,10 @@ class ApiClient {
   }
 
   async get<T>(path: string): Promise<T> {
+    const headers = this.getHeaders();
+    console.log('[API] GET request to:', path, 'Authorization header:', headers['Authorization'] ? 'present' : 'MISSING');
     const res = await fetch(`${this.baseUrl}${path}`, {
-      headers: this.getHeaders(),
+      headers,
     });
     return this.handleResponse<T>(res);
   }

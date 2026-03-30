@@ -120,20 +120,23 @@ const SellerDashboard: React.FC<SellerDashboardProps> = ({ onBack, onNavigate })
 
   useEffect(() => {
     const init = async () => {
+      console.log('[SellerDashboard] init called, token:', token ? `present (${token.substring(0, 20)}...)` : 'NULL/UNDEFINED');
       if (!token) {
+        console.log('[SellerDashboard] No token, setting authInvalid=true');
         setAuthInvalid(true);
         setLoading(false);
         return;
       }
       try {
+        console.log('[SellerDashboard] Calling getSellerProfile with token:', token.substring(0, 20) + '...');
         const profile = await getSellerProfile();
         setSellerProfile(profile);
         setHasSellerProfile(true);
         loadProducts();
       } catch (error: any) {
-        console.log('Profile fetch error:', error?.statusCode, error?.message);
+        console.log('[SellerDashboard] Profile fetch error:', error?.statusCode, error?.message);
         if (error?.statusCode === 401) {
-          console.error('Token inválido o expirado');
+          console.error('[SellerDashboard] Token inválido o expirado');
           logout();
           return;
         } else if (error?.statusCode === 404 || error?.message?.includes('perfil')) {
