@@ -102,7 +102,7 @@ const EventsView: React.FC<EventsViewProps> = ({
             >
               <ArrowLeft size={24} />
             </button>
-            <img src="/images/poi_auditorio_guelaguetza.png" alt="Eventos" className="w-10 h-10 md:w-12 md:h-12 object-cover drop-shadow-md" />
+            <img src="/images/poi_auditorio_guelaguetza.png" alt="Eventos" className="w-10 h-10 md:w-12 md:h-12 rounded-lg object-cover drop-shadow-md" />
             <div>
               <h1 className="text-xl font-bold text-gray-900 dark:text-white">Eventos</h1>
               <p className="text-xs text-gray-500 dark:text-gray-500">Guelaguetza 2025</p>

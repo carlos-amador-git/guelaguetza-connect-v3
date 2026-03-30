@@ -354,7 +354,7 @@ Puedo ayudarte con:
                   <ChevronLeft size={20} aria-hidden="true" />
                 </button>
               )}
-              <img src="/images/dance_pluma.png" alt="GuelaBot" className="w-10 h-10 md:w-12 md:h-12 object-cover drop-shadow-md" />
+              <img src="/images/dance_pluma.png" alt="GuelaBot" className="w-10 h-10 md:w-12 md:h-12 rounded-lg object-cover drop-shadow-md" />
               <h2 className="text-xl font-bold">GuelaBot</h2>
             </div>
             <button

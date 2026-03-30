@@ -234,7 +234,7 @@ const SearchView: React.FC<SearchViewProps> = ({
               <button onClick={onBack} aria-label="Volver" className="p-2 -ml-2 rounded-full hover:bg-white/10 transition">
                 <ArrowLeft size={20} aria-hidden="true" />
               </button>
-              <img src="/images/poi_santo_domingo.png" alt="Buscar" className="w-10 h-10 md:w-12 md:h-12 object-cover drop-shadow-md" />
+              <img src="/images/poi_santo_domingo.png" alt="Buscar" className="w-10 h-10 md:w-12 md:h-12 rounded-lg object-cover drop-shadow-md" />
               <h2 className="text-xl font-bold">Buscar</h2>
             </div>
           </div>
