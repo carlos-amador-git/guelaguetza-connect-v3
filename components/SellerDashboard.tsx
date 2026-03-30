@@ -68,7 +68,7 @@ interface ProductFormData {
 const EMPTY_FORM: ProductFormData = { name: '', description: '', price: '', category: 'ARTESANIA', stock: '0' };
 
 const SellerDashboard: React.FC<SellerDashboardProps> = ({ onBack, onNavigate }) => {
-  const { user, token } = useAuth();
+  const { user, token, logout } = useAuth();
   const [activeTab, setActiveTab] = useState<TabType>('products');
   const [productFilter, setProductFilter] = useState('ALL');
 
@@ -77,6 +77,7 @@ const SellerDashboard: React.FC<SellerDashboardProps> = ({ onBack, onNavigate })
   const [loading, setLoading] = useState(true);
   const [hasSellerProfile, setHasSellerProfile] = useState(false);
   const [creatingProfile, setCreatingProfile] = useState(false);
+  const [authInvalid, setAuthInvalid] = useState(false);
 
   // Product form
   const [showProductForm, setShowProductForm] = useState(false);
@@ -120,6 +121,7 @@ const SellerDashboard: React.FC<SellerDashboardProps> = ({ onBack, onNavigate })
   useEffect(() => {
     const init = async () => {
       if (!token) {
+        setAuthInvalid(true);
         setLoading(false);
         return;
       }
@@ -132,7 +134,8 @@ const SellerDashboard: React.FC<SellerDashboardProps> = ({ onBack, onNavigate })
         console.log('Profile fetch error:', error?.statusCode, error?.message);
         if (error?.statusCode === 401) {
           console.error('Token inválido o expirado');
-          setHasSellerProfile(false);
+          logout();
+          return;
         } else if (error?.statusCode === 404 || error?.message?.includes('perfil')) {
           setHasSellerProfile(false);
         } else {
@@ -164,6 +167,10 @@ const SellerDashboard: React.FC<SellerDashboardProps> = ({ onBack, onNavigate })
       loadProducts();
     } catch (error: any) {
       console.error('Error creating profile:', error);
+      if (error?.statusCode === 401) {
+        logout();
+        return;
+      }
       if (error?.statusCode === 409 || error?.message?.includes('perfil') || error?.message?.includes('Ya tienes')) {
         try {
           const existingProfile = await getSellerProfile();
@@ -381,6 +388,21 @@ const SellerDashboard: React.FC<SellerDashboardProps> = ({ onBack, onNavigate })
 
       {/* Content */}
       <div className="p-4 md:p-6 lg:p-8 max-w-7xl mx-auto">
+        {/* Auth invalid — redirect to login */}
+        {authInvalid && (
+          <div className="text-center py-12">
+            <Package className="mx-auto mb-4 text-gray-300" size={48} />
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">Sesión expirada</h3>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">Por favor inicia sesión nuevamente para continuar</p>
+            <button
+              onClick={() => onBack()}
+              className="bg-oaxaca-yellow text-white px-6 py-3 rounded-xl font-medium hover:bg-oaxaca-yellow/90 transition"
+            >
+              Ir a inicio de sesión
+            </button>
+          </div>
+        )}
+
         {/* No seller profile — setup form */}
         {!hasSellerProfile && !loading && !showProfileForm && (
           <div className="text-center py-12">
