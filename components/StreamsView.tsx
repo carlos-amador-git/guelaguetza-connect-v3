@@ -54,7 +54,7 @@ export default function StreamsView({ onNavigate, onBack }: StreamsViewProps) {
     thumbnailUrl: '',
   });
   
-  const canManageStreams = !!user;
+  const canManageStreams = user?.role === 'ADMIN';
 
   useEffect(() => {
     loadStreams();
