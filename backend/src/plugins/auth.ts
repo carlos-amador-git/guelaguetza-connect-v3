@@ -64,7 +64,8 @@ const authPlugin: FastifyPluginAsync = async (fastify) => {
         ...user,
         userId: user.id,
       };
-    } catch {
+    } catch (error: any) {
+      fastify.log.error('Auth error:', error?.message, error?.code);
       reply.status(401).send({ error: 'No autorizado' });
     }
   });
