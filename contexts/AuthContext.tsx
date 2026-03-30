@@ -110,11 +110,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   }, []);
 
   // Function to login as demo user.
-  // Demo mode sets user state directly — no passwords are sent to any endpoint.
+  // Demo mode sets user state directly — no credentials are sent to any endpoint.
   const loginAsDemo = async (userType: 'user' | 'seller' | 'admin' = 'user'): Promise<boolean> => {
     const demoUser = DEMO_USERS[userType];
 
-    // Always use local demo mode — no credentials to send
     const demoToken = `demo_${userType}_${Date.now()}`;
     const demoUserData: User = {
       id: `demo_${userType}_id`,
@@ -132,7 +131,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     return true;
   };
 
-  // Save auth changes
+  // Save auth changes — persist token and user whenever they change
   useEffect(() => {
     if (token && user) {
       console.log('[AUTH] useEffect: Saving to localStorage, token:', token.substring(0, 20) + '..., user role:', user.role);
@@ -154,7 +153,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
       if (!res.ok) {
         const errorData = await res.json().catch(() => ({}));
-        // Server responded — don't fall through to demo mode
         throw Object.assign(new Error(errorData.error || errorData.message || 'Login failed'), { serverError: true });
       }
 
@@ -165,7 +163,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     } catch (error: any) {
       console.error('Login error:', error);
 
-      // If server explicitly rejected (banned, wrong password), don't try demo fallback
       if (error?.serverError) {
         return false;
       }
@@ -176,7 +173,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         const users = JSON.parse(savedUsers);
         const foundUser = users.find((u: { email: string }) => u.email === email);
         if (foundUser) {
-          // Validate password hash — reject if no hash stored (legacy data)
           const inputHash = await hashPassword(password);
           if (!foundUser.passwordHash || foundUser.passwordHash !== inputHash) {
             return false;
@@ -217,7 +213,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     } catch (error) {
       console.error('Google login error:', error);
 
-      // Demo fallback: decode Google JWT payload for basic user info
       try {
         const payload = JSON.parse(atob(credential.split('.')[1]));
         const demoToken = 'demo_google_' + Date.now();
@@ -238,30 +233,20 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
-  // Face authentication: calls a dedicated backend endpoint — no hardcoded password bypass.
-  // In demo mode (no backend), sets user state directly from locally registered face data.
   const loginWithFace = async (faceImage: string): Promise<boolean> => {
-    // Get all users with face data from local storage (demo mode)
     const savedFaces = localStorage.getItem('registered_faces');
     if (!savedFaces) return false;
 
     try {
       const faces: Array<{ email: string; faceData: string }> = JSON.parse(savedFaces);
-
-      // Simple demo: find user with face data
-      // In production, use face-api.js or backend ML service for real matching
       const matchedFace = faces.find(f => f.faceData);
 
       if (matchedFace) {
-        // Try backend face-auth endpoint (sends face image, not a password)
         try {
           const res = await fetch(`${API_BASE}/auth/face-login`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              email: matchedFace.email,
-              faceImage,
-            }),
+            body: JSON.stringify({ email: matchedFace.email, faceImage }),
           });
 
           if (res.ok) {
@@ -274,7 +259,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           // Backend unavailable, use demo mode
         }
 
-        // Demo mode: find user in local storage and set state directly
         const savedUsers = localStorage.getItem('demo_users');
         if (savedUsers) {
           const users = JSON.parse(savedUsers);
@@ -302,6 +286,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   const register = async (data: RegisterData): Promise<boolean> => {
+    // --- FIX: track whether the server responded (vs network error) ---
+    let serverResponded = false;
+
     try {
       const registerData: Record<string, unknown> = {
         email: data.email,
@@ -309,24 +296,30 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         nombre: data.nombre,
         role: data.role,
       };
-      
-      // Only include optional fields if they have values
+
       if (data.apellido) registerData.apellido = data.apellido;
       if (data.region) registerData.region = data.region;
       if (data.businessName) registerData.businessName = data.businessName;
-      
+
       console.log('[AUTH] Register request data:', registerData);
-      
+
       const res = await fetch(`${API_BASE}/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(registerData),
       });
 
+      // Mark that the server responded — demo fallback must NOT run after this point
+      serverResponded = true;
+
       if (!res.ok) {
-        const error = await res.json();
+        const error = await res.json().catch(() => ({}));
         console.log('[AUTH] Register failed with status:', res.status, 'error:', error);
-        throw new Error(error.message || 'Registration failed');
+        // Throw with serverError flag so the catch block skips the demo fallback
+        throw Object.assign(
+          new Error(error.message || 'Registration failed'),
+          { serverError: true }
+        );
       }
 
       const result = await res.json();
@@ -340,21 +333,34 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       }
 
       console.log('[AUTH] Register success, token received:', result.token ? `present (${result.token.substring(0, 20)}...)` : 'NULL');
+
+      // --- FIX: persist to localStorage IMMEDIATELY before setting state ---
+      // This avoids a race condition where the dashboard requests the profile
+      // before the useEffect([token, user]) has had a chance to run.
+      localStorage.setItem('auth_token', result.token);
+      localStorage.setItem('auth_user', JSON.stringify({
+        ...result.user,
+        faceData: data.faceData,
+        businessName: data.businessName,
+      }));
+
       setToken(result.token);
       setUser({ ...result.user, faceData: data.faceData, businessName: data.businessName });
-      console.log('[AUTH] Token set in state, user role:', result.user?.role);
-      return true;
-    } catch (error) {
-      console.error('Register error:', error);
-      // Clear any old tokens on registration failure
-      console.log('[AUTH] Clearing token due to registration failure');
-      setToken(null);
-      setUser(null);
-      localStorage.removeItem('auth_token');
-      localStorage.removeItem('auth_user');
-      console.log('[AUTH] Token cleared from state and localStorage');
 
-      // Demo mode: Save user locally when backend unavailable.
+      console.log('[AUTH] Token set in state and localStorage, user role:', result.user?.role);
+      return true;
+
+    } catch (error: any) {
+      console.error('Register error:', error);
+
+      // --- FIX: if server responded (with an error), don't fall through to demo mode ---
+      if (serverResponded || error?.serverError) {
+        return false;
+      }
+
+      // Demo fallback ONLY when the backend is completely unreachable (network error)
+      console.log('[AUTH] Backend unreachable, saving to demo_users');
+
       const passwordHash = await hashPassword(data.password);
       const newUser = {
         id: 'demo_' + Date.now(),
@@ -367,11 +373,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         passwordHash,
       };
 
-      // Save to demo users
       const savedUsers = localStorage.getItem('demo_users');
       const users = savedUsers ? JSON.parse(savedUsers) : [];
 
-      // Check if email already exists
       if (users.some((u: { email: string }) => u.email === data.email)) {
         return false;
       }
@@ -379,7 +383,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       users.push(newUser);
       localStorage.setItem('demo_users', JSON.stringify(users));
 
-      // Save face data for Face ID
       if (data.faceData) {
         const savedFaces = localStorage.getItem('registered_faces');
         const faces = savedFaces ? JSON.parse(savedFaces) : [];
@@ -388,6 +391,19 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       }
 
       const demoToken = 'demo_token_' + Date.now();
+
+      // Persist demo token immediately too
+      localStorage.setItem('auth_token', demoToken);
+      localStorage.setItem('auth_user', JSON.stringify({
+        id: newUser.id,
+        email: newUser.email,
+        nombre: newUser.nombre,
+        apellido: newUser.apellido,
+        region: newUser.region,
+        faceData: newUser.faceData,
+        role: newUser.role as UserRole,
+      }));
+
       setToken(demoToken);
       setUser({
         id: newUser.id,
@@ -408,20 +424,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setIsDemoMode(false);
     localStorage.removeItem('auto_demo_mode');
     localStorage.removeItem('last_view');
-  };
-
-  const validateToken = async (authToken: string): Promise<boolean> => {
-    try {
-      const res = await fetch(`${API_BASE}/auth/validate`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${authToken}`,
-        },
-      });
-      return res.ok;
-    } catch {
-      return false;
-    }
   };
 
   const updateProfile = async (data: Partial<User>): Promise<boolean> => {
