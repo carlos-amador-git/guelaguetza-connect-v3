@@ -94,8 +94,20 @@ const ProfileView: React.FC<ProfileViewProps> = ({ setView, onLogout }) => {
       <div className="relative overflow-hidden">
         <img src="/images/verde.png" alt="" className="absolute inset-0 w-full h-full object-cover" />
         <div className="relative p-6 md:px-6 lg:px-8 pt-8 pb-20 text-white max-w-7xl mx-auto w-full">
-          <h2 className="font-bold text-xl mb-1">Mi Perfil</h2>
-          <p className="text-white/70 text-sm">Gestiona tu cuenta</p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="font-bold text-xl mb-1">Mi Perfil</h2>
+              <p className="text-white/70 text-sm">Gestiona tu cuenta</p>
+            </div>
+            <button
+              onClick={() => setShowLogoutConfirm(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-white/20 hover:bg-red-500/80 rounded-full transition"
+              title="Cerrar sesión"
+            >
+              <LogOut size={16} />
+              <span className="text-xs font-medium hidden sm:inline">Salir</span>
+            </button>
+          </div>
         </div>
       </div>
 
