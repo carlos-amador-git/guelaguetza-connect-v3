@@ -68,6 +68,13 @@ export default function StreamsView({ onNavigate, onBack }: StreamsViewProps) {
         getUpcomingStreams(),
         getStreams({ status: 'ENDED', limit: 20 }),
       ]);
+      console.log('[StreamsView] Loaded streams:', {
+        liveCount: live.length,
+        upcomingCount: upcoming.length,
+        pastCount: past.streams.length,
+        live: live.map(s => ({ id: s.id, title: s.title, status: s.status })),
+        upcoming: upcoming.map(s => ({ id: s.id, title: s.title, status: s.status })),
+      });
       setLiveStreams(live);
       setUpcomingStreams(upcoming);
       setPastStreams(past.streams);
@@ -122,6 +129,7 @@ export default function StreamsView({ onNavigate, onBack }: StreamsViewProps) {
       };
       
       const created = await createStream(streamDataToSend);
+      console.log('[StreamsView] Created stream:', { id: created.id, title: created.title, status: created.status, embedUrl: created.embedUrl });
       setShowCreateModal(false);
       setNewStream({ title: '', description: '', category: 'DANZA', scheduledAt: '', thumbnailUrl: '' });
       loadStreams();
