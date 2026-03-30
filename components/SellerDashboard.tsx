@@ -105,6 +105,7 @@ const SellerDashboard: React.FC<SellerDashboardProps> = ({ onBack, onNavigate })
     setLoading(true);
     try {
       const result = await getMyProducts({ category: productFilter === 'ALL' ? undefined : productFilter });
+      console.log('[SellerDashboard] loadProducts result:', result.products.map(p => ({ id: p.id, name: p.name, images: p.images })));
       setProducts(result.products);
       setHasSellerProfile(true);
     } catch (error: any) {
@@ -247,10 +248,13 @@ const SellerDashboard: React.FC<SellerDashboardProps> = ({ onBack, onNavigate })
     setUploadingImage(true);
     try {
       for (const file of Array.from(files)) {
+        console.log('[SellerDashboard] Uploading image:', file.name);
         const url = await uploadProductImage(file);
+        console.log('[SellerDashboard] Uploaded image URL:', url);
         setFormImages(prev => [...prev, url]);
       }
-    } catch {
+    } catch (err) {
+      console.error('[SellerDashboard] Image upload error:', err);
       setFormError('Error al subir imagen');
     } finally {
       setUploadingImage(false);

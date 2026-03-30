@@ -289,18 +289,25 @@ export async function uploadProductImage(file: File): Promise<string> {
   formData.append('file', file);
 
   const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:3001') + '/api';
+  console.log('[API] Uploading image to:', `${API_URL}/upload/image`);
   const res = await fetch(`${API_URL}/upload/image`, {
     method: 'POST',
     headers: { 'Authorization': `Bearer ${token}` },
     body: formData,
   });
 
-  if (!res.ok) throw new Error('Error al subir imagen');
+  if (!res.ok) {
+    console.error('[API] Image upload failed:', res.status, await res.text());
+    throw new Error('Error al subir imagen');
+  }
   const data = await res.json();
+  console.log('[API] Image upload response:', data);
   // Return full URL so images work across ports
   const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
   const url = data.data.url;
-  return url.startsWith('http') ? url : `${apiUrl}${url}`;
+  const fullUrl = url.startsWith('http') ? url : `${apiUrl}${url}`;
+  console.log('[API] Returning image URL:', fullUrl);
+  return fullUrl;
 }
 
 // Reviews
