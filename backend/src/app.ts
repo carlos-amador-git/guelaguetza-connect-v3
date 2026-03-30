@@ -111,12 +111,18 @@ export async function buildApp(): Promise<FastifyInstance> {
   await mkdir(uploadsDir, { recursive: true });
   await app.register(fastifyStatic, {
     root: uploadsDir,
-    prefix: '/uploads/',
+    prefix: '/api/uploads/',
     decorateReply: false,
     setHeaders: (res) => {
       res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
       res.setHeader('Access-Control-Allow-Origin', '*');
     },
+  });
+
+  // Redirect legacy /uploads/ URLs to /api/uploads/ for backwards compatibility
+  app.get('/uploads/*', async (request, reply) => {
+    const filename = (request.params as { '*': string })['*'];
+    return reply.redirect(301, `/api/uploads/${filename}`);
   });
 
   // Register plugins
