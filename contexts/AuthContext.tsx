@@ -11,6 +11,7 @@ interface User {
   region?: string;
   faceData?: string; // Base64 encoded face image for Face ID
   role?: UserRole;
+  businessName?: string; // Seller's store name
 }
 
 interface AuthContextType {
@@ -332,7 +333,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       }
 
       setToken(result.token);
-      setUser({ ...result.user, faceData: data.faceData });
+      setUser({ ...result.user, faceData: data.faceData, businessName: data.businessName });
       return true;
     } catch (error) {
       console.error('Register error:', error);

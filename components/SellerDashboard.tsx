@@ -389,7 +389,8 @@ const SellerDashboard: React.FC<SellerDashboardProps> = ({ onBack, onNavigate })
             <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">Crea tu perfil de artesano para empezar a vender productos</p>
             <button
               onClick={() => {
-                setProfileData({ businessName: '', description: '', location: user?.region || '' });
+                const defaultBusinessName = (user as any)?.businessName || user?.nombre ? `${user.nombre}'s Store` : '';
+                setProfileData({ businessName: defaultBusinessName, description: '', location: user?.region || '' });
                 setShowProfileForm(true);
               }}
               className="bg-oaxaca-yellow text-white px-6 py-3 rounded-xl font-medium hover:bg-oaxaca-yellow/90 transition flex items-center gap-2 mx-auto"
