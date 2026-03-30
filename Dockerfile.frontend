@@ -93,12 +93,14 @@ http {
             add_header Cache-Control "public, immutable";
         }
 
-        # Imágenes subidas por vendedores/usuarios - servidas desde volumen persistente
+        # Imágenes subidas por vendedores/usuarios - proxy al backend
         location /uploads/ {
-            alias /usr/share/nginx/uploads/;
+            proxy_pass http://backend:3001;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_cache_bypass $http_upgrade;
             expires 30d;
             add_header Cache-Control "public";
-            try_files $uri =404;
         }
 
         location /api {
