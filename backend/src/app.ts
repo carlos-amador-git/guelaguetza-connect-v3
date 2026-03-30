@@ -105,9 +105,9 @@ export async function buildApp(): Promise<FastifyInstance> {
   // Register WebSocket support
   await app.register(websocket);
 
-  // Serve uploaded files with permissive headers
+  // Serve uploaded files with permissive headers (from shared volume)
   await app.register(fastifyStatic, {
-    root: join(process.cwd(), 'public', 'uploads'),
+    root: '/app/public/uploads',
     prefix: '/uploads/',
     decorateReply: false,
     setHeaders: (res) => {

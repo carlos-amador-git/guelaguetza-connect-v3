@@ -3,7 +3,7 @@ import { randomUUID } from 'crypto';
 import { writeFile, mkdir } from 'fs/promises';
 import { join } from 'path';
 
-const UPLOAD_DIR = join(process.cwd(), 'public', 'uploads');
+const UPLOAD_DIR = '/app/public/uploads';
 
 const uploadLocalRoutes: FastifyPluginAsync = async (fastify) => {
   // Ensure upload directory exists
