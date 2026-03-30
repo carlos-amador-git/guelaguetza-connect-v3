@@ -62,7 +62,27 @@ export default function StreamWatchView({
     try {
       setLoading(true);
       const data = await getStream(streamId);
-      setStream(data);
+      console.log('[StreamWatchView] Stream data:', {
+        id: data.id,
+        title: data.title,
+        embedUrl: data.embedUrl,
+        playbackUrl: data.playbackUrl,
+        vodUrl: data.vodUrl,
+        status: data.status,
+      });
+
+      // Generate embedUrl from thumbnailUrl if not set (for YouTube links)
+      let embedUrl = data.embedUrl;
+      if (!embedUrl && data.thumbnailUrl) {
+        const youtubeMatch = data.thumbnailUrl.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&]+)/);
+        if (youtubeMatch) {
+          embedUrl = `https://www.youtube.com/embed/${youtubeMatch[1]}?autoplay=1`;
+          console.log('[StreamWatchView] Generated embedUrl from thumbnailUrl:', embedUrl);
+        }
+      }
+
+      const streamWithEmbed = { ...data, embedUrl };
+      setStream(streamWithEmbed);
       setMessages(data.messages.reverse());
       setViewerCount(data.viewerCount);
     } catch (error) {
