@@ -19,8 +19,12 @@ declare module 'fastify' {
 
 // Use JWT_ACCESS_SECRET or fallback to JWT_SECRET
 const getSecret = (): Uint8Array => {
+  console.log('[AUTH] getSecret called, checking env vars');
+  console.log('[AUTH] JWT_ACCESS_SECRET set:', !!process.env.JWT_ACCESS_SECRET);
+  console.log('[AUTH] JWT_SECRET set:', !!process.env.JWT_SECRET);
   const secret = process.env.JWT_ACCESS_SECRET || process.env.JWT_SECRET;
   if (!secret) {
+    console.error('[AUTH] No JWT secret found!');
     throw new Error('JWT_ACCESS_SECRET or JWT_SECRET environment variable is required');
   }
   const encoded = new TextEncoder().encode(secret);
