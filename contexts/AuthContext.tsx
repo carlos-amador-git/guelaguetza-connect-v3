@@ -344,8 +344,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     } catch (error) {
       console.error('Register error:', error);
       // Clear any old tokens on registration failure
+      console.log('[AUTH] Clearing token due to registration failure');
       setToken(null);
       setUser(null);
+      localStorage.removeItem('auth_token');
+      localStorage.removeItem('auth_user');
+      console.log('[AUTH] Token cleared from state and localStorage');
 
       // Demo mode: Save user locally when backend unavailable.
       const passwordHash = await hashPassword(data.password);
