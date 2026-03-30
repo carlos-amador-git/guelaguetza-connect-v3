@@ -92,7 +92,7 @@ const uploadLocalRoutes: FastifyPluginAsync = async (fastify) => {
           `Image uploaded: ${data.filename} (${originalKB}KB → ${compressedKB}KB, -${Math.round((1 - buffer.length / rawBuffer.length) * 100)}%)`
         );
 
-        const url = `/api/uploads/${filename}`;
+        const url = `/uploads/${filename}`;
 
         return reply.send({
           success: true,
