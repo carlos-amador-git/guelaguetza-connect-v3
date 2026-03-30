@@ -95,19 +95,32 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   // Load saved auth on mount OR auto-login as demo user
   useEffect(() => {
-    const savedToken = localStorage.getItem('auth_token');
-    const savedUser = localStorage.getItem('auth_user');
-    const autoDemo = localStorage.getItem('auto_demo_mode');
+    const loadAuth = async () => {
+      const savedToken = localStorage.getItem('auth_token');
+      const savedUser = localStorage.getItem('auth_user');
+      const autoDemo = localStorage.getItem('auto_demo_mode');
 
-    if (savedToken && savedUser) {
-      setToken(savedToken);
-      setUser(JSON.parse(savedUser));
-      setIsDemoMode(savedToken.startsWith('demo_'));
-    } else if (autoDemo === 'true') {
-      // Auto-login as demo user
-      loginAsDemo('user');
-    }
-    setIsLoading(false);
+      if (savedToken && savedUser) {
+        // Validate token with backend (skip for demo tokens)
+        if (!savedToken.startsWith('demo_')) {
+          const isValid = await validateToken(savedToken);
+          if (!isValid) {
+            // Token invalid - clear auth and show login
+            logout();
+            setIsLoading(false);
+            return;
+          }
+        }
+        setToken(savedToken);
+        setUser(JSON.parse(savedUser));
+        setIsDemoMode(savedToken.startsWith('demo_'));
+      } else if (autoDemo === 'true') {
+        // Auto-login as demo user
+        loginAsDemo('user');
+      }
+      setIsLoading(false);
+    };
+    loadAuth();
   }, []);
 
   // Function to login as demo user.
@@ -391,6 +404,21 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setUser(null);
     setIsDemoMode(false);
     localStorage.removeItem('auto_demo_mode');
+    localStorage.removeItem('last_view');
+  };
+
+  const validateToken = async (authToken: string): Promise<boolean> => {
+    try {
+      const res = await fetch(`${API_BASE}/auth/me`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${authToken}`,
+        },
+      });
+      return res.ok;
+    } catch {
+      return false;
+    }
   };
 
   const updateProfile = async (data: Partial<User>): Promise<boolean> => {

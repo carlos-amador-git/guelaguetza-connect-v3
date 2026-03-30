@@ -84,7 +84,7 @@ class ErrorBoundary extends React.Component<
 }
 
 const App: React.FC = () => {
-  const { isAuthenticated, isDemoMode, user } = useAuth();
+  const { isAuthenticated, isDemoMode, user, token, isLoading } = useAuth();
 
   // Detect QR code hash routing: #/ar/<modelId> opens AR_DIRECT without login
   const parseArHash = (hash: string): string | null => {
@@ -171,6 +171,13 @@ const App: React.FC = () => {
   useEffect(() => {
     localStorage.setItem('last_view', currentView);
   }, [currentView]);
+
+  // Redirect to landing when token becomes null (logout or invalid)
+  useEffect(() => {
+    if (!token && !isLoading) {
+      setShowLanding(true);
+    }
+  }, [token, isLoading]);
 
   // Handle user selection from landing - receives role directly to avoid race condition
   const handleUserSelected = (selectedRole?: string) => {
