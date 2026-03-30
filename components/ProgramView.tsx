@@ -147,7 +147,7 @@ const ProgramView: React.FC<ProgramViewProps> = ({ onBack }) => {
                 <ArrowLeft size={20} aria-hidden="true" />
               </button>
             )}
-            <img src="/images/poi_auditorio_guelaguetza.png" alt="Programa" className="w-10 h-10 md:w-12 md:h-12 rounded-lg object-cover drop-shadow-md" />
+            <img src="/images/dance_flor_de_pina.png" alt="Programa" className="w-10 h-10 md:w-12 md:h-12 object-cover drop-shadow-md" />
             <h2 className="text-xl font-bold">Programa Guelaguetza 2026</h2>
           </div>
           <button

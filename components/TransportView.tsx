@@ -401,7 +401,7 @@ const TransportView: React.FC<TransportViewProps> = ({ onBack }) => {
                   <ArrowLeft size={20} aria-hidden="true" />
                 </button>
               )}
-              <img src="/images/poi_santo_domingo.png" alt="BinniBus" className="w-10 h-10 md:w-12 md:h-12 rounded-lg object-cover drop-shadow-md" />
+              <img src="/images/poi_santo_domingo.png" alt="BinniBus" className="w-10 h-10 md:w-12 md:h-12 object-cover drop-shadow-md" />
               <div>
                 <h2 className="text-xl font-bold">BinniBus</h2>
                 <p className="text-white/70 text-sm">Transporte oficial Guelaguetza 2025</p>

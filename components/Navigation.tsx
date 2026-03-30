@@ -35,7 +35,7 @@ const Navigation: React.FC<NavigationProps> = ({ currentView, setView, onUserPro
   // Items shown in desktop sidebar - all main items
   const mainNavItems = [
     { view: ViewState.HOME, icon: '/images/poi_auditorio_guelaguetza.png', label: 'Inicio', isImage: true },
-    { view: ViewState.PROGRAM, icon: '/images/poi_auditorio_guelaguetza.png', label: 'Programa', isImage: true },
+    { view: ViewState.PROGRAM, icon: '/images/dance_flor_de_pina.png', label: 'Programa', isImage: true },
     { view: ViewState.TIENDA, icon: '/images/product_barro_negro.png', label: 'Tienda', isImage: true },
     { view: ViewState.SEARCH, icon: '/images/poi_santo_domingo.png', label: 'Buscar', isImage: true },
     { view: ViewState.PROFILE, icon: '/images/dance_tehuana.png', label: 'Perfil', isImage: true },

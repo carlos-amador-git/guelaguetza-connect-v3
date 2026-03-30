@@ -176,7 +176,7 @@ export default function StreamsView({ onNavigate, onBack }: StreamsViewProps) {
               <button onClick={onBack} className="p-2 hover:bg-white/20 rounded-full transition">
                 <ChevronLeft className="w-6 h-6" />
               </button>
-              <img src="/images/poi_auditorio_guelaguetza.png" alt="Streaming" className="w-10 h-10 md:w-12 md:h-12 rounded-lg object-cover drop-shadow-md" />
+              <img src="/images/poi_auditorio_guelaguetza.png" alt="Streaming" className="w-10 h-10 md:w-12 md:h-12 object-cover drop-shadow-md" />
               <div>
                 <h1 className="text-xl md:text-2xl font-bold">Streaming</h1>
                 <p className="text-sm md:text-base text-white/80">
