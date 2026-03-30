@@ -84,7 +84,7 @@ class ErrorBoundary extends React.Component<
 }
 
 const App: React.FC = () => {
-  const { isAuthenticated, isDemoMode, user, token, isLoading } = useAuth();
+  const { isAuthenticated, isDemoMode, user, token, isLoading, loginAsDemo } = useAuth();
 
   // Detect QR code hash routing: #/ar/<modelId> opens AR_DIRECT without login
   const parseArHash = (hash: string): string | null => {
@@ -106,7 +106,14 @@ const App: React.FC = () => {
         const user = JSON.parse(savedUser);
         const savedView = localStorage.getItem('last_view');
         if (savedView && Object.values(ViewState).includes(savedView as ViewState)) {
-          return savedView as ViewState;
+          // Validate saved view against user's role
+          if (savedView === ViewState.ADMIN && user.role !== 'ADMIN') {
+            // Redirect admin-only view to role-appropriate view
+          } else if (savedView === ViewState.SELLER_DASHBOARD && user.role !== 'SELLER' && user.role !== 'HOST') {
+            // Redirect seller-only view to role-appropriate view
+          } else {
+            return savedView as ViewState;
+          }
         }
         // Default to role-specific view
         if (user.role === 'SELLER' || user.role === 'HOST') return ViewState.SELLER_DASHBOARD;
@@ -179,16 +186,83 @@ const App: React.FC = () => {
     }
   }, [token, isLoading]);
 
-  // Handle user selection from landing - receives role directly to avoid race condition
-  const handleUserSelected = (selectedRole?: string) => {
+  // Redirect unauthorized access to role-appropriate view
+  useEffect(() => {
+    if (!canAccessView(currentView)) {
+      const role = getActualRole();
+      if (role === 'ADMIN') {
+        setCurrentView(ViewState.ADMIN);
+      } else if (role === 'SELLER' || role === 'HOST') {
+        setCurrentView(ViewState.SELLER_DASHBOARD);
+      } else {
+        setCurrentView(ViewState.HOME);
+      }
+    }
+  }, [currentView]);
+
+  // Get user's actual role from localStorage
+  const getActualRole = (): string | undefined => {
+    const savedUser = localStorage.getItem('auth_user');
+    if (savedUser) {
+      try {
+        const userData = JSON.parse(savedUser);
+        return userData.role;
+      } catch {
+        return user?.role;
+      }
+    }
+    return user?.role;
+  };
+
+  // Check if user can access a specific view based on their role
+  const canAccessView = (view: ViewState): boolean => {
+    const role = getActualRole();
+    if (!role) return false;
+    
+    switch (view) {
+      case ViewState.ADMIN:
+        return role === 'ADMIN';
+      case ViewState.SELLER_DASHBOARD:
+        return role === 'SELLER' || role === 'HOST';
+      default:
+        return true; // All users can access other views
+    }
+  };
+
+  // Handle navigation with role-based access control
+  const handleNavigation = (view: ViewState) => {
+    if (canAccessView(view)) {
+      setCurrentView(view);
+    } else {
+      // Redirect to appropriate view based on role
+      const role = getActualRole();
+      if (role === 'ADMIN') {
+        setCurrentView(ViewState.ADMIN);
+      } else if (role === 'SELLER' || role === 'HOST') {
+        setCurrentView(ViewState.SELLER_DASHBOARD);
+      } else {
+        setCurrentView(ViewState.HOME);
+      }
+    }
+  };
+
+  // Handle user selection from landing - always use actual stored role for security
+  const handleUserSelected = (_selectedRole?: string) => {
     setShowLanding(false);
     setAdminViewingAsUser(false); // Reset admin view mode
-    // Set initial view based on selected role
-    const role = selectedRole || user?.role;
-    if (role === 'ADMIN') {
+    
+    const actualRole = getActualRole();
+    
+    // Fallback to HOME if no role found
+    if (!actualRole) {
+      setCurrentView(ViewState.HOME);
+      return;
+    }
+    
+    // Enforce role-based access: only allow views matching user's actual role
+    if (actualRole === 'ADMIN') {
       setCurrentView(ViewState.ADMIN);
-    } else if (role === 'SELLER' || role === 'HOST') {
-      // Both SELLER and HOST (legacy) use the unified SellerDashboard
+    } else if (actualRole === 'SELLER' || actualRole === 'HOST') {
       setCurrentView(ViewState.SELLER_DASHBOARD);
     } else {
       setCurrentView(ViewState.HOME);
@@ -611,13 +685,16 @@ const App: React.FC = () => {
             <span className="sm:hidden">Demo</span>
             <DemoUserSelector
               compact
-              onUserChange={(type) => {
-                // Map demo type to role and navigate
+              onUserChange={async (type) => {
+                // Map demo type to role and login as that demo user first
                 const roleMap: Record<string, string> = {
                   user: 'USER',
                   seller: 'SELLER',
                   admin: 'ADMIN',
                 };
+                // Login as demo user first to set the correct role
+                await loginAsDemo(type as 'user' | 'seller' | 'admin');
+                // Then navigate based on the actual stored role
                 handleUserSelected(roleMap[type]);
               }}
             />
@@ -651,7 +728,7 @@ const App: React.FC = () => {
           <div className="hidden md:flex">
             <Navigation
               currentView={currentView}
-              setView={setCurrentView}
+              setView={handleNavigation}
               onUserProfile={handleViewUserProfile}
               variant="sidebar"
               onToggleSidebar={() => setSidebarVisible(!sidebarVisible)}
@@ -675,7 +752,7 @@ const App: React.FC = () => {
             >
               <Navigation
                 currentView={currentView}
-                setView={(view) => { setCurrentView(view); setMobileSidebarOpen(false); }}
+                setView={(view) => { handleNavigation(view); setMobileSidebarOpen(false); }}
                 onUserProfile={handleViewUserProfile}
                 variant="sidebar"
                 onToggleSidebar={() => setMobileSidebarOpen(false)}
@@ -705,7 +782,7 @@ const App: React.FC = () => {
           {!hideNav && (
             <Navigation
               currentView={currentView}
-              setView={setCurrentView}
+              setView={handleNavigation}
               onUserProfile={handleViewUserProfile}
               variant="bottom"
               onOpenMobileSidebar={() => setMobileSidebarOpen(true)}
