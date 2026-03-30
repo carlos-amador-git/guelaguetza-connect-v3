@@ -271,7 +271,7 @@ export default function StreamWatchView({
                 messages.map((msg) => (
                   <div key={msg.id} className="flex gap-2">
                     <img
-                      src={msg.user.avatar || '/default-avatar.png'}
+                      src={msg.user.avatar || 'https://ui-avatars.com/api/?name=User&background=random&color=fff'}
                       alt={msg.user.nombre}
                       className="w-8 h-8 rounded-full"
                     />
