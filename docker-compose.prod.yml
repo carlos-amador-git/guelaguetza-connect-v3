@@ -121,6 +121,9 @@ services:
       CLEANUP_CRON_SCHEDULE: ${CLEANUP_CRON_SCHEDULE:-0 * * * *}
     ports:
       - "3001:3001"
+    volumes:
+      # Volumen persistente para imágenes subidas por vendedores/usuarios
+      - guelaguetza_uploads:/app/public/uploads
     depends_on:
       postgres:
         condition: service_healthy
@@ -170,6 +173,9 @@ services:
     ports:
       - "80:80"
       - "443:443"
+    volumes:
+      # Mismo volumen en solo-lectura - nginx sirve imágenes directamente sin pasar por backend
+      - guelaguetza_uploads:/usr/share/nginx/uploads:ro
     depends_on:
       - backend
     healthcheck:
@@ -206,6 +212,8 @@ volumes:
   postgres_data_prod:
     driver: local
   redis_data_prod:
+    driver: local
+  guelaguetza_uploads:
     driver: local
 
 # ============================================
