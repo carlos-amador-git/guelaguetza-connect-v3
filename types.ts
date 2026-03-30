@@ -41,7 +41,9 @@ export enum ViewState {
   EXPERIENCE_DETAIL = 'EXPERIENCE_DETAIL',
   MY_BOOKINGS = 'MY_BOOKINGS',
   // QR / tourist direct AR view — no login required
-  AR_DIRECT = 'AR_DIRECT'
+  AR_DIRECT = 'AR_DIRECT',
+  // AR location pointer
+  AR_LOCATION = 'AR_LOCATION'
 }
 
 export interface BusRoute {

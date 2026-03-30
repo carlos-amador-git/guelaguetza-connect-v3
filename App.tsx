@@ -31,6 +31,7 @@ import { QuestView } from './components/ar/QuestView';
 import VitrinaArtesanias, { type VitrinaSection } from './components/ar/vitrina/VitrinaArtesanias';
 import VitrinaDetalle from './components/ar/vitrina/VitrinaDetalle';
 import ARDirectView from './components/ar/vitrina/ARDirectView';
+import ARLocationView from './components/ar/ARLocationView';
 import TiendaView from './components/TiendaView';
 import ProductDetailView from './components/ProductDetailView';
 import WishlistView from './components/WishlistView';
@@ -239,7 +240,7 @@ const App: React.FC = () => {
       ViewState.AR_HOME, ViewState.AR_POINT_DETAIL, ViewState.AR_QUEST,
       ViewState.AR_VITRINA, ViewState.AR_VITRINA_DETALLE,
       ViewState.EXPERIENCES, ViewState.EXPERIENCE_DETAIL, ViewState.MY_BOOKINGS,
-      ViewState.AR_DIRECT,
+      ViewState.AR_DIRECT, ViewState.AR_LOCATION,
     ],
     SELLER: [ViewState.SELLER_DASHBOARD],
     HOST: [ViewState.SELLER_DASHBOARD],
@@ -658,6 +659,13 @@ const App: React.FC = () => {
             onBack={() => setCurrentView(ViewState.HOME)}
           />
         );
+      // AR location pointer
+      case ViewState.AR_LOCATION:
+        return (
+          <ARLocationView
+            onBack={() => setCurrentView(ViewState.AR_HOME)}
+          />
+        );
       // QR tourist direct AR — no login required
       case ViewState.AR_DIRECT:
         return (
@@ -701,6 +709,7 @@ const App: React.FC = () => {
     ViewState.AR_VITRINA_DETALLE,
     // QR tourist direct AR — fullscreen, no nav
     ViewState.AR_DIRECT,
+    ViewState.AR_LOCATION,
   ].includes(currentView);
 
   // QR hash route: render AR view immediately, bypass everything else
