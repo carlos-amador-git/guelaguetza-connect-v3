@@ -303,15 +303,18 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const register = async (data: RegisterData): Promise<boolean> => {
     try {
-      const registerData = {
+      const registerData: Record<string, unknown> = {
         email: data.email,
         password: data.password,
         nombre: data.nombre,
-        apellido: data.apellido,
-        region: data.region,
         role: data.role,
-        businessName: data.businessName,
       };
+      
+      // Only include optional fields if they have values
+      if (data.apellido) registerData.apellido = data.apellido;
+      if (data.region) registerData.region = data.region;
+      if (data.businessName) registerData.businessName = data.businessName;
+      
       console.log('[AUTH] Register request data:', registerData);
       
       const res = await fetch(`${API_BASE}/auth/register`, {
