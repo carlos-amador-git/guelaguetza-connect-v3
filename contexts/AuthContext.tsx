@@ -14,14 +14,17 @@ interface User {
   businessName?: string; // Seller's store name
 }
 
+// Login result: true = success, string = error message for the user
+type LoginResult = true | string;
+
 interface AuthContextType {
   user: User | null;
   token: string | null;
   isLoading: boolean;
   isAuthenticated: boolean;
   isDemoMode: boolean;
-  login: (email: string, password: string, role?: UserRole) => Promise<boolean>;
-  loginWithGoogle: (credential: string, role?: UserRole) => Promise<boolean>;
+  login: (email: string, password: string, role?: UserRole) => Promise<LoginResult>;
+  loginWithGoogle: (credential: string, role?: UserRole) => Promise<LoginResult>;
   loginWithFace: (faceImage: string) => Promise<boolean>;
   loginAsDemo: (userType?: 'user' | 'seller' | 'admin') => Promise<boolean>;
   register: (data: RegisterData) => Promise<boolean>;
@@ -41,6 +44,14 @@ interface RegisterData {
 }
 
 const API_BASE = (import.meta.env.VITE_API_URL || 'http://localhost:3001') + '/api';
+
+const ROLE_NAMES: Record<string, string> = {
+  USER: 'Visitante',
+  SELLER: 'Vendedor',
+  HOST: 'Vendedor',
+  ADMIN: 'Administrador',
+  MODERATOR: 'Moderador',
+};
 
 // Demo users for testing without a real backend.
 // Passwords are intentionally omitted — demo mode sets user state directly
@@ -143,13 +154,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   }, [token, user]);
 
-  const login = async (email: string, password: string, role?: UserRole): Promise<boolean> => {
+  const login = async (email: string, password: string, role?: UserRole): Promise<LoginResult> => {
     let serverResponded = false;
     try {
       const res = await fetch(`${API_BASE}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password, role }),
+        body: JSON.stringify({ email, password }),
       });
 
       serverResponded = true;
@@ -160,10 +171,17 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       }
 
       const data = await res.json();
-      // Always use the role from the server (database) — never override with the landing card selection
-      const userData = { ...data.user, role: data.user.role };
+      const serverRole = data.user.role as UserRole;
 
-      // --- FIX: persist immediately so api.ts getToken() finds it synchronously ---
+      // Reject login if the user's actual role doesn't match the selected section
+      if (role && serverRole !== role) {
+        const actualName = ROLE_NAMES[serverRole] || serverRole;
+        const expectedName = ROLE_NAMES[role] || role;
+        return `Esta cuenta es de ${actualName}. Usa la seccion "${expectedName === 'Visitante' ? 'Soy Visitante' : expectedName === 'Vendedor' ? 'Soy Vendedor' : 'Administrador'}" para ingresar, o selecciona "Soy ${actualName}" en la pantalla anterior.`;
+      }
+
+      const userData = { ...data.user, role: serverRole };
+
       localStorage.setItem('auth_token', data.token);
       localStorage.setItem('auth_user', JSON.stringify(userData));
 
@@ -174,7 +192,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       console.error('Login error:', error);
 
       if (serverResponded || error?.serverError) {
-        return false;
+        return 'Credenciales incorrectas. Intenta de nuevo.';
       }
 
       // Demo fallback only for network errors (backend unreachable)
@@ -185,8 +203,17 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         if (foundUser) {
           const inputHash = await hashPassword(password);
           if (!foundUser.passwordHash || foundUser.passwordHash !== inputHash) {
-            return false;
+            return 'Credenciales incorrectas. Intenta de nuevo.';
           }
+
+          const foundRole = (foundUser.role || 'USER') as UserRole;
+
+          // Reject if role doesn't match in demo mode too
+          if (role && foundRole !== role) {
+            const actualName = ROLE_NAMES[foundRole] || foundRole;
+            return `Esta cuenta es de ${actualName}. Selecciona "Soy ${actualName}" en la pantalla anterior.`;
+          }
+
           const demoToken = 'demo_token_' + Date.now();
           const demoUserData = {
             id: foundUser.id,
@@ -195,7 +222,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             apellido: foundUser.apellido,
             region: foundUser.region,
             faceData: foundUser.faceData,
-            role: foundUser.role || 'USER',
+            role: foundRole,
           };
 
           localStorage.setItem('auth_token', demoToken);
@@ -207,11 +234,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         }
       }
 
-      return false;
+      return 'Credenciales incorrectas. Intenta de nuevo.';
     }
   };
 
-  const loginWithGoogle = async (credential: string, role?: UserRole): Promise<boolean> => {
+  const loginWithGoogle = async (credential: string, role?: UserRole): Promise<LoginResult> => {
     try {
       const res = await fetch(`${API_BASE}/auth/google`, {
         method: 'POST',
@@ -222,8 +249,16 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       if (!res.ok) throw new Error('Google login failed');
 
       const data = await res.json();
+      const serverRole = data.user.role as UserRole;
+
+      // Reject if role doesn't match the selected section
+      if (role && serverRole !== role) {
+        const actualName = ROLE_NAMES[serverRole] || serverRole;
+        return `Esta cuenta es de ${actualName}. Selecciona "Soy ${actualName}" en la pantalla anterior.`;
+      }
+
       setToken(data.token);
-      setUser({ ...data.user, role: data.user.role });
+      setUser({ ...data.user, role: serverRole });
       return true;
     } catch (error) {
       console.error('Google login error:', error);
@@ -243,7 +278,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         setIsDemoMode(true);
         return true;
       } catch {
-        return false;
+        return 'Error al iniciar sesion con Google';
       }
     }
   };

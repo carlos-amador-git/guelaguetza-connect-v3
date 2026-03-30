@@ -189,11 +189,11 @@ const LandingView: React.FC<LandingViewProps> = ({ onUserSelected }) => {
     setIsLoading(true);
     setError('');
 
-    const success = await loginWithGoogle(response.credential, ROLE_MAP[selectedRole]);
-    if (success) {
+    const result = await loginWithGoogle(response.credential, ROLE_MAP[selectedRole]);
+    if (result === true) {
       onUserSelected(ROLE_MAP[selectedRole]);
     } else {
-      setError('Error al iniciar sesion con Google');
+      setError(typeof result === 'string' ? result : 'Error al iniciar sesion con Google');
     }
     setIsLoading(false);
   }, [selectedRole, loginWithGoogle, onUserSelected]);
@@ -238,11 +238,11 @@ const LandingView: React.FC<LandingViewProps> = ({ onUserSelected }) => {
     }
 
     setIsLoading(true);
-    const success = await login(email, password, ROLE_MAP[selectedRole]);
-    if (success) {
+    const result = await login(email, password, ROLE_MAP[selectedRole]);
+    if (result === true) {
       onUserSelected(ROLE_MAP[selectedRole]);
     } else {
-      setError('Credenciales incorrectas. Intenta de nuevo.');
+      setError(typeof result === 'string' ? result : 'Credenciales incorrectas. Intenta de nuevo.');
     }
     setIsLoading(false);
   };
