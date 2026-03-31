@@ -148,12 +148,13 @@ const authRoutes: FastifyPluginAsync = async (fastify) => {
         expiresIn: tokens.expiresIn,
         token: tokens.accessToken,
       });
-    } catch (error) {
+    } catch (error: any) {
+      fastify.log.error({ err: error, msg: 'Google auth error' }, 'Google OAuth failed');
+      console.error('[GOOGLE AUTH ERROR]', error?.message, error?.stack);
       if (error instanceof AppError) {
         return reply.status(error.statusCode).send({ error: error.message });
       }
-      // Fallback error
-      return reply.status(500).send({ error: 'Error al autenticar con Google' });
+      return reply.status(500).send({ error: `Error al autenticar con Google: ${error?.message || 'unknown'}` });
     }
   });
 
