@@ -57,11 +57,10 @@ export default function ARLocationView({ onBack }: ARLocationViewProps) {
   const bearing = position ? calculateBearing(position.lat, position.lng, TARGET.lat, TARGET.lng) : null;
   const hasArrived = distance != null && distance < 15;
 
-  // Auto-hide instructions after 6 seconds
+  // Hide instructions when user arrives
   useEffect(() => {
-    const timer = setTimeout(() => setShowInstructions(false), 6000);
-    return () => clearTimeout(timer);
-  }, []);
+    if (hasArrived) setShowInstructions(false);
+  }, [hasArrived]);
 
   // Load A-Frame + AR.js
   const loadScripts = useCallback(async () => {
@@ -157,20 +156,26 @@ export default function ARLocationView({ onBack }: ARLocationViewProps) {
 
       {/* ── Instructions toast (auto-hides) ───────────────────────────────── */}
       {loaded && showInstructions && (
-        <div className="absolute top-24 left-4 right-4 z-50 pointer-events-none animate-fade-in">
+        <div className="absolute top-24 left-4 right-4 z-50">
           <div className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl rounded-2xl p-4 shadow-2xl border border-white/20">
             <div className="flex items-start gap-3">
               <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-red-500 to-orange-500 flex items-center justify-center shrink-0">
                 <Navigation size={20} className="text-white" />
               </div>
-              <div>
+              <div className="flex-1">
                 <p className="font-bold text-gray-900 dark:text-white text-sm">Como usar</p>
                 <p className="text-gray-500 dark:text-gray-400 text-xs mt-1 leading-relaxed">
                   Mueve el telefono lentamente mirando a tu alrededor.
-                  Busca el <span className="text-red-500 font-semibold">marcador 3D rojo</span> flotando
+                  Busca el <span className="text-red-500 font-semibold">marcador 3D</span> flotando
                   en la direccion del destino.
                 </p>
               </div>
+              <button
+                onClick={() => setShowInstructions(false)}
+                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 p-1"
+              >
+                ✕
+              </button>
             </div>
           </div>
         </div>
