@@ -24,12 +24,12 @@ const Navigation: React.FC<NavigationProps> = ({ currentView, setView, onUserPro
   const [showNotifications, setShowNotifications] = useState(false);
   const [showMoreMenu, setShowMoreMenu] = useState(false);
 
-  // Main nav items for mobile (4 items + More button)
+  // Main nav items for mobile (4 items + More button) — same images as sidebar
   const mobileNavItems = [
-    { view: ViewState.HOME, icon: '/images/ui/icon_home.png', label: 'Inicio', isImage: true },
-    { view: ViewState.PROGRAM, icon: CalendarDays, label: 'Programa' },
-    { view: ViewState.TIENDA, icon: '/images/ui/icon_market.png', label: 'Tienda', isImage: true },
-    { view: ViewState.PROFILE, icon: User, label: 'Perfil' },
+    { view: ViewState.HOME, icon: '/images/poi_auditorio_guelaguetza.png', label: 'Inicio', isImage: true },
+    { view: ViewState.PROGRAM, icon: '/images/dance_flor_de_pina.png', label: 'Programa', isImage: true },
+    { view: ViewState.TIENDA, icon: '/images/product_barro_negro.png', label: 'Tienda', isImage: true },
+    { view: ViewState.PROFILE, icon: '/images/dance_tehuana.png', label: 'Perfil', isImage: true },
   ];
 
   // Items shown in desktop sidebar - all main items
@@ -52,10 +52,11 @@ const Navigation: React.FC<NavigationProps> = ({ currentView, setView, onUserPro
     { view: ViewState.CHAT, icon: '/images/dance_pluma.png', label: 'GuelaBot', isImage: true },
   ];
 
-  // All extra items for mobile "More" menu (includes Search)
+  // All extra items for mobile "More" menu (includes Search + AR Location)
   const moreMenuItems = [
-    { view: ViewState.SEARCH, icon: Search, label: 'Buscar' },
+    { view: ViewState.SEARCH, icon: '/images/poi_santo_domingo.png', label: 'Buscar', isImage: true },
     ...extraNavItems,
+    { view: ViewState.AR_LOCATION, icon: '/images/poi_monte_alban.png', label: 'AR Ubicacion', isImage: true },
   ];
 
   const handleNavClick = (view: ViewState) => {
