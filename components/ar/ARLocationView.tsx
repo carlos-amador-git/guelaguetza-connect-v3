@@ -95,14 +95,32 @@ export default function ARLocationView({ onBack }: ARLocationViewProps) {
     const marker = document.createElement('a-entity');
     marker.setAttribute('gps-entity-place', `latitude: ${TARGET.lat}; longitude: ${TARGET.lng};`);
     marker.innerHTML = `
-      <!-- GLB Model floating and rotating -->
+      <!-- Floating group (bobs up and down) -->
       <a-entity position="0 8 0"
-                animation="property: position; from: 0 8 0; to: 0 11 0; dir: alternate; dur: 2000; loop: true; easing: easeInOutSine;"
-                animation__rotate="property: rotation; from: 0 0 0; to: 0 360 0; dur: 8000; loop: true; easing: linear;">
-        <a-gltf-model src="/images/map_location_3d.glb"
-                       scale="1.7 1.7 1.7"
-                       rotation="0 0 0">
-        </a-gltf-model>
+                animation="property: position; from: 0 8 0; to: 0 11 0; dir: alternate; dur: 2000; loop: true; easing: easeInOutSine;">
+
+        <!-- GLB Model (rotates) -->
+        <a-entity animation="property: rotation; from: 0 0 0; to: 0 360 0; dur: 8000; loop: true; easing: linear;">
+          <a-gltf-model src="/images/map_location_3d.glb"
+                         scale="1.7 1.7 1.7"
+                         rotation="0 0 0">
+          </a-gltf-model>
+        </a-entity>
+
+        <!-- Text label (does NOT rotate — always faces camera) -->
+        <a-entity position="0 3 0" look-at="[gps-camera]">
+          <a-plane color="#000000" width="6" height="1.8" opacity="0.75"
+                   material="shader: flat;" position="0 0 0.01">
+          </a-plane>
+          <a-text value="${TARGET.name}" align="center" color="#FFFFFF" width="5"
+                  position="0 0.25 0.02"
+                  font="https://cdn.aframe.io/fonts/Roboto-msdf.json">
+          </a-text>
+          <a-text value="${TARGET.description}" align="center" color="#FBBF24" width="4"
+                  position="0 -0.35 0.02"
+                  font="https://cdn.aframe.io/fonts/Roboto-msdf.json">
+          </a-text>
+        </a-entity>
       </a-entity>
 
       <!-- Glow underneath the model -->
