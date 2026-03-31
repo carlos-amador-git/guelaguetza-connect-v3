@@ -460,10 +460,6 @@ return (
                       className={`w-6 h-6 rounded-full object-cover ${isActive ? 'ring-2 ring-oaxaca-pink' : ''}`}
                     />
                   </div>
-                ) : isProfile ? (
-                  <div className="relative">
-                    <item.icon size={24} strokeWidth={isActive ? 2.5 : 2} />
-                  </div>
                 ) : item.isImage ? (
                   <img
                     src={item.icon as string}
