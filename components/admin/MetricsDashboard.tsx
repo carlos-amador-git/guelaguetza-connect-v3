@@ -164,8 +164,9 @@ const MetricsDashboard: React.FC<MetricsDashboardProps> = ({ onBack, onNavigate 
   return (
     <div className="h-full bg-gray-50 dark:bg-gray-950 overflow-y-auto">
       {/* Header */}
-      <div className="bg-gradient-to-br from-oaxaca-purple via-oaxaca-pink to-oaxaca-purple text-white">
-        <div className="px-4 md:px-6 lg:px-8 py-4 max-w-7xl mx-auto">
+      <div className="relative text-white overflow-hidden">
+        <img src="/images/morado.png" alt="" className="absolute inset-0 w-full h-full object-cover" />
+        <div className="relative px-4 md:px-6 lg:px-8 py-4 max-w-7xl mx-auto">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
               <button
@@ -241,51 +242,59 @@ const MetricsDashboard: React.FC<MetricsDashboardProps> = ({ onBack, onNavigate 
             ))}
           </div>
 
-          {/* Key Metrics */}
+          {/* Key Metrics — Glass cards */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <div className="bg-white/10 backdrop-blur rounded-xl p-3">
-              <div className="flex items-center gap-2 mb-1">
-                <Users size={16} className="text-white/70" />
-                <span className="text-xs text-white/70">Usuarios Totales</span>
+            <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-4 border border-white/10 hover:bg-white/15 transition-all hover:scale-[1.02]">
+              <div className="flex items-center justify-between mb-2">
+                <div className="w-9 h-9 rounded-xl bg-blue-500/30 flex items-center justify-center">
+                  <Users size={18} className="text-blue-300" />
+                </div>
+                <div className="flex items-center gap-1 text-xs text-green-300 bg-green-500/20 px-2 py-0.5 rounded-full">
+                  <TrendingUp size={10} />
+                  <span>+12.5%</span>
+                </div>
               </div>
-              <div className="text-2xl font-bold">{stats?.totalUsers?.toLocaleString() || '12,847'}</div>
-              <div className="flex items-center gap-1 text-xs text-green-300">
-                <TrendingUp size={12} />
-                <span>+12.5%</span>
-              </div>
+              <div className="text-2xl font-extrabold tracking-tight">{stats?.totalUsers?.toLocaleString() || '12,847'}</div>
+              <div className="text-xs text-white/50 mt-0.5">Usuarios Totales</div>
             </div>
-            <div className="bg-white/10 backdrop-blur rounded-xl p-3">
-              <div className="flex items-center gap-2 mb-1">
-                <Eye size={16} className="text-white/70" />
-                <span className="text-xs text-white/70">Usuarios Activos</span>
+            <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-4 border border-white/10 hover:bg-white/15 transition-all hover:scale-[1.02]">
+              <div className="flex items-center justify-between mb-2">
+                <div className="w-9 h-9 rounded-xl bg-emerald-500/30 flex items-center justify-center">
+                  <Eye size={18} className="text-emerald-300" />
+                </div>
+                <div className="flex items-center gap-1 text-xs text-green-300 bg-green-500/20 px-2 py-0.5 rounded-full">
+                  <TrendingUp size={10} />
+                  <span>+8.3%</span>
+                </div>
               </div>
-              <div className="text-2xl font-bold">{stats?.activeUsersToday?.toLocaleString() || '4,567'}</div>
-              <div className="flex items-center gap-1 text-xs text-green-300">
-                <TrendingUp size={12} />
-                <span>+8.3%</span>
-              </div>
+              <div className="text-2xl font-extrabold tracking-tight">{stats?.activeUsersToday?.toLocaleString() || '4,567'}</div>
+              <div className="text-xs text-white/50 mt-0.5">Usuarios Activos</div>
             </div>
-            <div className="bg-white/10 backdrop-blur rounded-xl p-3">
-              <div className="flex items-center gap-2 mb-1">
-                <Activity size={16} className="text-white/70" />
-                <span className="text-xs text-white/70">Nuevos Hoy</span>
+            <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-4 border border-white/10 hover:bg-white/15 transition-all hover:scale-[1.02]">
+              <div className="flex items-center justify-between mb-2">
+                <div className="w-9 h-9 rounded-xl bg-amber-500/30 flex items-center justify-center">
+                  <Activity size={18} className="text-amber-300" />
+                </div>
+                <div className="flex items-center gap-1 text-xs text-green-300 bg-green-500/20 px-2 py-0.5 rounded-full">
+                  <TrendingUp size={10} />
+                  <span>+23%</span>
+                </div>
               </div>
-              <div className="text-2xl font-bold text-green-300">+{stats?.newUsersToday || '234'}</div>
-              <div className="flex items-center gap-1 text-xs text-green-300">
-                <TrendingUp size={12} />
-                <span>+23%</span>
-              </div>
+              <div className="text-2xl font-extrabold tracking-tight text-amber-300">+{stats?.newUsersToday || '234'}</div>
+              <div className="text-xs text-white/50 mt-0.5">Nuevos Hoy</div>
             </div>
-            <div className="bg-white/10 backdrop-blur rounded-xl p-3">
-              <div className="flex items-center gap-2 mb-1">
-                <Image size={16} className="text-white/70" />
-                <span className="text-xs text-white/70">Historias</span>
+            <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-4 border border-white/10 hover:bg-white/15 transition-all hover:scale-[1.02]">
+              <div className="flex items-center justify-between mb-2">
+                <div className="w-9 h-9 rounded-xl bg-pink-500/30 flex items-center justify-center">
+                  <Image size={18} className="text-pink-300" />
+                </div>
+                <div className="flex items-center gap-1 text-xs text-green-300 bg-green-500/20 px-2 py-0.5 rounded-full">
+                  <TrendingUp size={10} />
+                  <span>+15%</span>
+                </div>
               </div>
-              <div className="text-2xl font-bold">{stats?.totalStories?.toLocaleString() || '3,567'}</div>
-              <div className="flex items-center gap-1 text-xs text-green-300">
-                <TrendingUp size={12} />
-                <span>+15%</span>
-              </div>
+              <div className="text-2xl font-extrabold tracking-tight">{stats?.totalStories?.toLocaleString() || '3,567'}</div>
+              <div className="text-xs text-white/50 mt-0.5">Historias</div>
             </div>
           </div>
         </div>
@@ -294,72 +303,95 @@ const MetricsDashboard: React.FC<MetricsDashboardProps> = ({ onBack, onNavigate 
       {/* Content */}
       <div className="p-4 md:p-6 lg:p-8 space-y-4 max-w-7xl mx-auto">
         {/* Real-time Activity */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-              <Activity size={18} className="text-green-500" />
+        <div className="bg-white dark:bg-gray-800 rounded-2xl p-5 shadow-lg border border-gray-100 dark:border-gray-700">
+          <div className="flex items-center justify-between mb-5">
+            <h3 className="font-bold text-gray-900 dark:text-white flex items-center gap-2 text-base">
+              <div className="w-8 h-8 rounded-lg bg-green-500/10 flex items-center justify-center">
+                <Activity size={18} className="text-green-500" />
+              </div>
               Actividad en Tiempo Real
             </h3>
-            <span className="flex items-center gap-1 text-xs text-green-500 bg-green-50 dark:bg-green-900/20 px-2 py-1 rounded-full">
+            <span className="flex items-center gap-1.5 text-xs text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/30 px-3 py-1.5 rounded-full font-medium">
               <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
               En vivo
             </span>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <div className="bg-oaxaca-sky-light dark:bg-oaxaca-sky/20 rounded-xl p-4 text-center">
-              <Eye size={24} className="mx-auto text-oaxaca-sky mb-2" />
-              <div className="text-2xl font-bold text-gray-900 dark:text-white">1,247</div>
-              <div className="text-xs text-gray-500 dark:text-gray-400">Online ahora</div>
+            <div className="relative overflow-hidden bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-2xl p-4 text-center group hover:shadow-md transition-all">
+              <div className="absolute -top-4 -right-4 w-16 h-16 bg-blue-500/10 rounded-full" />
+              <Eye size={28} className="mx-auto text-blue-500 mb-2" />
+              <div className="text-3xl font-extrabold text-gray-900 dark:text-white">1,247</div>
+              <div className="text-xs text-gray-500 dark:text-gray-400 font-medium mt-1">Online ahora</div>
             </div>
-            <div className="bg-oaxaca-pink-light dark:bg-oaxaca-pink/20 rounded-xl p-4 text-center">
-              <Image size={24} className="mx-auto text-oaxaca-pink mb-2" />
-              <div className="text-2xl font-bold text-gray-900 dark:text-white">47</div>
-              <div className="text-xs text-gray-500 dark:text-gray-400">Historias/hora</div>
+            <div className="relative overflow-hidden bg-gradient-to-br from-pink-50 to-rose-50 dark:from-pink-900/20 dark:to-rose-900/20 rounded-2xl p-4 text-center group hover:shadow-md transition-all">
+              <div className="absolute -top-4 -right-4 w-16 h-16 bg-pink-500/10 rounded-full" />
+              <Image size={28} className="mx-auto text-pink-500 mb-2" />
+              <div className="text-3xl font-extrabold text-gray-900 dark:text-white">47</div>
+              <div className="text-xs text-gray-500 dark:text-gray-400 font-medium mt-1">Historias/hora</div>
             </div>
-            <div className="bg-oaxaca-purple-light dark:bg-oaxaca-purple/20 rounded-xl p-4 text-center">
-              <MessageCircle size={24} className="mx-auto text-oaxaca-purple mb-2" />
-              <div className="text-2xl font-bold text-gray-900 dark:text-white">312</div>
-              <div className="text-xs text-gray-500 dark:text-gray-400">Mensajes/hora</div>
+            <div className="relative overflow-hidden bg-gradient-to-br from-purple-50 to-violet-50 dark:from-purple-900/20 dark:to-violet-900/20 rounded-2xl p-4 text-center group hover:shadow-md transition-all">
+              <div className="absolute -top-4 -right-4 w-16 h-16 bg-purple-500/10 rounded-full" />
+              <MessageCircle size={28} className="mx-auto text-purple-500 mb-2" />
+              <div className="text-3xl font-extrabold text-gray-900 dark:text-white">312</div>
+              <div className="text-xs text-gray-500 dark:text-gray-400 font-medium mt-1">Mensajes/hora</div>
             </div>
-            <div className="bg-green-50 dark:bg-green-900/20 rounded-xl p-4 text-center">
-              <ShoppingBag size={24} className="mx-auto text-green-500 mb-2" />
-              <div className="text-2xl font-bold text-gray-900 dark:text-white">$18.5k</div>
-              <div className="text-xs text-gray-500 dark:text-gray-400">Ventas hoy</div>
+            <div className="relative overflow-hidden bg-gradient-to-br from-emerald-50 to-green-50 dark:from-emerald-900/20 dark:to-green-900/20 rounded-2xl p-4 text-center group hover:shadow-md transition-all">
+              <div className="absolute -top-4 -right-4 w-16 h-16 bg-green-500/10 rounded-full" />
+              <ShoppingBag size={28} className="mx-auto text-emerald-500 mb-2" />
+              <div className="text-3xl font-extrabold text-gray-900 dark:text-white">$18.5k</div>
+              <div className="text-xs text-gray-500 dark:text-gray-400 font-medium mt-1">Ventas hoy</div>
             </div>
           </div>
         </div>
 
         {/* Weekly Users Chart */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm">
-          <h3 className="font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-            <BarChart3 size={18} className="text-oaxaca-purple" />
+        <div className="bg-white dark:bg-gray-800 rounded-2xl p-5 shadow-lg border border-gray-100 dark:border-gray-700">
+          <h3 className="font-bold text-gray-900 dark:text-white mb-5 flex items-center gap-2 text-base">
+            <div className="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center">
+              <BarChart3 size={18} className="text-purple-500" />
+            </div>
             Usuarios por Dia
           </h3>
-          <div className="h-48 flex items-end justify-between gap-2">
-            {WEEKLY_USERS.map((data) => (
-              <div key={data.day} className="flex-1 flex flex-col items-center">
-                <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">
-                  {(data.users / 1000).toFixed(1)}k
+          <div className="h-52 flex items-end justify-between gap-2 px-1">
+            {WEEKLY_USERS.map((data, i) => {
+              const height = (data.users / maxWeeklyUsers) * 160;
+              const isMax = data.users === maxWeeklyUsers;
+              return (
+                <div key={data.day} className="flex-1 flex flex-col items-center group">
+                  <div className={`text-xs font-bold mb-1.5 transition-colors ${isMax ? 'text-purple-600 dark:text-purple-400' : 'text-gray-400 dark:text-gray-500'}`}>
+                    {(data.users / 1000).toFixed(1)}k
+                  </div>
+                  <div className="w-full relative">
+                    <div
+                      className={`w-full rounded-xl transition-all duration-500 group-hover:shadow-lg ${
+                        isMax
+                          ? 'bg-gradient-to-t from-purple-600 via-pink-500 to-amber-400 shadow-purple-500/30 shadow-md'
+                          : 'bg-gradient-to-t from-purple-500/80 to-pink-400/80 group-hover:from-purple-600 group-hover:to-pink-500'
+                      }`}
+                      style={{ height: `${height}px`, animationDelay: `${i * 80}ms` }}
+                    />
+                    {isMax && (
+                      <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-amber-400 rounded-full animate-pulse" />
+                    )}
+                  </div>
+                  <div className={`text-xs font-semibold mt-2 ${isMax ? 'text-purple-600 dark:text-purple-400' : 'text-gray-500 dark:text-gray-400'}`}>
+                    {data.day}
+                  </div>
+                  <div className="text-[10px] text-emerald-500 font-medium">+{data.newUsers}</div>
                 </div>
-                <div
-                  className="w-full bg-gradient-to-t from-oaxaca-purple to-oaxaca-pink rounded-t-lg transition-all hover:from-oaxaca-purple/90 hover:to-oaxaca-pink/90"
-                  style={{ height: `${(data.users / maxWeeklyUsers) * 140}px` }}
-                />
-                <div className="text-xs font-medium text-gray-600 dark:text-gray-300 mt-2">
-                  {data.day}
-                </div>
-                <div className="text-[10px] text-green-500">+{data.newUsers}</div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
 
         {/* Two Column Grid */}
         <div className="grid md:grid-cols-2 gap-4">
           {/* Feature Usage */}
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm">
-            <h3 className="font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-              <PieChart size={18} className="text-oaxaca-yellow" />
+          <div className="bg-white dark:bg-gray-800 rounded-2xl p-5 shadow-lg border border-gray-100 dark:border-gray-700">
+            <h3 className="font-bold text-gray-900 dark:text-white mb-5 flex items-center gap-2 text-base">
+              <div className="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center">
+                <PieChart size={18} className="text-amber-500" />
+              </div>
               Uso por Funcionalidad
             </h3>
             <div className="space-y-3">
@@ -389,9 +421,11 @@ const MetricsDashboard: React.FC<MetricsDashboardProps> = ({ onBack, onNavigate 
           </div>
 
           {/* Geographic Distribution */}
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm">
-            <h3 className="font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-              <Globe size={18} className="text-oaxaca-sky" />
+          <div className="bg-white dark:bg-gray-800 rounded-2xl p-5 shadow-lg border border-gray-100 dark:border-gray-700">
+            <h3 className="font-bold text-gray-900 dark:text-white mb-5 flex items-center gap-2 text-base">
+              <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
+                <Globe size={18} className="text-blue-500" />
+              </div>
               Distribucion Geografica
             </h3>
             <div className="space-y-3">
@@ -422,76 +456,61 @@ const MetricsDashboard: React.FC<MetricsDashboardProps> = ({ onBack, onNavigate 
         </div>
 
         {/* Engagement Metrics */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm">
-          <h3 className="font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-            <Heart size={18} className="text-red-500" />
+        <div className="bg-white dark:bg-gray-800 rounded-2xl p-5 shadow-lg border border-gray-100 dark:border-gray-700">
+          <h3 className="font-bold text-gray-900 dark:text-white mb-5 flex items-center gap-2 text-base">
+            <div className="w-8 h-8 rounded-lg bg-red-500/10 flex items-center justify-center">
+              <Heart size={18} className="text-red-500" />
+            </div>
             Metricas de Engagement
           </h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="text-center p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
-              <div className="text-3xl font-bold text-gray-900 dark:text-white">4.8</div>
-              <div className="text-xs text-gray-500 dark:text-gray-400">Rating promedio</div>
-              <div className="flex justify-center mt-1 text-yellow-400">★★★★★</div>
+            <div className="relative overflow-hidden text-center p-4 bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-yellow-900/10 dark:to-orange-900/10 rounded-2xl border border-yellow-100 dark:border-yellow-800/30">
+              <div className="text-4xl font-extrabold text-gray-900 dark:text-white">4.8</div>
+              <div className="text-xs text-gray-500 dark:text-gray-400 font-medium mt-1">Rating promedio</div>
+              <div className="flex justify-center mt-1.5 text-yellow-400 text-lg">★★★★★</div>
             </div>
-            <div className="text-center p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
-              <div className="text-3xl font-bold text-gray-900 dark:text-white">12:34</div>
-              <div className="text-xs text-gray-500 dark:text-gray-400">Tiempo promedio</div>
-              <div className="text-xs text-green-500 mt-1">+2:15 vs ayer</div>
+            <div className="relative overflow-hidden text-center p-4 bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/10 dark:to-cyan-900/10 rounded-2xl border border-blue-100 dark:border-blue-800/30">
+              <div className="text-4xl font-extrabold text-gray-900 dark:text-white">12:34</div>
+              <div className="text-xs text-gray-500 dark:text-gray-400 font-medium mt-1">Tiempo promedio</div>
+              <div className="text-xs text-emerald-500 font-semibold mt-1.5">+2:15 vs ayer</div>
             </div>
-            <div className="text-center p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
-              <div className="text-3xl font-bold text-gray-900 dark:text-white">78%</div>
-              <div className="text-xs text-gray-500 dark:text-gray-400">Tasa de retencion</div>
-              <div className="text-xs text-green-500 mt-1">+5% vs semana</div>
+            <div className="relative overflow-hidden text-center p-4 bg-gradient-to-br from-emerald-50 to-green-50 dark:from-emerald-900/10 dark:to-green-900/10 rounded-2xl border border-emerald-100 dark:border-emerald-800/30">
+              <div className="text-4xl font-extrabold text-emerald-600 dark:text-emerald-400">78%</div>
+              <div className="text-xs text-gray-500 dark:text-gray-400 font-medium mt-1">Tasa de retencion</div>
+              <div className="text-xs text-emerald-500 font-semibold mt-1.5">+5% vs semana</div>
             </div>
-            <div className="text-center p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
-              <div className="text-3xl font-bold text-gray-900 dark:text-white">92</div>
-              <div className="text-xs text-gray-500 dark:text-gray-400">NPS Score</div>
-              <div className="text-xs text-green-500 mt-1">Excelente</div>
+            <div className="relative overflow-hidden text-center p-4 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/10 dark:to-pink-900/10 rounded-2xl border border-purple-100 dark:border-purple-800/30">
+              <div className="text-4xl font-extrabold text-purple-600 dark:text-purple-400">92</div>
+              <div className="text-xs text-gray-500 dark:text-gray-400 font-medium mt-1">NPS Score</div>
+              <div className="text-xs text-emerald-500 font-semibold mt-1.5">Excelente</div>
             </div>
           </div>
         </div>
 
         {/* Content Stats */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm">
-          <h3 className="font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-            <Image size={18} className="text-oaxaca-pink" />
+        <div className="bg-white dark:bg-gray-800 rounded-2xl p-5 shadow-lg border border-gray-100 dark:border-gray-700">
+          <h3 className="font-bold text-gray-900 dark:text-white mb-5 flex items-center gap-2 text-base">
+            <div className="w-8 h-8 rounded-lg bg-pink-500/10 flex items-center justify-center">
+              <Image size={18} className="text-pink-500" />
+            </div>
             Estadisticas de Contenido
           </h3>
           <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
-            <div className="text-center">
-              <div className="text-xl font-bold text-gray-900 dark:text-white">
-                {stats?.totalStories?.toLocaleString() || '3,567'}
+            {[
+              { value: stats?.totalStories?.toLocaleString() || '3,567', label: 'Historias', color: 'from-pink-500 to-rose-500' },
+              { value: stats?.totalComments?.toLocaleString() || '18,345', label: 'Comentarios', color: 'from-blue-500 to-indigo-500' },
+              { value: stats?.totalLikes?.toLocaleString() || '45,901', label: 'Likes', color: 'from-red-500 to-pink-500' },
+              { value: stats?.totalCommunities || '156', label: 'Comunidades', color: 'from-purple-500 to-violet-500' },
+              { value: stats?.totalEvents || '89', label: 'Eventos', color: 'from-amber-500 to-orange-500' },
+              { value: '234', label: 'Productos', color: 'from-emerald-500 to-green-500' },
+            ].map((item) => (
+              <div key={item.label} className="text-center group">
+                <div className={`text-2xl font-extrabold bg-gradient-to-r ${item.color} bg-clip-text text-transparent`}>
+                  {item.value}
+                </div>
+                <div className="text-xs text-gray-500 dark:text-gray-400 font-medium mt-1">{item.label}</div>
               </div>
-              <div className="text-xs text-gray-500">Historias</div>
-            </div>
-            <div className="text-center">
-              <div className="text-xl font-bold text-gray-900 dark:text-white">
-                {stats?.totalComments?.toLocaleString() || '18,345'}
-              </div>
-              <div className="text-xs text-gray-500">Comentarios</div>
-            </div>
-            <div className="text-center">
-              <div className="text-xl font-bold text-gray-900 dark:text-white">
-                {stats?.totalLikes?.toLocaleString() || '45,901'}
-              </div>
-              <div className="text-xs text-gray-500">Likes</div>
-            </div>
-            <div className="text-center">
-              <div className="text-xl font-bold text-gray-900 dark:text-white">
-                {stats?.totalCommunities || '156'}
-              </div>
-              <div className="text-xs text-gray-500">Comunidades</div>
-            </div>
-            <div className="text-center">
-              <div className="text-xl font-bold text-gray-900 dark:text-white">
-                {stats?.totalEvents || '89'}
-              </div>
-              <div className="text-xs text-gray-500">Eventos</div>
-            </div>
-            <div className="text-center">
-              <div className="text-xl font-bold text-gray-900 dark:text-white">234</div>
-              <div className="text-xs text-gray-500">Productos</div>
-            </div>
+            ))}
           </div>
         </div>
       </div>
