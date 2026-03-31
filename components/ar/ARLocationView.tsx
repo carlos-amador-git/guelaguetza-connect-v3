@@ -106,21 +106,6 @@ export default function ARLocationView({ onBack }: ARLocationViewProps) {
                          rotation="0 0 0">
           </a-gltf-model>
         </a-entity>
-
-        <!-- Text label (does NOT rotate — always faces camera) -->
-        <a-entity position="0 3 0" look-at="[gps-camera]">
-          <a-plane color="#000000" width="6" height="1.8" opacity="0.75"
-                   material="shader: flat;" position="0 0 0.01">
-          </a-plane>
-          <a-text value="${TARGET.name}" align="center" color="#FFFFFF" width="5"
-                  position="0 0.25 0.02"
-                  font="https://cdn.aframe.io/fonts/Roboto-msdf.json">
-          </a-text>
-          <a-text value="${TARGET.description}" align="center" color="#FBBF24" width="4"
-                  position="0 -0.35 0.02"
-                  font="https://cdn.aframe.io/fonts/Roboto-msdf.json">
-          </a-text>
-        </a-entity>
       </a-entity>
 
       <!-- Glow underneath the model -->
@@ -172,7 +157,20 @@ export default function ARLocationView({ onBack }: ARLocationViewProps) {
         </div>
       </div>
 
-      {/* ── Instructions toast (auto-hides) ───────────────────────────────── */}
+      {/* ── Floating label (HTML overlay, always readable) ─────────────────── */}
+      {loaded && !hasArrived && (
+        <div className="absolute left-0 right-0 z-50 flex justify-center pointer-events-none" style={{ top: '38%' }}>
+          <div className="bg-black/60 backdrop-blur-md rounded-2xl px-5 py-3 border border-white/15 text-center shadow-xl">
+            <p className="text-white font-bold text-sm">{TARGET.name}</p>
+            <p className="text-amber-400 text-xs mt-0.5">{TARGET.description}</p>
+            {distance != null && (
+              <p className="text-white/60 text-[10px] mt-1">{formatDistance(distance)}</p>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ── Instructions toast ────────────────────────────────────────────── */}
       {loaded && showInstructions && (
         <div className="absolute top-24 left-4 right-4 z-50">
           <div className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl rounded-2xl p-4 shadow-2xl border border-white/20">
