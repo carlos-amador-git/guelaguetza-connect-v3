@@ -51,6 +51,7 @@ export default function ARLocationView({ onBack }: ARLocationViewProps) {
   const [error, setError] = useState<string | null>(null);
   const [showInstructions, setShowInstructions] = useState(true);
   const [previewMode, setPreviewMode] = useState(false);
+  const [dismissedFarBanner, setDismissedFarBanner] = useState(false);
 
   const { position } = useGeolocation({ watchPosition: true, enableHighAccuracy: true });
 
@@ -177,7 +178,7 @@ export default function ARLocationView({ onBack }: ARLocationViewProps) {
       </div>
 
       {/* ── Far away banner ──────────────────────────────────────────────── */}
-      {loaded && isFarAway && !previewMode && (
+      {loaded && isFarAway && !previewMode && !dismissedFarBanner && (
         <div className="absolute top-24 left-4 right-4 z-50">
           <div className="bg-amber-500/90 backdrop-blur-xl rounded-2xl p-4 shadow-xl">
             <div className="flex items-center gap-3">
@@ -193,6 +194,12 @@ export default function ARLocationView({ onBack }: ARLocationViewProps) {
                 className="bg-white text-amber-600 px-3 py-2 rounded-xl text-xs font-bold shrink-0 active:scale-95 transition pointer-events-auto"
               >
                 Preview
+              </button>
+              <button
+                onClick={() => setDismissedFarBanner(true)}
+                className="text-white/80 hover:text-white p-1 pointer-events-auto"
+              >
+                ✕
               </button>
             </div>
           </div>
