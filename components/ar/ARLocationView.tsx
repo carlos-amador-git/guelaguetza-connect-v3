@@ -100,7 +100,7 @@ export default function ARLocationView({ onBack }: ARLocationViewProps) {
                 animation="property: position; from: 0 8 0; to: 0 11 0; dir: alternate; dur: 2000; loop: true; easing: easeInOutSine;"
                 animation__rotate="property: rotation; from: 0 0 0; to: 0 360 0; dur: 8000; loop: true; easing: linear;">
         <a-gltf-model src="/images/map_location_3d.glb"
-                       scale="5 5 5"
+                       scale="1.7 1.7 1.7"
                        rotation="0 0 0">
         </a-gltf-model>
       </a-entity>
