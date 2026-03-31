@@ -41,15 +41,28 @@ export default defineConfig(({ mode }) => {
                 },
               },
               {
-                urlPattern: /^https?:\/\/localhost:3001\/api\/stories/,
+                // Cache API GET requests (stories, streams, products, etc.)
+                urlPattern: /\/api\/(stories|streams|marketplace|transport|events|communities|experiences)/,
                 handler: 'NetworkFirst',
                 options: {
-                  cacheName: 'stories-cache',
+                  cacheName: 'api-data-cache',
                   expiration: {
-                    maxEntries: 50,
-                    maxAgeSeconds: 60 * 60 * 24,
+                    maxEntries: 100,
+                    maxAgeSeconds: 60 * 60 * 24, // 24h
                   },
                   networkTimeoutSeconds: 5,
+                },
+              },
+              {
+                // Cache uploaded product images
+                urlPattern: /\/api\/uploads\//,
+                handler: 'CacheFirst',
+                options: {
+                  cacheName: 'uploads-cache',
+                  expiration: {
+                    maxEntries: 100,
+                    maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
+                  },
                 },
               },
               {
@@ -59,6 +72,18 @@ export default defineConfig(({ mode }) => {
                   cacheName: 'images-cache',
                   expiration: {
                     maxEntries: 100,
+                    maxAgeSeconds: 60 * 60 * 24 * 7,
+                  },
+                },
+              },
+              {
+                // Cache Google profile pictures and external images
+                urlPattern: /^https:\/\/(lh3\.googleusercontent\.com|img\.youtube\.com|ui-avatars\.com)\/.*/,
+                handler: 'CacheFirst',
+                options: {
+                  cacheName: 'external-images-cache',
+                  expiration: {
+                    maxEntries: 50,
                     maxAgeSeconds: 60 * 60 * 24 * 7,
                   },
                 },
