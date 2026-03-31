@@ -20,6 +20,9 @@ export default defineConfig(({ mode }) => {
           manifest: false,
           workbox: {
             globPatterns: ['**/*.{js,css,html,ico,svg,woff,woff2}'],
+            // Offline fallback page
+            navigateFallback: '/offline.html',
+            navigateFallbackDenylist: [/^\/api/, /^\/uploads/],
             // Exclude large images from precache, they'll be cached at runtime
             globIgnores: ['**/images/guelaguetza-*.png'],
             // Allow larger files if needed (default is 2MB)
