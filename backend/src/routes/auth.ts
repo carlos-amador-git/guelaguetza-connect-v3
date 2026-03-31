@@ -113,7 +113,8 @@ const authRoutes: FastifyPluginAsync = async (fastify) => {
 
       if (!user) {
         // Auto-register Google user
-        const bcrypt = await import('bcryptjs');
+        const bcryptModule = await import('bcryptjs');
+        const bcrypt = bcryptModule.default || bcryptModule;
         const randomPassword = await bcrypt.hash(crypto.randomUUID(), 12);
 
         user = await fastify.prisma.user.create({
