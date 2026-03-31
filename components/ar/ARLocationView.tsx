@@ -50,12 +50,14 @@ export default function ARLocationView({ onBack }: ARLocationViewProps) {
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showInstructions, setShowInstructions] = useState(true);
+  const [previewMode, setPreviewMode] = useState(false);
 
   const { position } = useGeolocation({ watchPosition: true, enableHighAccuracy: true });
 
   const distance = position ? calculateDistance(position.lat, position.lng, TARGET.lat, TARGET.lng) : null;
   const bearing = position ? calculateBearing(position.lat, position.lng, TARGET.lat, TARGET.lng) : null;
   const hasArrived = distance != null && distance < 3;
+  const isFarAway = distance != null && distance > 500;
 
   // Hide instructions when user arrives
   useEffect(() => {
@@ -102,7 +104,7 @@ export default function ARLocationView({ onBack }: ARLocationViewProps) {
         <!-- GLB Model (rotates) -->
         <a-entity animation="property: rotation; from: 0 0 0; to: 0 360 0; dur: 8000; loop: true; easing: linear;">
           <a-gltf-model src="/images/map_location_3d.glb"
-                         scale="1.7 1.7 1.7"
+                         scale="0.85 0.85 0.85"
                          rotation="0 0 0">
           </a-gltf-model>
         </a-entity>
@@ -129,14 +131,21 @@ export default function ARLocationView({ onBack }: ARLocationViewProps) {
 
     // ── Camera ──────────────────────────────────────────────────────────
     const camera = document.createElement('a-camera');
-    camera.setAttribute('gps-camera', 'simulateLatitude: 0; simulateLongitude: 0;');
+    if (previewMode) {
+      // Simulate being 20m north of the target so you can see the model
+      const simLat = TARGET.lat + 0.00018; // ~20m north
+      const simLng = TARGET.lng;
+      camera.setAttribute('gps-camera', `simulateLatitude: ${simLat}; simulateLongitude: ${simLng};`);
+    } else {
+      camera.setAttribute('gps-camera', 'simulateLatitude: 0; simulateLongitude: 0;');
+    }
     camera.setAttribute('rotation-reader', '');
     scene.appendChild(camera);
 
     containerRef.current.appendChild(scene);
 
     return () => { if (containerRef.current) containerRef.current.innerHTML = ''; };
-  }, [loaded]);
+  }, [loaded, previewMode]);
 
   return (
     <div className="fixed inset-0 bg-black z-50">
@@ -150,12 +159,56 @@ export default function ARLocationView({ onBack }: ARLocationViewProps) {
             <ChevronLeft size={22} />
           </button>
           <div className="bg-black/40 backdrop-blur-xl rounded-2xl px-5 py-2.5 flex items-center gap-2.5">
-            <div className={`w-2 h-2 rounded-full ${loaded ? 'bg-green-400' : 'bg-yellow-400 animate-pulse'}`} />
-            <span className="text-white text-sm font-semibold">AR Ubicacion</span>
+            <div className={`w-2 h-2 rounded-full ${previewMode ? 'bg-blue-400' : loaded ? 'bg-green-400' : 'bg-yellow-400 animate-pulse'}`} />
+            <span className="text-white text-sm font-semibold">{previewMode ? 'Vista Previa' : 'AR Ubicacion'}</span>
           </div>
-          <div className="w-12" />
+          {loaded && (
+            <button
+              onClick={() => setPreviewMode(!previewMode)}
+              className={`px-3 py-2 rounded-2xl backdrop-blur-xl text-xs font-semibold pointer-events-auto active:scale-95 transition ${
+                previewMode ? 'bg-blue-500 text-white' : 'bg-black/40 text-white'
+              }`}
+            >
+              {previewMode ? 'AR Real' : 'Preview'}
+            </button>
+          )}
+          {!loaded && <div className="w-12" />}
         </div>
       </div>
+
+      {/* ── Far away banner ──────────────────────────────────────────────── */}
+      {loaded && isFarAway && !previewMode && (
+        <div className="absolute top-24 left-4 right-4 z-50">
+          <div className="bg-amber-500/90 backdrop-blur-xl rounded-2xl p-4 shadow-xl">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center shrink-0">
+                <Navigation size={20} className="text-white" />
+              </div>
+              <div className="flex-1">
+                <p className="text-white font-bold text-sm">Estas a {distance != null ? formatDistance(distance) : ''}</p>
+                <p className="text-white/80 text-xs">Activa la vista previa para ver como se ve el AR en el destino</p>
+              </div>
+              <button
+                onClick={() => setPreviewMode(true)}
+                className="bg-white text-amber-600 px-3 py-2 rounded-xl text-xs font-bold shrink-0 active:scale-95 transition pointer-events-auto"
+              >
+                Preview
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Preview mode indicator ────────────────────────────────────────── */}
+      {previewMode && (
+        <div className="absolute top-24 left-4 right-4 z-50 pointer-events-none">
+          <div className="bg-blue-500/90 backdrop-blur-xl rounded-2xl px-4 py-3 shadow-xl">
+            <p className="text-white text-center text-sm">
+              <span className="font-bold">Vista Previa</span> — Simulando estar a 20m del destino
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* ── Floating label (HTML overlay, always readable) ─────────────────── */}
       {loaded && !hasArrived && (
