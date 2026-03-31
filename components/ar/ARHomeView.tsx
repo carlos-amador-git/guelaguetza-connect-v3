@@ -171,7 +171,7 @@ function QuickActionCard({ image, label, sublabel, color, onClick }: QuickAction
       className="flex flex-col items-start gap-2 p-5 bg-white rounded-2xl shadow-lg
                  border-2 border-transparent hover:border-purple-400 hover:shadow-xl
                  focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500
-                 active:scale-95 transition-all duration-200 w-full text-left"
+                 active:scale-95 transition-all duration-200 w-full h-full text-left"
       style={{ borderTop: `4px solid ${color}`, background: 'linear-gradient(135deg, white 0%, #faf5ff 100%)' }}
     >
       <div className="flex items-center justify-between w-full">

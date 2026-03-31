@@ -258,29 +258,15 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         return `Esta cuenta es de ${actualName}. Selecciona "Soy ${actualName}" en la pantalla anterior.`;
       }
 
+      localStorage.setItem('auth_token', data.token);
+      localStorage.setItem('auth_user', JSON.stringify({ ...data.user, role: serverRole }));
+
       setToken(data.token);
       setUser({ ...data.user, role: serverRole });
       return true;
     } catch (error) {
       console.error('Google login error:', error);
-
-      try {
-        const payload = JSON.parse(atob(credential.split('.')[1]));
-        const demoToken = 'demo_google_' + Date.now();
-        setToken(demoToken);
-        setUser({
-          id: 'google_' + payload.sub,
-          email: payload.email,
-          nombre: payload.given_name || payload.name || 'Usuario',
-          apellido: payload.family_name || '',
-          avatar: payload.picture,
-          role: role || 'USER', // Google fallback: no server role available, use card selection
-        });
-        setIsDemoMode(true);
-        return true;
-      } catch {
-        return 'Error al iniciar sesion con Google';
-      }
+      return 'Error al iniciar sesion con Google. Verifica tu conexion.';
     }
   };
 
