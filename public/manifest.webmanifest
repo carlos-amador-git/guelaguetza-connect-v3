@@ -1,5 +1,5 @@
 {
-  "name": "Guelaguetza Connect 2025",
+  "name": "Guelaguetza Connect 2026",
   "short_name": "Guelaguetza",
   "description": "Experiencia digital inmersiva para la maxima fiesta de los Oaxaquenos",
   "start_url": "/",
@@ -55,6 +55,61 @@
       "purpose": "maskable"
     }
   ],
+  "screenshots": [
+    {
+      "src": "/icons/screenshot-mobile.jpg",
+      "sizes": "390x844",
+      "type": "image/jpeg",
+      "form_factor": "narrow",
+      "label": "Guelaguetza Connect - Inicio"
+    },
+    {
+      "src": "/icons/screenshot-desktop.jpg",
+      "sizes": "1280x720",
+      "type": "image/jpeg",
+      "form_factor": "wide",
+      "label": "Guelaguetza Connect - Dashboard"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Tienda",
+      "short_name": "Tienda",
+      "description": "Explora artesanias y productos oaxaquenos",
+      "url": "/?view=TIENDA",
+      "icons": [{ "src": "/icons/icon-96.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "En Vivo",
+      "short_name": "En Vivo",
+      "description": "Transmisiones en vivo de la Guelaguetza",
+      "url": "/?view=STREAMS",
+      "icons": [{ "src": "/icons/icon-96.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "AR Guelaguetza",
+      "short_name": "AR",
+      "description": "Explora Oaxaca en realidad aumentada",
+      "url": "/?view=AR_HOME",
+      "icons": [{ "src": "/icons/icon-96.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Programa",
+      "short_name": "Programa",
+      "description": "Calendario de eventos de la Guelaguetza",
+      "url": "/?view=PROGRAM",
+      "icons": [{ "src": "/icons/icon-96.png", "sizes": "96x96" }]
+    }
+  ],
+  "share_target": {
+    "action": "/?share=true",
+    "method": "GET",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  },
   "categories": ["entertainment", "travel", "social"],
   "lang": "es-MX",
   "dir": "ltr"

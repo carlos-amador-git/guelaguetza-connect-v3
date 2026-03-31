@@ -98,6 +98,10 @@ const App: React.FC = () => {
 
   const initialArModelId = typeof window !== 'undefined' ? parseArHash(window.location.hash) : null;
 
+  // PWA shortcut: ?view=TIENDA opens that view directly
+  const urlParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
+  const shortcutView = urlParams?.get('view') as ViewState | null;
+
   const [currentView, setCurrentView] = useState<ViewState>(() => {
     // Restore last view from localStorage if user is authenticated
     const savedToken = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
@@ -124,6 +128,10 @@ const App: React.FC = () => {
         if (user.role === 'SELLER' || user.role === 'HOST') return ViewState.SELLER_DASHBOARD;
         if (user.role === 'ADMIN') return ViewState.ADMIN;
       } catch {}
+    }
+    // PWA shortcut view
+    if (shortcutView && Object.values(ViewState).includes(shortcutView)) {
+      return shortcutView;
     }
     return initialArModelId ? ViewState.AR_DIRECT : ViewState.HOME;
   });
