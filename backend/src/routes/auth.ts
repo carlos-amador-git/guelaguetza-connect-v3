@@ -128,8 +128,7 @@ const authRoutes: FastifyPluginAsync = async (fastify) => {
         });
       }
 
-      const result = await authService.login(user.email, '');
-      // Since we can't login with empty password, generate tokens directly
+      // Generate tokens directly (Google users don't have a password to verify)
       const tokens = await authService.generateTokenPair(user.id, user.email, user.role);
 
       setRefreshCookie(reply, tokens.refreshToken);

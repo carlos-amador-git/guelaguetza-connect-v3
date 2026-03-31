@@ -858,7 +858,7 @@ const App: React.FC = () => {
 
       {/* PWA Prompts — hidden in AR direct mode (QR scan) */}
       {currentView !== ViewState.AR_DIRECT && <NotificationPrompt />}
-      <UpdatePrompt />
+      {/* <UpdatePrompt /> */}
     </div>
   );
 };
