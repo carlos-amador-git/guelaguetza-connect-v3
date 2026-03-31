@@ -1,12 +1,45 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { ChevronLeft } from 'lucide-react';
+import { ChevronLeft, Navigation, MapPin, Footprints } from 'lucide-react';
+import { useGeolocation } from '../../hooks/ar/useGeolocation';
 
 // ── Target location ─────────────────────────────────────────────────────────
 const TARGET = {
   lat: 19.370198,
   lng: -99.577324,
   name: 'Punto de Interés',
+  description: 'Toluca, Estado de México',
 };
+
+const toRad = (d: number) => (d * Math.PI) / 180;
+const toDeg = (r: number) => (r * 180) / Math.PI;
+
+function calculateBearing(lat1: number, lng1: number, lat2: number, lng2: number): number {
+  const dLng = toRad(lng2 - lng1);
+  const y = Math.sin(dLng) * Math.cos(toRad(lat2));
+  const x =
+    Math.cos(toRad(lat1)) * Math.sin(toRad(lat2)) -
+    Math.sin(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.cos(dLng);
+  return (toDeg(Math.atan2(y, x)) + 360) % 360;
+}
+
+function calculateDistance(lat1: number, lng1: number, lat2: number, lng2: number): number {
+  const R = 6371000;
+  const dLat = toRad(lat2 - lat1);
+  const dLng = toRad(lng2 - lng1);
+  const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+function formatDistance(m: number): string {
+  return m < 1000 ? `${Math.round(m)} m` : `${(m / 1000).toFixed(1)} km`;
+}
+
+function getCardinalDirection(bearing: number): string {
+  const dirs = ['N', 'NE', 'E', 'SE', 'S', 'SO', 'O', 'NO'];
+  return dirs[Math.round(bearing / 45) % 8];
+}
+
+// ── Component ───────────────────────────────────────────────────────────────
 
 interface ARLocationViewProps {
   onBack: () => void;
@@ -16,34 +49,40 @@ export default function ARLocationView({ onBack }: ARLocationViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showInstructions, setShowInstructions] = useState(true);
 
-  // Load A-Frame + AR.js scripts dynamically
+  const { position } = useGeolocation({ watchPosition: true, enableHighAccuracy: true });
+
+  const distance = position ? calculateDistance(position.lat, position.lng, TARGET.lat, TARGET.lng) : null;
+  const bearing = position ? calculateBearing(position.lat, position.lng, TARGET.lat, TARGET.lng) : null;
+  const hasArrived = distance != null && distance < 15;
+
+  // Auto-hide instructions after 6 seconds
+  useEffect(() => {
+    const timer = setTimeout(() => setShowInstructions(false), 6000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Load A-Frame + AR.js
   const loadScripts = useCallback(async () => {
     try {
-      // Load A-Frame first
       if (!(window as any).AFRAME) {
         await loadScript('https://aframe.io/releases/1.4.2/aframe.min.js');
       }
-      // Then AR.js (location-based)
       if (!(window as any).THREEx) {
         await loadScript('https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js');
       }
       setLoaded(true);
-    } catch (err) {
+    } catch {
       setError('Error al cargar AR. Verifica tu conexion.');
-      console.error('AR script load error:', err);
     }
   }, []);
 
-  useEffect(() => {
-    loadScripts();
-  }, [loadScripts]);
+  useEffect(() => { loadScripts(); }, [loadScripts]);
 
-  // Build A-Frame scene once scripts are loaded
+  // Build A-Frame scene
   useEffect(() => {
     if (!loaded || !containerRef.current) return;
-
-    // Clear previous content
     containerRef.current.innerHTML = '';
 
     const scene = document.createElement('a-scene');
@@ -53,90 +92,40 @@ export default function ARLocationView({ onBack }: ARLocationViewProps) {
     scene.style.position = 'absolute';
     scene.style.inset = '0';
 
-    // ── 3D Arrow pointing down at the target location ──────────────────
-
-    // Vertical red arrow (cone pointing down)
-    const arrow = document.createElement('a-entity');
-    arrow.setAttribute('gps-entity-place', `latitude: ${TARGET.lat}; longitude: ${TARGET.lng};`);
-    arrow.setAttribute('look-at', '[gps-camera]');
-
-    arrow.innerHTML = `
-      <!-- Animated floating arrow group -->
-      <a-entity animation="property: position; to: 0 12 0; dir: alternate; dur: 1500; loop: true; easing: easeInOutSine;">
-        <!-- Red cone arrow pointing down -->
-        <a-cone color="#EF4444" radius-bottom="1.5" radius-top="0" height="3"
-                position="0 0 0" rotation="180 0 0"
-                material="shader: standard; emissive: #EF4444; emissiveIntensity: 0.3;">
-        </a-cone>
-        <!-- Arrow shaft -->
-        <a-cylinder color="#EF4444" radius="0.4" height="4" position="0 3.5 0"
-                    material="shader: standard; emissive: #EF4444; emissiveIntensity: 0.2;">
-        </a-cylinder>
-        <!-- Glowing ring around the arrow -->
-        <a-torus color="#FBBF24" radius="2" radius-tubular="0.15" position="0 -1 0" rotation="90 0 0"
-                 material="shader: standard; emissive: #FBBF24; emissiveIntensity: 0.5; opacity: 0.7; transparent: true;"
-                 animation="property: rotation; to: 90 360 0; dur: 4000; loop: true; easing: linear;">
-        </a-torus>
+    // ── 3D GLB Model at target GPS ──────────────────────────────────────
+    const marker = document.createElement('a-entity');
+    marker.setAttribute('gps-entity-place', `latitude: ${TARGET.lat}; longitude: ${TARGET.lng};`);
+    marker.innerHTML = `
+      <!-- GLB Model floating and rotating -->
+      <a-entity position="0 8 0"
+                animation="property: position; from: 0 8 0; to: 0 11 0; dir: alternate; dur: 2000; loop: true; easing: easeInOutSine;"
+                animation__rotate="property: rotation; from: 0 0 0; to: 0 360 0; dur: 8000; loop: true; easing: linear;">
+        <a-gltf-model src="/images/map_location_3d.glb"
+                       scale="5 5 5"
+                       rotation="0 0 0">
+        </a-gltf-model>
       </a-entity>
 
-      <!-- Ground marker: pulsing red circle on the floor -->
-      <a-ring color="#EF4444" radius-inner="2" radius-outer="3" position="0 0.5 0" rotation="-90 0 0"
-              material="opacity: 0.6; transparent: true; emissive: #EF4444; emissiveIntensity: 0.4;"
-              animation="property: scale; from: 0.8 0.8 0.8; to: 1.3 1.3 1.3; dir: alternate; dur: 1000; loop: true;">
-      </a-ring>
-      <a-ring color="#FBBF24" radius-inner="3.5" radius-outer="4.5" position="0 0.3 0" rotation="-90 0 0"
-              material="opacity: 0.4; transparent: true;"
-              animation="property: scale; from: 1 1 1; to: 1.5 1.5 1.5; dir: alternate; dur: 1500; loop: true;">
+      <!-- Glow underneath the model -->
+      <a-circle color="#EF4444" radius="3" position="0 0.2 0" rotation="-90 0 0"
+                material="opacity: 0.4; transparent: true; emissive: #EF4444; emissiveIntensity: 0.6; side: double;"
+                animation="property: scale; from: 0.8 0.8 0.8; to: 1.4 1.4 1.4; dir: alternate; dur: 1200; loop: true;">
+      </a-circle>
+
+      <!-- Second pulse ring -->
+      <a-ring color="#FBBF24" radius-inner="3.5" radius-outer="4" position="0 0.1 0" rotation="-90 0 0"
+              material="opacity: 0.3; transparent: true; side: double;"
+              animation="property: scale; from: 1 1 1; to: 1.8 1.8 1.8; dir: alternate; dur: 1800; loop: true;">
       </a-ring>
 
-      <!-- Floating text label -->
-      <a-entity position="0 18 0">
-        <a-plane color="#000000" width="8" height="2.5" opacity="0.7"
-                 material="shader: flat;">
-        </a-plane>
-        <a-text value="${TARGET.name}" align="center" color="#FFFFFF" width="7" position="0 0.3 0.01"
-                font="https://cdn.aframe.io/fonts/Roboto-msdf.json">
-        </a-text>
-        <a-text value="Punto AR" align="center" color="#FBBF24" width="5" position="0 -0.4 0.01"
-                font="https://cdn.aframe.io/fonts/Roboto-msdf.json">
-        </a-text>
-      </a-entity>
-
-      <!-- Vertical beam of light from ground to arrow -->
-      <a-cylinder color="#EF4444" radius="0.1" height="10" position="0 5 0"
-                  material="opacity: 0.3; transparent: true; emissive: #EF4444; emissiveIntensity: 0.8;">
+      <!-- Light beam -->
+      <a-cylinder color="#EF4444" radius="0.08" height="8" position="0 4 0"
+                  material="opacity: 0.25; transparent: true; emissive: #EF4444; emissiveIntensity: 1;">
       </a-cylinder>
     `;
+    scene.appendChild(marker);
 
-    scene.appendChild(arrow);
-
-    // ── Directional arrows on the ground pointing to target ────────────
-    // Place 4 arrows at nearby positions pointing toward target
-    const offsets = [
-      { angle: 0, dist: 0.00005 },   // North
-      { angle: 90, dist: 0.00005 },   // East
-      { angle: 180, dist: 0.00005 },  // South
-      { angle: 270, dist: 0.00005 },  // West
-    ];
-
-    offsets.forEach(({ angle, dist }) => {
-      const rad = (angle * Math.PI) / 180;
-      const lat = TARGET.lat + dist * Math.cos(rad);
-      const lng = TARGET.lng + dist * Math.sin(rad);
-
-      const guideArrow = document.createElement('a-entity');
-      guideArrow.setAttribute('gps-entity-place', `latitude: ${lat}; longitude: ${lng};`);
-      guideArrow.innerHTML = `
-        <a-cone color="#22C55E" radius-bottom="0.8" radius-top="0" height="2"
-                position="0 1 0" rotation="0 0 0"
-                material="shader: standard; emissive: #22C55E; emissiveIntensity: 0.3; opacity: 0.8; transparent: true;"
-                animation="property: position; from: 0 1 0; to: 0 3 0; dir: alternate; dur: 1200; loop: true; easing: easeInOutSine;">
-        </a-cone>
-      `;
-      scene.appendChild(guideArrow);
-    });
-
-    // ── Camera with GPS ────────────────────────────────────────────────
+    // ── Camera ──────────────────────────────────────────────────────────
     const camera = document.createElement('a-camera');
     camera.setAttribute('gps-camera', 'simulateLatitude: 0; simulateLongitude: 0;');
     camera.setAttribute('rotation-reader', '');
@@ -144,73 +133,129 @@ export default function ARLocationView({ onBack }: ARLocationViewProps) {
 
     containerRef.current.appendChild(scene);
 
-    return () => {
-      // Cleanup: remove the scene
-      if (containerRef.current) {
-        containerRef.current.innerHTML = '';
-      }
-    };
+    return () => { if (containerRef.current) containerRef.current.innerHTML = ''; };
   }, [loaded]);
 
   return (
     <div className="fixed inset-0 bg-black z-50">
-      {/* AR Scene container */}
+      {/* AR Scene */}
       <div ref={containerRef} className="absolute inset-0" />
 
-      {/* Back button overlay */}
-      <div className="absolute top-0 left-0 right-0 z-50 flex items-center justify-between p-4 pt-8 pointer-events-none">
-        <button
-          onClick={onBack}
-          className="p-3 rounded-full bg-black/50 backdrop-blur-sm text-white pointer-events-auto"
-        >
-          <ChevronLeft size={24} />
-        </button>
-
-        <div className="bg-black/50 backdrop-blur-sm rounded-full px-4 py-2 text-white text-sm font-medium flex items-center gap-2">
-          <div className={`w-2 h-2 rounded-full ${loaded ? 'bg-green-400' : 'bg-yellow-400 animate-pulse'}`} />
-          AR Ubicacion 3D
+      {/* ── Top bar ───────────────────────────────────────────────────────── */}
+      <div className="absolute top-0 left-0 right-0 z-50 p-4 pt-8 pointer-events-none">
+        <div className="flex items-center justify-between">
+          <button onClick={onBack} className="p-3 rounded-2xl bg-black/40 backdrop-blur-xl text-white pointer-events-auto active:scale-95 transition">
+            <ChevronLeft size={22} />
+          </button>
+          <div className="bg-black/40 backdrop-blur-xl rounded-2xl px-5 py-2.5 flex items-center gap-2.5">
+            <div className={`w-2 h-2 rounded-full ${loaded ? 'bg-green-400' : 'bg-yellow-400 animate-pulse'}`} />
+            <span className="text-white text-sm font-semibold">AR Ubicacion</span>
+          </div>
+          <div className="w-12" />
         </div>
-
-        <div className="w-12" />
       </div>
 
-      {/* Bottom info panel */}
-      {loaded && (
-        <div className="absolute bottom-0 left-0 right-0 z-50 p-4 pb-8 pointer-events-none">
-          <div className="bg-black/50 backdrop-blur-md rounded-2xl p-4 border border-white/10">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-red-500/20 flex items-center justify-center shrink-0">
-                <span className="text-lg">📍</span>
+      {/* ── Instructions toast (auto-hides) ───────────────────────────────── */}
+      {loaded && showInstructions && (
+        <div className="absolute top-24 left-4 right-4 z-50 pointer-events-none animate-fade-in">
+          <div className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl rounded-2xl p-4 shadow-2xl border border-white/20">
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-red-500 to-orange-500 flex items-center justify-center shrink-0">
+                <Navigation size={20} className="text-white" />
               </div>
-              <div className="flex-1 min-w-0">
-                <h3 className="text-white font-bold text-sm">{TARGET.name}</h3>
-                <p className="text-white/50 text-xs">Busca la flecha roja y el anillo dorado</p>
+              <div>
+                <p className="font-bold text-gray-900 dark:text-white text-sm">Como usar</p>
+                <p className="text-gray-500 dark:text-gray-400 text-xs mt-1 leading-relaxed">
+                  Mueve el telefono lentamente mirando a tu alrededor.
+                  Busca el <span className="text-red-500 font-semibold">marcador 3D rojo</span> flotando
+                  en la direccion del destino.
+                </p>
               </div>
             </div>
           </div>
         </div>
       )}
 
-      {/* Loading state */}
-      {!loaded && !error && (
-        <div className="absolute inset-0 z-40 flex items-center justify-center bg-black/80">
-          <div className="text-center">
-            <div className="w-16 h-16 border-4 border-white/20 border-t-red-500 rounded-full animate-spin mx-auto mb-4" />
-            <p className="text-white font-medium">Cargando AR...</p>
-            <p className="text-white/50 text-xs mt-1">Acepta los permisos de camara y ubicacion</p>
+      {/* ── Arrived celebration ────────────────────────────────────────────── */}
+      {loaded && hasArrived && (
+        <div className="absolute top-24 left-4 right-4 z-50 pointer-events-none">
+          <div className="bg-gradient-to-r from-green-500 to-emerald-600 rounded-2xl p-4 shadow-2xl">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center">
+                <Footprints size={24} className="text-white" />
+              </div>
+              <div>
+                <p className="font-bold text-white">Has llegado!</p>
+                <p className="text-white/80 text-xs">{TARGET.name} — {distance != null ? formatDistance(distance) : ''}</p>
+              </div>
+            </div>
           </div>
         </div>
       )}
 
-      {/* Error state */}
+      {/* ── Bottom panel ──────────────────────────────────────────────────── */}
+      {loaded && (
+        <div className="absolute bottom-0 left-0 right-0 z-50 p-4 pb-8 pointer-events-none">
+          <div className="bg-black/40 backdrop-blur-xl rounded-2xl p-4 border border-white/10">
+            {/* Target info row */}
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-red-500 to-pink-600 flex items-center justify-center shrink-0 shadow-lg">
+                <MapPin size={20} className="text-white" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3 className="text-white font-bold text-sm">{TARGET.name}</h3>
+                <p className="text-white/50 text-xs">{TARGET.description}</p>
+              </div>
+            </div>
+
+            {/* Stats */}
+            <div className="grid grid-cols-3 gap-2">
+              <div className="bg-white/10 rounded-xl p-2.5 text-center">
+                <p className="text-white font-bold text-base">{distance != null ? formatDistance(distance) : '--'}</p>
+                <p className="text-white/40 text-[9px] uppercase tracking-wider mt-0.5">Distancia</p>
+              </div>
+              <div className="bg-white/10 rounded-xl p-2.5 text-center">
+                <p className="text-white font-bold text-base">
+                  {bearing != null ? getCardinalDirection(bearing) : '--'}
+                </p>
+                <p className="text-white/40 text-[9px] uppercase tracking-wider mt-0.5">Direccion</p>
+              </div>
+              <div className={`rounded-xl p-2.5 text-center ${hasArrived ? 'bg-green-500/20' : 'bg-white/10'}`}>
+                <p className={`font-bold text-base ${hasArrived ? 'text-green-400' : 'text-white'}`}>
+                  {hasArrived ? '✓' : bearing != null ? `${Math.round(bearing)}°` : '--'}
+                </p>
+                <p className="text-white/40 text-[9px] uppercase tracking-wider mt-0.5">
+                  {hasArrived ? 'Llegaste' : 'Rumbo'}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Loading ───────────────────────────────────────────────────────── */}
+      {!loaded && !error && (
+        <div className="absolute inset-0 z-40 flex items-center justify-center bg-black">
+          <div className="text-center px-8">
+            <div className="relative w-20 h-20 mx-auto mb-6">
+              <div className="absolute inset-0 border-4 border-white/10 rounded-full" />
+              <div className="absolute inset-0 border-4 border-transparent border-t-red-500 rounded-full animate-spin" />
+              <div className="absolute inset-0 flex items-center justify-center">
+                <MapPin size={28} className="text-red-500" />
+              </div>
+            </div>
+            <p className="text-white font-bold text-lg mb-1">Iniciando AR</p>
+            <p className="text-white/50 text-sm">Acepta los permisos de camara y ubicacion</p>
+          </div>
+        </div>
+      )}
+
+      {/* ── Error ─────────────────────────────────────────────────────────── */}
       {error && (
-        <div className="absolute inset-0 z-40 flex items-center justify-center bg-black/80">
+        <div className="absolute inset-0 z-40 flex items-center justify-center bg-black">
           <div className="text-center p-8">
-            <p className="text-red-400 font-medium mb-2">{error}</p>
-            <button
-              onClick={onBack}
-              className="bg-white/10 text-white px-6 py-2 rounded-xl"
-            >
+            <p className="text-red-400 font-medium mb-4">{error}</p>
+            <button onClick={onBack} className="bg-white/10 text-white px-6 py-3 rounded-xl font-medium">
               Volver
             </button>
           </div>
@@ -220,19 +265,14 @@ export default function ARLocationView({ onBack }: ARLocationViewProps) {
   );
 }
 
-// ── Helper: load a script tag dynamically ───────────────────────────────────
 function loadScript(src: string): Promise<void> {
   return new Promise((resolve, reject) => {
-    // Check if already loaded
-    if (document.querySelector(`script[src="${src}"]`)) {
-      resolve();
-      return;
-    }
-    const script = document.createElement('script');
-    script.src = src;
-    script.async = true;
-    script.onload = () => resolve();
-    script.onerror = () => reject(new Error(`Failed to load ${src}`));
-    document.head.appendChild(script);
+    if (document.querySelector(`script[src="${src}"]`)) { resolve(); return; }
+    const s = document.createElement('script');
+    s.src = src;
+    s.async = true;
+    s.onload = () => resolve();
+    s.onerror = () => reject(new Error(`Failed to load ${src}`));
+    document.head.appendChild(s);
   });
 }
