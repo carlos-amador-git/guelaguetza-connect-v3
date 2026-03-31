@@ -55,7 +55,7 @@ export default function ARLocationView({ onBack }: ARLocationViewProps) {
 
   const distance = position ? calculateDistance(position.lat, position.lng, TARGET.lat, TARGET.lng) : null;
   const bearing = position ? calculateBearing(position.lat, position.lng, TARGET.lat, TARGET.lng) : null;
-  const hasArrived = distance != null && distance < 15;
+  const hasArrived = distance != null && distance < 3;
 
   // Hide instructions when user arrives
   useEffect(() => {
