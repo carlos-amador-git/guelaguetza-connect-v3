@@ -107,17 +107,20 @@ const MetricsDashboard: React.FC<MetricsDashboardProps> = ({ onBack, onNavigate 
   if (activeTab === 'users') {
     return (
       <div className="h-full flex flex-col">
-        <div className="bg-gradient-to-br from-oaxaca-purple via-oaxaca-pink to-oaxaca-purple text-white px-4 md:px-6 lg:px-8 py-3 flex-shrink-0">
-          <div className="flex items-center gap-3 max-w-7xl mx-auto">
-            <button
-              onClick={() => setActiveTab('metrics')}
-              className="p-2 hover:bg-white/10 rounded-full transition"
-            >
-              <ArrowLeft size={20} />
-            </button>
-            <div className="flex-1">
-              <h1 className="font-bold text-lg">Gestión de Usuarios</h1>
-              <p className="text-xs text-white/70">Administrar roles y permisos</p>
+        <div className="relative text-white overflow-hidden flex-shrink-0">
+          <img src="/images/morado.png" alt="" className="absolute inset-0 w-full h-full object-cover" />
+          <div className="relative px-4 md:px-6 lg:px-8 py-3">
+            <div className="flex items-center gap-3 max-w-7xl mx-auto">
+              <button
+                onClick={() => setActiveTab('metrics')}
+                className="p-2 hover:bg-white/10 rounded-full transition"
+              >
+                <ArrowLeft size={20} />
+              </button>
+              <div className="flex-1">
+                <h1 className="font-bold text-lg">Gestion de Usuarios</h1>
+                <p className="text-xs text-white/70">Administrar roles y permisos</p>
+              </div>
             </div>
           </div>
         </div>
@@ -132,7 +135,9 @@ const MetricsDashboard: React.FC<MetricsDashboardProps> = ({ onBack, onNavigate 
     return (
       <div className="h-full flex flex-col">
         {/* Slim header with back-to-metrics */}
-        <div className="bg-gradient-to-br from-oaxaca-purple via-oaxaca-pink to-oaxaca-purple text-white px-4 py-3 flex items-center gap-3 flex-shrink-0">
+        <div className="relative text-white overflow-hidden flex-shrink-0">
+          <img src="/images/morado.png" alt="" className="absolute inset-0 w-full h-full object-cover" />
+          <div className="relative px-4 py-3 flex items-center gap-3">
           <button
             onClick={() => setActiveTab('metrics')}
             className="p-2 hover:bg-white/10 rounded-full transition"
@@ -140,7 +145,7 @@ const MetricsDashboard: React.FC<MetricsDashboardProps> = ({ onBack, onNavigate 
             <ArrowLeft size={20} />
           </button>
           <div className="flex-1">
-            <h1 className="font-bold text-lg">Códigos QR — AR</h1>
+            <h1 className="font-bold text-lg">Codigos QR — AR</h1>
             <p className="text-xs text-white/70">Panel de Administracion</p>
           </div>
           {onNavigate && (
@@ -153,6 +158,7 @@ const MetricsDashboard: React.FC<MetricsDashboardProps> = ({ onBack, onNavigate 
               <span className="text-xs font-medium hidden sm:inline">Ver App</span>
             </button>
           )}
+          </div>
         </div>
         <div className="flex-1 overflow-hidden">
           <QRCodesPanel />
