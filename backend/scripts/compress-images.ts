@@ -17,10 +17,10 @@ import { join, extname, basename } from 'path';
 // ── Config ───────────────────────────────────────────────────────────────────
 
 const SUPPORTED_EXTENSIONS = new Set(['.png', '.jpg', '.jpeg', '.webp']);
-const QUALITY_JPEG = 82;
-const QUALITY_WEBP = 80;
+const QUALITY_JPEG = 80;
+const QUALITY_WEBP = 78;
 const QUALITY_PNG_EFFORT = 9; // 1-10, higher = smaller but slower
-const MAX_DIMENSION = 2048; // resize if either side exceeds this
+const MAX_DIMENSION = 1200; // resize if either side exceeds this
 
 // ── CLI args ─────────────────────────────────────────────────────────────────
 
@@ -76,18 +76,26 @@ async function compressImage(filePath: string): Promise<{ saved: number; newSize
       .webp({ quality: QUALITY_WEBP, effort: 6 })
       .toBuffer();
   } else {
-    // PNG — try both optimized PNG and WebP, keep whichever is smaller
-    const pngBuffer = await pipeline
+    // PNG — check if it's a photo (many colors) or graphic (few colors)
+    const { channels, width, height } = metadata;
+    const isLargePhoto = (width || 0) * (height || 0) > 100000 && (channels || 3) >= 3;
+
+    // Try optimized PNG
+    const pngBuffer = await pipeline.clone()
       .png({ compressionLevel: QUALITY_PNG_EFFORT, palette: true, effort: 10 })
       .toBuffer();
 
-    const webpBuffer = await pipeline
-      .webp({ quality: QUALITY_WEBP, effort: 6 })
-      .toBuffer();
+    // For large photos, also try JPEG which is much better for photographs
+    if (isLargePhoto && pngBuffer.length > THRESHOLD_BYTES) {
+      const jpegBuffer = await pipeline.clone()
+        .jpeg({ quality: QUALITY_JPEG, progressive: true, mozjpeg: true })
+        .toBuffer();
 
-    // Use optimized PNG (keeping original format) if it's small enough
-    // Otherwise only suggest WebP but keep PNG for compatibility
-    outputBuffer = pngBuffer;
+      // Use JPEG if it's significantly smaller (keeps .png extension for compatibility)
+      outputBuffer = jpegBuffer.length < pngBuffer.length * 0.7 ? jpegBuffer : pngBuffer;
+    } else {
+      outputBuffer = pngBuffer;
+    }
   }
 
   // Only write if we actually saved space
