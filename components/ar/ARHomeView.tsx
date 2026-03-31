@@ -778,19 +778,29 @@ export function ARHomeView({ onNavigate, onBack }: ARHomeViewProps) {
         <section className="px-4 pb-4 shrink-0">
           <button
             onClick={() => onNavigate(ViewState.AR_LOCATION)}
-            className="w-full bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl p-4 text-white
-                       shadow-lg hover:shadow-xl active:scale-[0.98] transition-all flex items-center gap-4"
+            className="w-full relative overflow-hidden rounded-2xl text-white
+                       shadow-lg hover:shadow-xl active:scale-[0.98] transition-all"
           >
-            <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center">
-              <MapPin className="w-6 h-6" />
+            <img src="/images/azul.png" alt="" className="absolute inset-0 w-full h-full object-cover" />
+            <div className="relative flex items-center gap-4 p-4">
+              {/* @ts-ignore — model-viewer is a custom element */}
+              <model-viewer
+                src="/images/map_location_3d.glb"
+                auto-rotate
+                rotation-per-second="60deg"
+                interaction-prompt="none"
+                camera-controls={false}
+                disable-zoom
+                style={{ width: '56px', height: '56px', background: 'transparent', pointerEvents: 'none' }}
+              />
+              <div className="flex-1 text-left">
+                <p className="font-bold text-base">AR Ubicacion</p>
+                <p className="text-xs text-white/70">Usa la camara para encontrar un punto de interes</p>
+              </div>
+              <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+              </svg>
             </div>
-            <div className="flex-1 text-left">
-              <p className="font-bold">AR Ubicacion</p>
-              <p className="text-xs text-white/70">Usa la camara para encontrar un punto de interes</p>
-            </div>
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-            </svg>
           </button>
         </section>
 
