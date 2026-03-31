@@ -102,6 +102,18 @@ const App: React.FC = () => {
   const urlParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
   const shortcutView = urlParams?.get('view') as ViewState | null;
 
+  // PWA Share Target: receive shared content from other apps
+  const [sharedContent, setSharedContent] = useState<{ title?: string; text?: string; url?: string } | null>(() => {
+    if (urlParams?.get('share') === 'true') {
+      return {
+        title: urlParams.get('title') || undefined,
+        text: urlParams.get('text') || undefined,
+        url: urlParams.get('url') || undefined,
+      };
+    }
+    return null;
+  });
+
   const [currentView, setCurrentView] = useState<ViewState>(() => {
     // Restore last view from localStorage if user is authenticated
     const savedToken = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
@@ -867,6 +879,45 @@ const App: React.FC = () => {
       {/* PWA Prompts — hidden in AR direct mode (QR scan) */}
       {currentView !== ViewState.AR_DIRECT && <NotificationPrompt />}
       {/* <UpdatePrompt /> */}
+
+      {/* PWA Share Target Modal */}
+      {sharedContent && (
+        <div className="fixed inset-0 bg-black/50 z-[100] flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 w-full max-w-sm shadow-2xl">
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1">Contenido compartido</h3>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">Recibido desde otra aplicacion</p>
+            {sharedContent.title && (
+              <div className="mb-3">
+                <p className="text-xs text-gray-400 uppercase font-medium">Titulo</p>
+                <p className="text-gray-900 dark:text-white font-medium">{sharedContent.title}</p>
+              </div>
+            )}
+            {sharedContent.text && (
+              <div className="mb-3">
+                <p className="text-xs text-gray-400 uppercase font-medium">Texto</p>
+                <p className="text-gray-700 dark:text-gray-300 text-sm">{sharedContent.text}</p>
+              </div>
+            )}
+            {sharedContent.url && (
+              <div className="mb-3">
+                <p className="text-xs text-gray-400 uppercase font-medium">Enlace</p>
+                <a href={sharedContent.url} target="_blank" rel="noopener noreferrer"
+                   className="text-oaxaca-pink text-sm underline break-all">{sharedContent.url}</a>
+              </div>
+            )}
+            <button
+              onClick={() => {
+                setSharedContent(null);
+                // Clean URL params
+                window.history.replaceState({}, '', '/');
+              }}
+              className="w-full mt-2 py-3 bg-oaxaca-pink text-white rounded-xl font-bold"
+            >
+              Cerrar
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
