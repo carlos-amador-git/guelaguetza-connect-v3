@@ -4,10 +4,10 @@ import { useGeolocation } from '../../hooks/ar/useGeolocation';
 
 // ── Target location ─────────────────────────────────────────────────────────
 const TARGET = {
-  lat: 19.370198,
-  lng: -99.577324,
-  name: 'Punto de Interés',
-  description: 'Toluca, Estado de México',
+  lat: 17.065755,
+  lng: -96.723224,
+  name: 'Santo Domingo de Guzmán',
+  description: 'Oaxaca',
 };
 
 const toRad = (d: number) => (d * Math.PI) / 180;
@@ -96,8 +96,8 @@ export default function ARLocationView({ onBack }: ARLocationViewProps) {
     marker.setAttribute('gps-entity-place', `latitude: ${TARGET.lat}; longitude: ${TARGET.lng};`);
     marker.innerHTML = `
       <!-- Floating group (bobs up and down) -->
-      <a-entity position="0 8 0"
-                animation="property: position; from: 0 8 0; to: 0 11 0; dir: alternate; dur: 2000; loop: true; easing: easeInOutSine;">
+      <a-entity position="0 30 0"
+                animation="property: position; from: 0 30 0; to: 0 33 0; dir: alternate; dur: 2000; loop: true; easing: easeInOutSine;">
 
         <!-- GLB Model (rotates) -->
         <a-entity animation="property: rotation; from: 0 0 0; to: 0 360 0; dur: 8000; loop: true; easing: linear;">
@@ -121,7 +121,7 @@ export default function ARLocationView({ onBack }: ARLocationViewProps) {
       </a-ring>
 
       <!-- Light beam -->
-      <a-cylinder color="#EF4444" radius="0.08" height="8" position="0 4 0"
+      <a-cylinder color="#EF4444" radius="0.08" height="30" position="0 15 0"
                   material="opacity: 0.25; transparent: true; emissive: #EF4444; emissiveIntensity: 1;">
       </a-cylinder>
     `;
