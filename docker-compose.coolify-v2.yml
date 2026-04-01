@@ -1,7 +1,9 @@
 # ============================================
 # Coolify Deploy - V2 (guelaguetzav2.mdconsultoria-ti.org)
 # ============================================
-# Usar este archivo en Coolify para la aplicación V2
+# Variables de entorno requeridas en Coolify:
+#   POSTGRES_PASSWORD - Password de PostgreSQL
+#   JWT_SECRET       - Secret para JWT tokens
 # ============================================
 
 services:
@@ -11,15 +13,15 @@ services:
     environment:
       POSTGRES_DB: guelaguetza_db
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-guelaguetza_secure_2026}
     volumes:
       - postgres-data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d guelaguetza_db"]
       interval: 10s
       timeout: 5s
-      retries: 10
-      start_period: 30s
+      retries: 15
+      start_period: 60s
 
   redis:
     image: redis:7-alpine
@@ -32,6 +34,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+      start_period: 10s
 
   backend:
     build:
@@ -43,10 +46,10 @@ services:
     environment:
       NODE_ENV: production
       PORT: 3001
-      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD}@postgres:5432/guelaguetza_db
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-guelaguetza_secure_2026}@postgres:5432/guelaguetza_db
       REDIS_URL: redis://redis:6379
-      JWT_SECRET: ${JWT_SECRET}
-      COOKIE_SECRET: ${COOKIE_SECRET:-${JWT_SECRET}}
+      JWT_SECRET: ${JWT_SECRET:-guelaguetza_jwt_secret_2026}
+      COOKIE_SECRET: ${COOKIE_SECRET:-${JWT_SECRET:-guelaguetza_jwt_secret_2026}}
       CORS_ORIGINS: ${CORS_ORIGINS:-https://guelaguetzav2.mdconsultoria-ti.org,http://guelaguetzav2.mdconsultoria-ti.org}
       AUTO_SEED: "true"
       ENABLE_PAYMENTS: "false"
@@ -63,8 +66,8 @@ services:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3001/health"]
       interval: 30s
       timeout: 10s
-      retries: 3
-      start_period: 60s
+      retries: 5
+      start_period: 90s
 
   frontend:
     build:
@@ -76,7 +79,8 @@ services:
     ports:
       - "3082:80"
     depends_on:
-      - backend
+      backend:
+        condition: service_started
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:80/health"]
       interval: 30s
