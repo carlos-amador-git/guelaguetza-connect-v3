@@ -13,7 +13,7 @@ services:
     environment:
       POSTGRES_DB: guelaguetza_db
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-guelaguetza_secure_2026}
+      POSTGRES_PASSWORD: guelaguetza_secure_2026
     volumes:
       - postgres-data:/var/lib/postgresql/data
 
@@ -36,9 +36,9 @@ services:
       PORT: 3001
       DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-guelaguetza_secure_2026}@postgres:5432/guelaguetza_db
       REDIS_URL: redis://redis:6379
-      JWT_SECRET: ${JWT_SECRET:-guelaguetza_jwt_secret_2026}
-      COOKIE_SECRET: ${COOKIE_SECRET:-${JWT_SECRET:-guelaguetza_jwt_secret_2026}}
-      CORS_ORIGINS: ${CORS_ORIGINS:-https://guelaguetzav3.mdconsultoria-ti.org,http://guelaguetzav3.mdconsultoria-ti.org}
+      JWT_SECRET: guelaguetza_jwt_secret_2026
+      COOKIE_SECRET: guelaguetza_jwt_secret_2026
+      CORS_ORIGINS: https://guelaguetzav3.mdconsultoria-ti.org,http://guelaguetzav3.mdconsultoria-ti.org
       AUTO_SEED: "true"
       ENABLE_PAYMENTS: "false"
       ENABLE_NOTIFICATIONS: "false"
