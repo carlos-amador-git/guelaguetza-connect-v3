@@ -1,7 +1,7 @@
 # ============================================
-# Coolify Deploy - V3 (guelaguetzav3.mdconsultoria-ti.org)
+# Coolify Deploy - V2 (guelaguetzav2.mdconsultoria-ti.org)
 # ============================================
-# Usar este archivo en Coolify para la aplicación V3
+# Usar este archivo en Coolify para la aplicación V2
 # ============================================
 
 services:
@@ -46,7 +46,7 @@ services:
       REDIS_URL: redis://redis:6379
       JWT_SECRET: ${JWT_SECRET}
       COOKIE_SECRET: ${COOKIE_SECRET:-${JWT_SECRET}}
-      CORS_ORIGINS: ${CORS_ORIGINS:-https://guelaguetzav3.mdconsultoria-ti.org,http://guelaguetzav3.mdconsultoria-ti.org}
+      CORS_ORIGINS: ${CORS_ORIGINS:-https://guelaguetzav2.mdconsultoria-ti.org,http://guelaguetzav2.mdconsultoria-ti.org}
       AUTO_SEED: "true"
       ENABLE_PAYMENTS: "false"
       ENABLE_NOTIFICATIONS: "false"
@@ -70,10 +70,10 @@ services:
       context: .
       dockerfile: Dockerfile.frontend
       args:
-        VITE_API_URL: "https://guelaguetzav3.mdconsultoria-ti.org"
+        VITE_API_URL: "https://guelaguetzav2.mdconsultoria-ti.org"
     restart: always
     ports:
-      - "3081:80"
+      - "3082:80"
     depends_on:
       - backend
     healthcheck:

@@ -1,0 +1,48 @@
+# ============================================
+# AUTO DEPLOY TO COOLIFY - Guelaguetza Connect
+# ============================================
+# Dispara el deploy en Coolify para ambos dominios
+# en cada push a main.
+#
+# Secrets requeridos en GitHub:
+#   COOLIFY_WEBHOOK_URL_V3 - Webhook de Coolify para V3
+#   COOLIFY_WEBHOOK_URL_V2 - Webhook de Coolify para V2
+# ============================================
+
+name: Deploy to Coolify
+
+on:
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: coolify-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy-v3:
+    name: Deploy V3 (guelaguetzav3)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Coolify Deploy - V3
+        run: |
+          echo "Triggering Coolify deploy for V3..."
+          curl -s -o /dev/null -w "%{http_code}" \
+            "${{ secrets.COOLIFY_WEBHOOK_URL_V3 }}" \
+            | grep -q "200\|201\|202" \
+            && echo "V3 deploy triggered successfully" \
+            || (echo "Failed to trigger V3 deploy" && exit 1)
+
+  deploy-v2:
+    name: Deploy V2 (guelaguetzav2)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Coolify Deploy - V2
+        run: |
+          echo "Triggering Coolify deploy for V2..."
+          curl -s -o /dev/null -w "%{http_code}" \
+            "${{ secrets.COOLIFY_WEBHOOK_URL_V2 }}" \
+            | grep -q "200\|201\|202" \
+            && echo "V2 deploy triggered successfully" \
+            || (echo "Failed to trigger V2 deploy" && exit 1)
