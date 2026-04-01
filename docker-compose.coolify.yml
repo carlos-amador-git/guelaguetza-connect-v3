@@ -16,12 +16,6 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-guelaguetza_secure_2026}
     volumes:
       - postgres-data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d guelaguetza_db"]
-      interval: 10s
-      timeout: 5s
-      retries: 15
-      start_period: 60s
 
   redis:
     image: redis:7-alpine
@@ -29,12 +23,6 @@ services:
     command: redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru
     volumes:
       - redis-data:/data
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 10s
 
   backend:
     build:
@@ -58,16 +46,8 @@ services:
       LOG_LEVEL: info
     user: "root"
     depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3001/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-      start_period: 90s
+      - postgres
+      - redis
 
   frontend:
     build:
@@ -79,14 +59,7 @@ services:
     ports:
       - "3081:80"
     depends_on:
-      backend:
-        condition: service_started
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:80/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 30s
+      - backend
 
 volumes:
   postgres-data:
